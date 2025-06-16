@@ -94,6 +94,7 @@ const FormStep1: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-6">
+            {/* CRM Field */}
             <div className="space-y-2">
               <Label htmlFor="crm" className="text-gray-700 font-medium">CRM:</Label>
               <Input
@@ -105,6 +106,7 @@ const FormStep1: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
               />
             </div>
 
+            {/* Razão Social Field */}
             <div className="space-y-2">
               <Label htmlFor="razaoSocial" className="text-gray-700 font-medium">
                 Razão Social <span className="text-red-500">*</span>
@@ -123,6 +125,7 @@ const FormStep1: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
               )}
             </div>
 
+            {/* CNPJ Field */}
             <div className="space-y-2">
               <Label htmlFor="cnpj" className="text-gray-700 font-medium">
                 CNPJ <span className="text-red-500">*</span>
@@ -142,6 +145,7 @@ const FormStep1: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
               )}
             </div>
 
+            {/* Location Fields */}
             <div className="space-y-2">
               <Label htmlFor="localizacao" className="text-gray-700 font-medium">
                 Localização (Município/UF) <span className="text-red-500">*</span>
@@ -184,6 +188,7 @@ const FormStep1: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
               </div>
             </div>
 
+            {/* Responsável Field */}
             <div className="space-y-2">
               <Label htmlFor="responsavel" className="text-gray-700 font-medium">
                 Responsável pelas Informações (Nome Completo) <span className="text-red-500">*</span>
@@ -202,6 +207,7 @@ const FormStep1: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
               )}
             </div>
 
+            {/* Email Field */}
             <div className="space-y-2">
               <Label htmlFor="email" className="text-gray-700 font-medium">
                 E-mail Corporativo <span className="text-red-500">*</span>
