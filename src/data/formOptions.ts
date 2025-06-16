@@ -1,4 +1,3 @@
-
 export const estadosBrasil = [
   { value: 'AC', label: 'Acre' },
   { value: 'AL', label: 'Alagoas' },
@@ -30,8 +29,7 @@ export const estadosBrasil = [
 ];
 
 export const segmentosEmpresa = [
-  { value: 'industria', label: 'Indústria' },
-  { value: 'varejo', label: 'Varejo' },
+  { value: 'industria', label: 'Indústria, Varejo ou Outros' },
   { value: 'utilities', label: 'Utilities (Serviços Públicos - Energia, Água, Gás, Saneamento)' },
   { value: 'servico', label: 'Serviço' }
 ];
