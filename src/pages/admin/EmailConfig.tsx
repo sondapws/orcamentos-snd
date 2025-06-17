@@ -141,12 +141,12 @@ Equipe Comercial`
                 <div className="bg-blue-50 p-4 rounded-lg">
                   <h4 className="font-semibold mb-2">Variáveis Disponíveis:</h4>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
-                    <span className="bg-white px-2 py-1 rounded">{{`{{razaoSocial}}`}}</span>
-                    <span className="bg-white px-2 py-1 rounded">{{`{{responsavel}}`}}</span>
-                    <span className="bg-white px-2 py-1 rounded">{{`{{cnpj}}`}}</span>
-                    <span className="bg-white px-2 py-1 rounded">{{`{{segmento}}`}}</span>
-                    <span className="bg-white px-2 py-1 rounded">{{`{{modalidade}}`}}</span>
-                    <span className="bg-white px-2 py-1 rounded">{{`{{valor}}`}}</span>
+                    <span className="bg-white px-2 py-1 rounded">{'{{razaoSocial}}'}</span>
+                    <span className="bg-white px-2 py-1 rounded">{'{{responsavel}}'}</span>
+                    <span className="bg-white px-2 py-1 rounded">{'{{cnpj}}'}</span>
+                    <span className="bg-white px-2 py-1 rounded">{'{{segmento}}'}</span>
+                    <span className="bg-white px-2 py-1 rounded">{'{{modalidade}}'}</span>
+                    <span className="bg-white px-2 py-1 rounded">{'{{valor}}'}</span>
                   </div>
                 </div>
                 <Button onClick={handleSaveTemplate}>Salvar Template</Button>
