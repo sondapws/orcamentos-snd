@@ -2,8 +2,9 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Menu } from 'lucide-react';
+import { LogOut, Menu, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -12,14 +13,15 @@ interface AdminLayoutProps {
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { signOut, user } = useAuth();
 
-  const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated');
+  const handleLogout = async () => {
+    await signOut();
     toast({
       title: "Logout realizado",
       description: "Você foi desconectado com sucesso.",
     });
-    navigate('/login');
+    navigate('/auth');
   };
 
   return (
@@ -53,6 +55,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               >
                 Precificação
               </Button>
+              <div className="flex items-center space-x-2">
+                <User className="h-4 w-4" />
+                <span className="text-sm">{user?.email}</span>
+              </div>
               <Button
                 variant="ghost"
                 onClick={handleLogout}
