@@ -1,22 +1,13 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, Calculator } from 'lucide-react';
 import { Step2Data } from '@/types/formData';
-import {
-  segmentosEmpresa,
-  escopoInboundOptions,
-  escopoOutboundOptions,
-  modelosNotasOptions,
-  cenariosNegocioOptions,
-  volumetriaOptions,
-  modalidadeOptions,
-  prazoContratacaoOptions
-} from '@/data/formOptions';
+import SegmentSelector from './sections/SegmentSelector';
+import ScopeSelector from './sections/ScopeSelector';
+import AutomationSection from './sections/AutomationSection';
+import AbrangenciaSection from './sections/AbrangenciaSection';
+import ConfiguracaoSection from './sections/ConfiguracaoSection';
 
 interface FormStep2Props {
   data: Step2Data;
@@ -29,10 +20,6 @@ const FormStep2: React.FC<FormStep2Props> = ({ data, onUpdate, onPrev, onSubmit 
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [quantidadePrefeiturasInbound, setQuantidadePrefeiturasInbound] = React.useState(0);
   const [quantidadePrefeiturasOutbound, setQuantidadePrefeiturasOutbound] = React.useState(0);
-
-  const hasNfseInbound = data.escopoInbound.includes('nfse');
-  const hasNfseOutbound = data.escopoOutbound.includes('nfse');
-  const hasFaturas = data.escopoInbound.includes('faturas');
 
   const validateStep2 = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -68,13 +55,27 @@ const FormStep2: React.FC<FormStep2Props> = ({ data, onUpdate, onPrev, onSubmit 
     }
   };
 
-  const handleCheckboxChange = (field: keyof Step2Data, value: string, checked: boolean) => {
-    const currentArray = (data[field] as string[]) || [];
+  const handleCheckboxChange = (field: string, value: string, checked: boolean) => {
+    const currentArray = (data[field as keyof Step2Data] as string[]) || [];
     const newArray = checked 
       ? [...currentArray, value]
       : currentArray.filter(item => item !== value);
     
     onUpdate({ [field]: newArray });
+  };
+
+  const handleQuantidadeChange = (field: string, value: number) => {
+    if (field === 'quantidadePrefeiturasInbound') {
+      setQuantidadePrefeiturasInbound(value);
+    } else if (field === 'quantidadePrefeiturasOutbound') {
+      setQuantidadePrefeiturasOutbound(value);
+    } else {
+      onUpdate({ [field]: value });
+    }
+  };
+
+  const handleFieldUpdate = (field: string, value: any) => {
+    onUpdate({ [field]: value });
   };
 
   return (
@@ -100,303 +101,43 @@ const FormStep2: React.FC<FormStep2Props> = ({ data, onUpdate, onPrev, onSubmit 
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Segmento da Empresa */}
-          <div className="space-y-3">
-            <Label className="text-base font-semibold">Segmento da Empresa *</Label>
-            <Select value={data.segmento} onValueChange={(value) => onUpdate({ segmento: value as any })}>
-              <SelectTrigger className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${errors.segmento ? 'border-red-500' : ''}`}>
-                <SelectValue placeholder="Selecione o segmento" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="industria">Indústria, Varejo ou Outros</SelectItem>
-                <SelectItem value="utilities">Utilities (Serviços Públicos - Energia, Água, Gás, Saneamento)</SelectItem>
-                <SelectItem value="servico">Serviço</SelectItem>
-              </SelectContent>
-            </Select>
-            {errors.segmento && <p className="text-red-500 text-sm">{errors.segmento}</p>}
-          </div>
+          <SegmentSelector 
+            value={data.segmento}
+            onChange={(value) => onUpdate({ segmento: value as any })}
+            error={errors.segmento}
+          />
 
-          {/* Escopo */}
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold">Escopo</h3>
-            
-            {/* Escopo Inbound */}
-            <div className="space-y-3">
-              <div>
-                <Label className="text-base font-semibold">Inbound</Label>
-                <p className="text-sm text-gray-600 mt-1">
-                  Entrada de documentos eletrônicos no sistema da empresa, normalmente enviados por fornecedores.
-                </p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {escopoInboundOptions.map(option => (
-                  <div key={`inbound-${option.value}`}>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`inbound-${option.value}`}
-                        checked={data.escopoInbound.includes(option.value)}
-                        onCheckedChange={(checked) => 
-                          handleCheckboxChange('escopoInbound', option.value, checked as boolean)
-                        }
-                      />
-                      <Label 
-                        htmlFor={`inbound-${option.value}`} 
-                        className="text-sm font-normal cursor-pointer"
-                      >
-                        {option.label}
-                      </Label>
-                    </div>
-                    
-                    {/* Campo condicional para NFS-e Inbound */}
-                    {option.value === 'nfse' && hasNfseInbound && (
-                      <div className="mt-3 ml-6">
-                        <Label htmlFor="quantidadePrefeiturasInbound" className="text-sm">
-                          Quantidade de Prefeituras (Inbound)
-                        </Label>
-                        <Input
-                          id="quantidadePrefeiturasInbound"
-                          type="number"
-                          min="0"
-                          value={quantidadePrefeiturasInbound}
-                          onChange={(e) => setQuantidadePrefeiturasInbound(parseInt(e.target.value) || 0)}
-                          className="mt-1 w-48 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                        />
-                      </div>
-                    )}
+          <ScopeSelector
+            escopoInbound={data.escopoInbound}
+            escopoOutbound={data.escopoOutbound}
+            quantidadePrefeiturasInbound={quantidadePrefeiturasInbound}
+            quantidadePrefeiturasOutbound={quantidadePrefeiturasOutbound}
+            quantidadeConcessionarias={data.quantidadeConcessionarias || 0}
+            quantidadeFaturas={data.quantidadeFaturas || 0}
+            onCheckboxChange={handleCheckboxChange}
+            onQuantidadeChange={handleQuantidadeChange}
+            error={errors.escopo}
+          />
 
-                    {/* Campos condicionais para Faturas */}
-                    {option.value === 'faturas' && hasFaturas && (
-                      <div className="mt-3 ml-6 space-y-3">
-                        <div>
-                          <Label htmlFor="quantidadeConcessionarias" className="text-sm">
-                            Quantidade de Concessionárias
-                          </Label>
-                          <Input
-                            id="quantidadeConcessionarias"
-                            type="number"
-                            min="0"
-                            value={data.quantidadeConcessionarias || 0}
-                            onChange={(e) => onUpdate({ quantidadeConcessionarias: parseInt(e.target.value) || 0 })}
-                            className="mt-1 w-48 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="quantidadeFaturas" className="text-sm">
-                            Quantidade de Faturas
-                          </Label>
-                          <Input
-                            id="quantidadeFaturas"
-                            type="number"
-                            min="0"
-                            value={data.quantidadeFaturas || 0}
-                            onChange={(e) => onUpdate({ quantidadeFaturas: parseInt(e.target.value) || 0 })}
-                            className="mt-1 w-48 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
+          <AutomationSection
+            modelosNotas={data.modelosNotas}
+            cenariosNegocio={data.cenariosNegocio}
+            onCheckboxChange={handleCheckboxChange}
+          />
 
-            {/* Escopo Outbound */}
-            <div className="space-y-3">
-              <div>
-                <Label className="text-base font-semibold">Outbound</Label>
-                <p className="text-sm text-gray-600 mt-1">
-                  Emissão ou envio de documentos eletrônicos pela empresa, geralmente para clientes ou órgãos reguladores.
-                </p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {escopoOutboundOptions.map(option => (
-                  <div key={`outbound-${option.value}`}>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`outbound-${option.value}`}
-                        checked={data.escopoOutbound.includes(option.value)}
-                        onCheckedChange={(checked) => 
-                          handleCheckboxChange('escopoOutbound', option.value, checked as boolean)
-                        }
-                      />
-                      <Label 
-                        htmlFor={`outbound-${option.value}`} 
-                        className="text-sm font-normal cursor-pointer"
-                      >
-                        {option.label}
-                      </Label>
-                    </div>
-                    
-                    {/* Campo condicional para NFS-e Outbound */}
-                    {option.value === 'nfse' && hasNfseOutbound && (
-                      <div className="mt-3 ml-6">
-                        <Label htmlFor="quantidadePrefeiturasOutbound" className="text-sm">
-                          Quantidade de Prefeituras (Outbound)
-                        </Label>
-                        <Input
-                          id="quantidadePrefeiturasOutbound"
-                          type="number"
-                          min="0"
-                          value={quantidadePrefeiturasOutbound}
-                          onChange={(e) => setQuantidadePrefeiturasOutbound(parseInt(e.target.value) || 0)}
-                          className="mt-1 w-48 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                        />
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-              {errors.escopo && <p className="text-red-500 text-sm">{errors.escopo}</p>}
-            </div>
-          </div>
+          <AbrangenciaSection
+            quantidadeEmpresas={data.quantidadeEmpresas}
+            quantidadeUfs={data.quantidadeUfs}
+            onUpdate={handleFieldUpdate}
+          />
 
-          {/* Automação MIRO e MIGO */}
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-semibold mb-4">Automação MIRO e MIGO</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Modelos de Notas */}
-              <div className="space-y-3">
-                <Label className="text-base font-semibold">Modelos de Notas</Label>
-                <div className="space-y-2">
-                  {modelosNotasOptions.map(option => (
-                    <div key={`modelo-${option.value}`} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`modelo-${option.value}`}
-                        checked={data.modelosNotas.includes(option.value)}
-                        onCheckedChange={(checked) => 
-                          handleCheckboxChange('modelosNotas', option.value, checked as boolean)
-                        }
-                      />
-                      <Label 
-                        htmlFor={`modelo-${option.value}`} 
-                        className="text-sm font-normal cursor-pointer"
-                      >
-                        {option.label}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Cenários de Negócio */}
-              <div className="space-y-3">
-                <Label className="text-base font-semibold">Cenários de Negócio</Label>
-                <div className="space-y-2">
-                  {cenariosNegocioOptions.map(option => (
-                    <div key={`cenario-${option.value}`} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`cenario-${option.value}`}
-                        checked={data.cenariosNegocio.includes(option.value)}
-                        onCheckedChange={(checked) => 
-                          handleCheckboxChange('cenariosNegocio', option.value, checked as boolean)
-                        }
-                      />
-                      <Label 
-                        htmlFor={`cenario-${option.value}`} 
-                        className="text-sm font-normal cursor-pointer"
-                      >
-                        {option.label}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Abrangência */}
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-semibold mb-4">Abrangência</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="quantidadeEmpresas">Quantidade de Empresas (Matriz)</Label>
-                <Input
-                  id="quantidadeEmpresas"
-                  type="number"
-                  min="1"
-                  value={data.quantidadeEmpresas}
-                  onChange={(e) => onUpdate({ quantidadeEmpresas: parseInt(e.target.value) || 1 })}
-                  className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="quantidadeUfs">Quantidade de UFs</Label>
-                <Input
-                  id="quantidadeUfs"
-                  type="number"
-                  min="1"
-                  max="27"
-                  value={data.quantidadeUfs}
-                  onChange={(e) => onUpdate({ quantidadeUfs: parseInt(e.target.value) || 1 })}
-                  className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Configurações Finais */}
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-semibold mb-4">Configurações</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <Label>Volumetria de Notas *</Label>
-                <Select value={data.volumetriaNotas} onValueChange={(value) => onUpdate({ volumetriaNotas: value })}>
-                  <SelectTrigger className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${errors.volumetriaNotas ? 'border-red-500' : ''}`}>
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {volumetriaOptions.map(option => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.volumetriaNotas && <p className="text-red-500 text-sm">{errors.volumetriaNotas}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label>Modalidade *</Label>
-                <Select value={data.modalidade} onValueChange={(value) => onUpdate({ modalidade: value as any })}>
-                  <SelectTrigger className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${errors.modalidade ? 'border-red-500' : ''}`}>
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {modalidadeOptions.map(option => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.modalidade && <p className="text-red-500 text-sm">{errors.modalidade}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label>Prazo de Contratação *</Label>
-                <Select 
-                  value={data.prazoContratacao.toString()} 
-                  onValueChange={(value) => onUpdate({ prazoContratacao: parseInt(value) })}
-                >
-                  <SelectTrigger className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${errors.prazoContratacao ? 'border-red-500' : ''}`}>
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {prazoContratacaoOptions.map(option => (
-                      <SelectItem key={option.value} value={option.value.toString()}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.prazoContratacao && <p className="text-red-500 text-sm">{errors.prazoContratacao}</p>}
-              </div>
-            </div>
-          </div>
+          <ConfiguracaoSection
+            volumetriaNotas={data.volumetriaNotas}
+            modalidade={data.modalidade}
+            prazoContratacao={data.prazoContratacao}
+            onUpdate={handleFieldUpdate}
+            errors={errors}
+          />
 
           {/* Buttons */}
           <div className="flex gap-4 pt-6">
