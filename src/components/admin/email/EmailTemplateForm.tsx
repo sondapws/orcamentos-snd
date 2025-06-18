@@ -14,7 +14,7 @@ interface EmailTemplate {
 
 interface EmailTemplateFormProps {
   emailTemplate: any;
-  onSave: (template: EmailTemplate) => Promise<void>;
+  onSave: (template: Omit<EmailTemplate, 'id' | 'nome'>) => Promise<{ success: boolean; error?: any }>;
 }
 
 const EmailTemplateForm: React.FC<EmailTemplateFormProps> = ({ emailTemplate, onSave }) => {

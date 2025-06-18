@@ -16,7 +16,7 @@ interface SmtpConfig {
 
 interface SmtpConfigFormProps {
   emailConfig: any;
-  onSave: (config: Omit<SmtpConfig, 'id'>) => Promise<void>;
+  onSave: (config: Omit<SmtpConfig, 'id'>) => Promise<{ success: boolean; error?: any }>;
 }
 
 const SmtpConfigForm: React.FC<SmtpConfigFormProps> = ({ emailConfig, onSave }) => {
