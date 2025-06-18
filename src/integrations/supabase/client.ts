@@ -14,11 +14,31 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
     persistSession: true,
     autoRefreshToken: true,
-    detectSessionInUrl: true
+    detectSessionInUrl: true,
+    flowType: 'pkce'
   },
   global: {
     headers: {
       'Content-Type': 'application/json'
+    },
+    fetch: (url, options = {}) => {
+      console.log('Supabase fetch:', url);
+      return fetch(url, {
+        ...options,
+        signal: AbortSignal.timeout(10000), // 10 segundo timeout
+      }).catch(error => {
+        console.error('Supabase fetch error:', error);
+        throw error;
+      });
     }
+  },
+  db: {
+    schema: 'public'
   }
+});
+
+// Log de inicialização
+console.log('Supabase client inicializado com:', {
+  url: SUPABASE_URL,
+  hasKey: !!SUPABASE_PUBLISHABLE_KEY
 });
