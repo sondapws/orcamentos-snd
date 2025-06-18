@@ -9,6 +9,66 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      email_config: {
+        Row: {
+          created_at: string | null
+          id: string
+          porta: number
+          senha: string
+          servidor: string
+          ssl: boolean | null
+          updated_at: string | null
+          usuario: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          porta: number
+          senha: string
+          servidor: string
+          ssl?: boolean | null
+          updated_at?: string | null
+          usuario: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          porta?: number
+          senha?: string
+          servidor?: string
+          ssl?: boolean | null
+          updated_at?: string | null
+          usuario?: string
+        }
+        Relationships: []
+      }
+      email_templates: {
+        Row: {
+          assunto: string
+          corpo: string
+          created_at: string | null
+          id: string
+          nome: string
+          updated_at: string | null
+        }
+        Insert: {
+          assunto: string
+          corpo: string
+          created_at?: string | null
+          id?: string
+          nome?: string
+          updated_at?: string | null
+        }
+        Update: {
+          assunto?: string
+          corpo?: string
+          created_at?: string | null
+          id?: string
+          nome?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
