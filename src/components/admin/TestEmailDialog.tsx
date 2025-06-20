@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Send, Loader2 } from 'lucide-react';
+import { emailService } from '@/services/emailService';
 
 interface TestEmailDialogProps {
   emailTemplate: {
@@ -40,42 +41,27 @@ const TestEmailDialog: React.FC<TestEmailDialogProps> = ({ emailTemplate }) => {
     setSending(true);
 
     try {
-      // Simular dados de teste para o template
-      const dadosTeste = {
-        razaoSocial: 'Empresa de Teste Ltda',
-        responsavel: 'João da Silva',
-        cnpj: '12.345.678/0001-90',
-        segmento: 'Indústria',
-        modalidade: 'SaaS',
-        valor: 'R$ 5.000,00'
-      };
+      const result = await emailService.sendTestEmail(testEmail, emailTemplate);
 
-      // Substituir variáveis no template
-      let assuntoFinal = emailTemplate.assunto;
-      let corpoFinal = emailTemplate.corpo;
-
-      Object.entries(dadosTeste).forEach(([key, value]) => {
-        const regex = new RegExp(`{{${key}}}`, 'g');
-        assuntoFinal = assuntoFinal.replace(regex, value);
-        corpoFinal = corpoFinal.replace(regex, value);
-      });
-
-      // Aqui você integraria com o serviço de envio de e-mail real
-      // Por enquanto, apenas simular o envio
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      toast({
-        title: "E-mail de teste enviado!",
-        description: `E-mail enviado com sucesso para ${testEmail}`,
-      });
-
-      setOpen(false);
-      setTestEmail('');
+      if (result.success) {
+        toast({
+          title: "E-mail de teste enviado!",
+          description: `E-mail enviado com sucesso para ${testEmail}`,
+        });
+        setOpen(false);
+        setTestEmail('');
+      } else {
+        toast({
+          title: "Erro ao enviar e-mail",
+          description: result.error || "Ocorreu um erro ao enviar o e-mail de teste.",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error('Erro ao enviar e-mail de teste:', error);
       toast({
         title: "Erro ao enviar e-mail",
-        description: "Ocorreu um erro ao enviar o e-mail de teste.",
+        description: "Ocorreu um erro inesperado ao enviar o e-mail de teste.",
         variant: "destructive",
       });
     } finally {
