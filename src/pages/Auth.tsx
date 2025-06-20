@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,10 +23,15 @@ const Auth = () => {
     const checkConnection = async () => {
       try {
         setConnectionStatus('checking');
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        
         const response = await fetch('https://ugwpnonuqhwjagwdpnbu.supabase.co/rest/v1/', {
           method: 'HEAD',
-          timeout: 5000
+          signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
         setConnectionStatus(response.ok ? 'online' : 'offline');
       } catch (error) {
         console.error('Auth: Erro de conectividade:', error);
