@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,43 +8,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { Loader2, AlertCircle, Wifi, WifiOff } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
 
 const Auth = () => {
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [signupData, setSignupData] = useState({ email: '', password: '', fullName: '', confirmPassword: '' });
   const [loading, setLoading] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<'online' | 'offline' | 'checking'>('checking');
   const navigate = useNavigate();
   const { toast } = useToast();
   const { signIn, signUp, user, isReady } = useAuth();
-
-  // Verificar conectividade
-  useEffect(() => {
-    const checkConnection = async () => {
-      try {
-        setConnectionStatus('checking');
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
-        
-        const response = await fetch('https://ugwpnonuqhwjagwdpnbu.supabase.co/rest/v1/', {
-          method: 'HEAD',
-          signal: controller.signal
-        });
-        
-        clearTimeout(timeoutId);
-        setConnectionStatus(response.ok ? 'online' : 'offline');
-      } catch (error) {
-        console.error('Auth: Erro de conectividade:', error);
-        setConnectionStatus('offline');
-      }
-    };
-
-    checkConnection();
-    const interval = setInterval(checkConnection, 30000); // Verificar a cada 30 segundos
-
-    return () => clearInterval(interval);
-  }, []);
 
   // Redirecionar se já estiver autenticado
   useEffect(() => {
@@ -65,15 +38,6 @@ const Auth = () => {
       return;
     }
 
-    if (connectionStatus === 'offline') {
-      toast({
-        title: "Sem conexão",
-        description: "Verifique sua conexão com a internet e tente novamente.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setLoading(true);
 
     try {
@@ -85,10 +49,10 @@ const Auth = () => {
         
         let errorMessage = "Erro ao fazer login. Tente novamente.";
         
-        if (error.message && error.message.includes('conexão')) {
-          errorMessage = "Problema de conexão. Verifique sua internet e tente novamente.";
-        } else if (error.message && error.message.includes('Invalid login credentials')) {
+        if (error.message && error.message.includes('Invalid login credentials')) {
           errorMessage = "E-mail ou senha incorretos.";
+        } else if (error.message && error.message.includes('Email not confirmed')) {
+          errorMessage = "Por favor, confirme seu e-mail antes de fazer login.";
         } else if (error.message) {
           errorMessage = error.message;
         }
@@ -147,15 +111,6 @@ const Auth = () => {
       return;
     }
 
-    if (connectionStatus === 'offline') {
-      toast({
-        title: "Sem conexão",
-        description: "Verifique sua conexão com a internet e tente novamente.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setLoading(true);
 
     try {
@@ -167,8 +122,8 @@ const Auth = () => {
         
         let errorMessage = "Erro ao criar conta.";
         
-        if (error.message && error.message.includes('conexão')) {
-          errorMessage = "Problema de conexão. Verifique sua internet e tente novamente.";
+        if (error.message && error.message.includes('User already registered')) {
+          errorMessage = "Este e-mail já está cadastrado.";
         } else if (error.message) {
           errorMessage = error.message;
         }
@@ -217,39 +172,8 @@ const Auth = () => {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-blue-600">Sistema de Orçamentos</CardTitle>
           <CardDescription>Faça login ou crie sua conta</CardDescription>
-          
-          {/* Indicador de conectividade */}
-          <div className="flex items-center justify-center gap-2 mt-2">
-            {connectionStatus === 'checking' && (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
-                <span className="text-xs text-gray-500">Verificando conexão...</span>
-              </>
-            )}
-            {connectionStatus === 'online' && (
-              <>
-                <Wifi className="h-4 w-4 text-green-500" />
-                <span className="text-xs text-green-600">Conectado</span>
-              </>
-            )}
-            {connectionStatus === 'offline' && (
-              <>
-                <WifiOff className="h-4 w-4 text-red-500" />
-                <span className="text-xs text-red-600">Sem conexão</span>
-              </>
-            )}
-          </div>
         </CardHeader>
         <CardContent>
-          {connectionStatus === 'offline' && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-red-500" />
-              <span className="text-sm text-red-700">
-                Problema de conexão detectado. Verifique sua internet.
-              </span>
-            </div>
-          )}
-          
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Login</TabsTrigger>
@@ -267,7 +191,7 @@ const Auth = () => {
                     onChange={(e) => setLoginData(prev => ({ ...prev, email: e.target.value }))}
                     placeholder="seu@email.com"
                     required
-                    disabled={loading || connectionStatus === 'offline'}
+                    disabled={loading}
                   />
                 </div>
                 <div className="space-y-2">
@@ -279,13 +203,13 @@ const Auth = () => {
                     onChange={(e) => setLoginData(prev => ({ ...prev, password: e.target.value }))}
                     placeholder="Sua senha"
                     required
-                    disabled={loading || connectionStatus === 'offline'}
+                    disabled={loading}
                   />
                 </div>
                 <Button 
                   type="submit" 
                   className="w-full" 
-                  disabled={loading || connectionStatus === 'offline'}
+                  disabled={loading}
                 >
                   {loading ? (
                     <>
@@ -310,7 +234,7 @@ const Auth = () => {
                     onChange={(e) => setSignupData(prev => ({ ...prev, fullName: e.target.value }))}
                     placeholder="Seu nome completo"
                     required
-                    disabled={loading || connectionStatus === 'offline'}
+                    disabled={loading}
                   />
                 </div>
                 <div className="space-y-2">
@@ -322,7 +246,7 @@ const Auth = () => {
                     onChange={(e) => setSignupData(prev => ({ ...prev, email: e.target.value }))}
                     placeholder="seu@email.com"
                     required
-                    disabled={loading || connectionStatus === 'offline'}
+                    disabled={loading}
                   />
                 </div>
                 <div className="space-y-2">
@@ -335,7 +259,7 @@ const Auth = () => {
                     placeholder="Mínimo 6 caracteres"
                     required
                     minLength={6}
-                    disabled={loading || connectionStatus === 'offline'}
+                    disabled={loading}
                   />
                 </div>
                 <div className="space-y-2">
@@ -347,13 +271,13 @@ const Auth = () => {
                     onChange={(e) => setSignupData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                     placeholder="Confirme sua senha"
                     required
-                    disabled={loading || connectionStatus === 'offline'}
+                    disabled={loading}
                   />
                 </div>
                 <Button 
                   type="submit" 
                   className="w-full" 
-                  disabled={loading || connectionStatus === 'offline'}
+                  disabled={loading}
                 >
                   {loading ? (
                     <>
