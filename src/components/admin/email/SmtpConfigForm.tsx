@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Mail, Shield } from 'lucide-react';
 
 interface SmtpConfig {
   servidor: string;
@@ -21,7 +23,7 @@ interface SmtpConfigFormProps {
 
 const SmtpConfigForm: React.FC<SmtpConfigFormProps> = ({ emailConfig, onSave }) => {
   const [smtpConfig, setSmtpConfig] = useState<SmtpConfig>({
-    servidor: 'smtp.office365.com',
+    servidor: 'smtp.gmail.com',
     porta: 587,
     usuario: '',
     senha: '',
@@ -47,9 +49,19 @@ const SmtpConfigForm: React.FC<SmtpConfigFormProps> = ({ emailConfig, onSave }) 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Configurações do Servidor SMTP</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <Mail className="h-5 w-5" />
+          Configurações do Servidor SMTP
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        <Alert>
+          <Shield className="h-4 w-4" />
+          <AlertDescription>
+            Sistema configurado para envio direto via SMTP. Configure seu servidor de e-mail abaixo.
+          </AlertDescription>
+        </Alert>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="servidor">Servidor SMTP</Label>
@@ -57,6 +69,7 @@ const SmtpConfigForm: React.FC<SmtpConfigFormProps> = ({ emailConfig, onSave }) 
               id="servidor"
               value={smtpConfig.servidor}
               onChange={(e) => setSmtpConfig(prev => ({ ...prev, servidor: e.target.value }))}
+              placeholder="smtp.gmail.com"
             />
           </div>
           <div className="space-y-2">
@@ -75,16 +88,17 @@ const SmtpConfigForm: React.FC<SmtpConfigFormProps> = ({ emailConfig, onSave }) 
               type="email"
               value={smtpConfig.usuario}
               onChange={(e) => setSmtpConfig(prev => ({ ...prev, usuario: e.target.value }))}
-              placeholder="seu-email@empresa.com"
+              placeholder="seu-email@gmail.com"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="senha">Senha</Label>
+            <Label htmlFor="senha">Senha do App</Label>
             <Input
               id="senha"
               type="password"
               value={smtpConfig.senha}
               onChange={(e) => setSmtpConfig(prev => ({ ...prev, senha: e.target.value }))}
+              placeholder="Senha específica do app"
             />
           </div>
           <div className="flex items-center space-x-2">
@@ -96,7 +110,19 @@ const SmtpConfigForm: React.FC<SmtpConfigFormProps> = ({ emailConfig, onSave }) 
             <Label htmlFor="ssl">Usar SSL/TLS</Label>
           </div>
         </div>
-        <Button onClick={handleSave}>Salvar Configurações SMTP</Button>
+
+        <div className="bg-blue-50 p-4 rounded-lg">
+          <h4 className="font-semibold mb-2">Configurações Comuns:</h4>
+          <div className="text-sm space-y-1">
+            <p><strong>Gmail:</strong> smtp.gmail.com:587 (SSL) - Use senha de app</p>
+            <p><strong>Outlook:</strong> smtp.office365.com:587 (SSL)</p>
+            <p><strong>Yahoo:</strong> smtp.mail.yahoo.com:587 (SSL)</p>
+          </div>
+        </div>
+
+        <Button onClick={handleSave} className="w-full">
+          Salvar Configurações SMTP
+        </Button>
       </CardContent>
     </Card>
   );

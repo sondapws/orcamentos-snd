@@ -21,24 +21,30 @@ export interface EmailResponse {
 export const emailService = {
   async sendEmail(emailData: EmailData): Promise<EmailResponse> {
     try {
+      console.log('Enviando e-mail via SMTP:', {
+        to: emailData.to,
+        subject: emailData.subject
+      });
+
       const { data, error } = await supabase.functions.invoke('send-email', {
         body: emailData
       });
 
       if (error) {
-        console.error('Erro na Edge Function:', error);
+        console.error('Erro na Edge Function SMTP:', error);
         return {
           success: false,
-          error: error.message || 'Erro ao enviar email'
+          error: error.message || 'Erro ao enviar email via SMTP'
         };
       }
 
+      console.log('Resposta do envio SMTP:', data);
       return data;
     } catch (error) {
-      console.error('Erro ao chamar serviço de email:', error);
+      console.error('Erro ao chamar serviço SMTP:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Erro desconhecido'
+        error: error instanceof Error ? error.message : 'Erro desconhecido no envio SMTP'
       };
     }
   },
@@ -74,7 +80,12 @@ export const emailService = {
         <html>
           <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
             <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+              <h2 style="color: #2563eb;">E-mail de Teste - Sistema de Orçamentos</h2>
               ${htmlContent}
+              <hr style="margin: 20px 0; border: 1px solid #e5e7eb;">
+              <p style="font-size: 12px; color: #6b7280;">
+                Este é um e-mail de teste enviado via SMTP configurado no sistema.
+              </p>
             </div>
           </body>
         </html>
