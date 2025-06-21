@@ -39,7 +39,19 @@ export const emailService = {
       }
 
       console.log('Resposta do envio SMTP:', data);
-      return data;
+      
+      // Verificar se a resposta indica sucesso
+      if (data && data.success === false) {
+        return {
+          success: false,
+          error: data.error || 'Erro desconhecido no envio SMTP'
+        };
+      }
+
+      return {
+        success: true,
+        message: data?.message || 'E-mail enviado com sucesso'
+      };
     } catch (error) {
       console.error('Erro ao chamar serviço SMTP:', error);
       return {

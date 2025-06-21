@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Mail, Shield } from 'lucide-react';
+import { Mail, Shield, CheckCircle } from 'lucide-react';
 
 interface SmtpConfig {
   servidor: string;
@@ -23,27 +23,34 @@ interface SmtpConfigFormProps {
 
 const SmtpConfigForm: React.FC<SmtpConfigFormProps> = ({ emailConfig, onSave }) => {
   const [smtpConfig, setSmtpConfig] = useState<SmtpConfig>({
-    servidor: 'smtp.gmail.com',
+    servidor: '',
     porta: 587,
     usuario: '',
     senha: '',
     ssl: true
   });
 
+  const [saving, setSaving] = useState(false);
+
   useEffect(() => {
     if (emailConfig) {
       setSmtpConfig({
-        servidor: emailConfig.servidor,
-        porta: emailConfig.porta,
-        usuario: emailConfig.usuario,
-        senha: emailConfig.senha,
-        ssl: emailConfig.ssl,
+        servidor: emailConfig.servidor || '',
+        porta: emailConfig.porta || 587,
+        usuario: emailConfig.usuario || '',
+        senha: emailConfig.senha || '',
+        ssl: emailConfig.ssl !== false,
       });
     }
   }, [emailConfig]);
 
   const handleSave = async () => {
-    await onSave(smtpConfig);
+    setSaving(true);
+    try {
+      await onSave(smtpConfig);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -61,6 +68,15 @@ const SmtpConfigForm: React.FC<SmtpConfigFormProps> = ({ emailConfig, onSave }) 
             Sistema configurado para envio direto via SMTP. Configure seu servidor de e-mail abaixo.
           </AlertDescription>
         </Alert>
+
+        {emailConfig && (
+          <Alert>
+            <CheckCircle className="h-4 w-4" />
+            <AlertDescription>
+              Configuração SMTP encontrada e carregada com sucesso.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
@@ -117,11 +133,12 @@ const SmtpConfigForm: React.FC<SmtpConfigFormProps> = ({ emailConfig, onSave }) 
             <p><strong>Gmail:</strong> smtp.gmail.com:587 (SSL) - Use senha de app</p>
             <p><strong>Outlook:</strong> smtp.office365.com:587 (SSL)</p>
             <p><strong>Yahoo:</strong> smtp.mail.yahoo.com:587 (SSL)</p>
+            <p><strong>Sonda:</strong> sonda-com.mail.protection.outlook.com:25 (SSL)</p>
           </div>
         </div>
 
-        <Button onClick={handleSave} className="w-full">
-          Salvar Configurações SMTP
+        <Button onClick={handleSave} className="w-full" disabled={saving}>
+          {saving ? 'Salvando...' : 'Salvar Configurações SMTP'}
         </Button>
       </CardContent>
     </Card>
