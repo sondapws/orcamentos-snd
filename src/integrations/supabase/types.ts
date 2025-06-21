@@ -9,6 +9,110 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      aplicativos: {
+        Row: {
+          ativo: boolean
+          created_at: string | null
+          descricao: string | null
+          id: string
+          nome: string
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          nome: string
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          nome?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      dados_produto_ano: {
+        Row: {
+          ano: number
+          aplicativo_id: string
+          bloco_k_lu: number | null
+          bloco_k_ma: number | null
+          calibracao_lu: number
+          created_at: string | null
+          custo_base: number | null
+          custo_medio: number | null
+          custo_mensal: number | null
+          custo_percent: number | null
+          id: string
+          lu_ma_minima: number
+          lu_meses: number
+          margem_venda: number
+          qtd_clientes: number | null
+          receita_custo: number | null
+          receita_mensal: number | null
+          reinf_lu: number | null
+          reinf_ma: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          ano: number
+          aplicativo_id: string
+          bloco_k_lu?: number | null
+          bloco_k_ma?: number | null
+          calibracao_lu?: number
+          created_at?: string | null
+          custo_base?: number | null
+          custo_medio?: number | null
+          custo_mensal?: number | null
+          custo_percent?: number | null
+          id?: string
+          lu_ma_minima?: number
+          lu_meses?: number
+          margem_venda?: number
+          qtd_clientes?: number | null
+          receita_custo?: number | null
+          receita_mensal?: number | null
+          reinf_lu?: number | null
+          reinf_ma?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          ano?: number
+          aplicativo_id?: string
+          bloco_k_lu?: number | null
+          bloco_k_ma?: number | null
+          calibracao_lu?: number
+          created_at?: string | null
+          custo_base?: number | null
+          custo_medio?: number | null
+          custo_mensal?: number | null
+          custo_percent?: number | null
+          id?: string
+          lu_ma_minima?: number
+          lu_meses?: number
+          margem_venda?: number
+          qtd_clientes?: number | null
+          receita_custo?: number | null
+          receita_mensal?: number | null
+          reinf_lu?: number | null
+          reinf_ma?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dados_produto_ano_aplicativo_id_fkey"
+            columns: ["aplicativo_id"]
+            isOneToOne: false
+            referencedRelation: "aplicativos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_config: {
         Row: {
           created_at: string | null
@@ -39,6 +143,36 @@ export type Database = {
           ssl?: boolean | null
           updated_at?: string | null
           usuario?: string
+        }
+        Relationships: []
+      }
+      email_logs: {
+        Row: {
+          assunto: string
+          created_at: string | null
+          destinatario: string
+          enviado_em: string | null
+          erro: string | null
+          id: string
+          status: string
+        }
+        Insert: {
+          assunto: string
+          created_at?: string | null
+          destinatario: string
+          enviado_em?: string | null
+          erro?: string | null
+          id?: string
+          status?: string
+        }
+        Update: {
+          assunto?: string
+          created_at?: string | null
+          destinatario?: string
+          enviado_em?: string | null
+          erro?: string | null
+          id?: string
+          status?: string
         }
         Relationships: []
       }

@@ -43,6 +43,20 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               </Button>
               <Button
                 variant="ghost"
+                onClick={() => navigate('/admin/aplicativos')}
+                className="text-white hover:bg-blue-700"
+              >
+                Aplicativos
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => navigate('/admin/dados-produtos')}
+                className="text-white hover:bg-blue-700"
+              >
+                Dados Produtos
+              </Button>
+              <Button
+                variant="ghost"
                 onClick={() => navigate('/admin/email-config')}
                 className="text-white hover:bg-blue-700"
               >

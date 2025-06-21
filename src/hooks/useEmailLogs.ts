@@ -29,7 +29,18 @@ export const useEmailLogs = () => {
         return;
       }
 
-      setLogs(data || []);
+      // Mapear os dados para o tipo EmailLog
+      const mappedLogs: EmailLog[] = (data || []).map(log => ({
+        id: log.id,
+        destinatario: log.destinatario,
+        assunto: log.assunto,
+        status: log.status,
+        erro: log.erro || undefined,
+        enviado_em: log.enviado_em || new Date().toISOString(),
+        created_at: log.created_at || new Date().toISOString()
+      }));
+
+      setLogs(mappedLogs);
     } catch (error) {
       console.error('Erro ao buscar logs:', error);
     } finally {
