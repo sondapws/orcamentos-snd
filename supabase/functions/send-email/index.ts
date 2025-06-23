@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -119,58 +120,70 @@ serve(async (req) => {
       ssl: config.ssl
     })
 
-    // Implementar envio SMTP real usando um transporter customizado
-    const smtpConfig = {
-      host: config.servidor,
-      port: config.porta,
-      secure: config.ssl, // true para 465, false para outras portas
-      auth: {
-        user: config.usuario,
-        pass: config.senha
-      },
-      tls: {
-        rejectUnauthorized: false // Para desenvolvimento/teste
-      }
-    }
-
-    console.log('Tentando enviar e-mail via SMTP:', {
-      from: config.usuario,
-      to: to,
-      subject: subject
-    })
-
-    // Para ambiente Deno, vamos implementar um envio HTTP simples
-    // Em produção real, usaria uma biblioteca SMTP adequada
     try {
-      // Simular envio SMTP com sucesso para desenvolvimento
-      // Em produção, aqui seria a implementação real do SMTP
-      const envioSucesso = true
+      // Criar cliente SMTP real
+      const client = new SMTPClient({
+        connection: {
+          hostname: config.servidor,
+          port: config.porta,
+          tls: config.ssl,
+          auth: {
+            username: config.usuario,
+            password: config.senha,
+          },
+        },
+      })
 
-      if (envioSucesso) {
-        // Log do envio bem-sucedido
-        await supabaseClient
-          .from('email_logs')
-          .insert({
-            destinatario: to,
-            assunto: subject,
-            status: 'enviado',
-            enviado_em: new Date().toISOString()
-          })
+      console.log('Conectando ao servidor SMTP...')
 
-        console.log('E-mail enviado com sucesso via SMTP')
+      // Enviar e-mail real
+      await client.send({
+        from: config.usuario,
+        to: to,
+        subject: subject,
+        content: html,
+        html: html,
+      })
 
-        return new Response(
-          JSON.stringify({ 
-            success: true, 
-            message: 'E-mail enviado com sucesso via SMTP' 
-          }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
-      } else {
-        throw new Error('Falha no envio SMTP')
-      }
+      await client.close()
+
+      console.log('E-mail enviado com sucesso via SMTP')
+
+      // Log do envio bem-sucedido
+      await supabaseClient
+        .from('email_logs')
+        .insert({
+          destinatario: to,
+          assunto: subject,
+          status: 'enviado',
+          enviado_em: new Date().toISOString()
+        })
+
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: 'E-mail enviado com sucesso via SMTP' 
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+
     } catch (smtpError) {
       console.error('Erro no envio SMTP:', smtpError)
+      
+      // Tratar diferentes tipos de erro SMTP
+      let errorMessage = 'Erro desconhecido no envio SMTP'
+      
+      if (smtpError.message.includes('authentication')) {
+        errorMessage = 'Erro de autenticação SMTP. Verifique usuário e senha.'
+      } else if (smtpError.message.includes('connection')) {
+        errorMessage = 'Erro de conexão SMTP. Verifique servidor e porta.'
+      } else if (smtpError.message.includes('timeout')) {
+        errorMessage = 'Timeout na conexão SMTP. Tente novamente.'
+      } else if (smtpError.message.includes('recipient')) {
+        errorMessage = 'Endereço de destinatário inválido.'
+      } else {
+        errorMessage = `Erro SMTP: ${smtpError.message}`
+      }
       
       await supabaseClient
         .from('email_logs')
@@ -178,14 +191,14 @@ serve(async (req) => {
           destinatario: to,
           assunto: subject,
           status: 'erro',
-          erro: `Erro SMTP: ${smtpError.message}`,
+          erro: errorMessage,
           enviado_em: new Date().toISOString()
         })
 
       return new Response(
         JSON.stringify({ 
           success: false,
-          error: `Erro no envio SMTP: ${smtpError.message}` 
+          error: errorMessage
         }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )

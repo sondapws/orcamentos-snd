@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Mail, Shield, CheckCircle } from 'lucide-react';
+import { Mail, Shield, CheckCircle, AlertTriangle } from 'lucide-react';
 
 interface SmtpConfig {
   servidor: string;
@@ -65,7 +65,7 @@ const SmtpConfigForm: React.FC<SmtpConfigFormProps> = ({ emailConfig, onSave }) 
         <Alert>
           <Shield className="h-4 w-4" />
           <AlertDescription>
-            Sistema configurado para envio direto via SMTP. Configure seu servidor de e-mail abaixo.
+            Sistema configurado para envio SMTP real. Configure seu servidor de e-mail abaixo para envio efetivo.
           </AlertDescription>
         </Alert>
 
@@ -77,6 +77,13 @@ const SmtpConfigForm: React.FC<SmtpConfigFormProps> = ({ emailConfig, onSave }) 
             </AlertDescription>
           </Alert>
         )}
+
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Importante:</strong> O sistema agora usa envio SMTP real. Certifique-se de que as configurações estão corretas para evitar falhas no envio.
+          </AlertDescription>
+        </Alert>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
@@ -133,7 +140,17 @@ const SmtpConfigForm: React.FC<SmtpConfigFormProps> = ({ emailConfig, onSave }) 
             <p><strong>Gmail:</strong> smtp.gmail.com:587 (SSL) - Use senha de app</p>
             <p><strong>Outlook:</strong> smtp.office365.com:587 (SSL)</p>
             <p><strong>Yahoo:</strong> smtp.mail.yahoo.com:587 (SSL)</p>
-            <p><strong>Sonda:</strong> sonda-com.mail.protection.outlook.com:25 (SSL)</p>
+            <p><strong>Senda:</strong> smtp.senda.com.br:587 (SSL)</p>
+          </div>
+        </div>
+
+        <div className="bg-yellow-50 p-4 rounded-lg">
+          <h4 className="font-semibold mb-2 text-yellow-800">Dicas para Gmail:</h4>
+          <div className="text-sm text-yellow-700 space-y-1">
+            <p>1. Ative a verificação em 2 etapas na sua conta Google</p>
+            <p>2. Crie uma "Senha de app" específica para este sistema</p>
+            <p>3. Use a senha de app no campo "Senha do App" acima</p>
+            <p>4. Nunca use sua senha normal do Gmail</p>
           </div>
         </div>
 
