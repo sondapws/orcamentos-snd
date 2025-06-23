@@ -5,6 +5,7 @@ import { Loader2 } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import SmtpConfigForm from '@/components/admin/email/SmtpConfigForm';
 import EmailTemplateForm from '@/components/admin/email/EmailTemplateForm';
+import EmailLogsViewer from '@/components/admin/email/EmailLogsViewer';
 import { useEmailConfig } from '@/hooks/useEmailConfig';
 
 const EmailConfig = () => {
@@ -31,13 +32,14 @@ const EmailConfig = () => {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Configuração de E-mails</h1>
-          <p className="text-gray-600">Configure o SMTP e templates de e-mail</p>
+          <p className="text-gray-600">Configure o SMTP, templates e monitore os envios</p>
         </div>
 
         <Tabs defaultValue="smtp" className="space-y-4">
           <TabsList>
             <TabsTrigger value="smtp">Configurações SMTP</TabsTrigger>
             <TabsTrigger value="template">Template de E-mail</TabsTrigger>
+            <TabsTrigger value="logs">Logs de Envio</TabsTrigger>
           </TabsList>
 
           <TabsContent value="smtp">
@@ -52,6 +54,10 @@ const EmailConfig = () => {
               emailTemplate={emailTemplate}
               onSave={saveEmailTemplate}
             />
+          </TabsContent>
+
+          <TabsContent value="logs">
+            <EmailLogsViewer />
           </TabsContent>
         </Tabs>
       </div>
