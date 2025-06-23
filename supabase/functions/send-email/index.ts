@@ -1,164 +1,53 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts"
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { handleCors, corsHeaders } from './cors.ts'
+import { validateEmailRequest } from './validator.ts'
+import { fetchEmailConfig } from './email-config.ts'
+import { sendEmailViaSMTP } from './smtp-client.ts'
+import { logEmailAttempt } from './logger.ts'
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
+  // Handle CORS preflight requests
+  const corsResponse = handleCors(req)
+  if (corsResponse) return corsResponse
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-    )
-
-    const { to, subject, html, attachments } = await req.json()
-
-    if (!to || !subject || !html) {
+    const body = await req.json()
+    
+    // Validate request
+    const validation = validateEmailRequest(body)
+    if (!validation.valid) {
       return new Response(
         JSON.stringify({ 
           success: false,
-          error: 'Campos obrigatórios: to, subject, html' 
+          error: validation.error 
         }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    console.log('Buscando configurações SMTP...')
+    const emailData = validation.data!
 
-    // Buscar configurações SMTP do banco
-    const { data: emailConfig, error: configError } = await supabaseClient
-      .from('email_config')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(1)
-
-    if (configError) {
-      console.error('Erro ao buscar configurações SMTP:', configError)
+    // Fetch email configuration
+    const { config, error: configError } = await fetchEmailConfig()
+    if (!config) {
+      await logEmailAttempt(emailData.to, emailData.subject, 'erro', configError)
       
-      await supabaseClient
-        .from('email_logs')
-        .insert({
-          destinatario: to,
-          assunto: subject,
-          status: 'erro',
-          erro: `Erro ao buscar configurações: ${configError.message}`,
-          enviado_em: new Date().toISOString()
-        })
-
       return new Response(
         JSON.stringify({ 
           success: false,
-          error: `Erro ao buscar configurações SMTP: ${configError.message}` 
+          error: configError 
         }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    if (!emailConfig || emailConfig.length === 0) {
-      console.error('Nenhuma configuração SMTP encontrada')
+    // Send email via SMTP
+    const result = await sendEmailViaSMTP(config, emailData)
+    
+    if (result.success) {
+      await logEmailAttempt(emailData.to, emailData.subject, 'enviado')
       
-      await supabaseClient
-        .from('email_logs')
-        .insert({
-          destinatario: to,
-          assunto: subject,
-          status: 'erro',
-          erro: 'Configurações SMTP não encontradas',
-          enviado_em: new Date().toISOString()
-        })
-
-      return new Response(
-        JSON.stringify({ 
-          success: false,
-          error: 'Configurações SMTP não encontradas. Configure o SMTP nas configurações do sistema.' 
-        }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    const config = Array.isArray(emailConfig) ? emailConfig[0] : emailConfig
-
-    // Validar configurações SMTP
-    if (!config.servidor || !config.usuario || !config.senha) {
-      console.error('Configurações SMTP incompletas:', {
-        servidor: !!config.servidor,
-        usuario: !!config.usuario,
-        senha: !!config.senha
-      })
-      
-      await supabaseClient
-        .from('email_logs')
-        .insert({
-          destinatario: to,
-          assunto: subject,
-          status: 'erro',
-          erro: 'Configurações SMTP incompletas',
-          enviado_em: new Date().toISOString()
-        })
-
-      return new Response(
-        JSON.stringify({ 
-          success: false,
-          error: 'Configurações SMTP incompletas. Verifique servidor, usuário e senha.' 
-        }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    console.log('Configurações SMTP encontradas:', {
-      servidor: config.servidor,
-      porta: config.porta,
-      usuario: config.usuario,
-      ssl: config.ssl
-    })
-
-    try {
-      // Criar cliente SMTP real
-      const client = new SMTPClient({
-        connection: {
-          hostname: config.servidor,
-          port: config.porta,
-          tls: config.ssl,
-          auth: {
-            username: config.usuario,
-            password: config.senha,
-          },
-        },
-      })
-
-      console.log('Conectando ao servidor SMTP...')
-
-      // Enviar e-mail real
-      await client.send({
-        from: config.usuario,
-        to: to,
-        subject: subject,
-        content: html,
-        html: html,
-      })
-
-      await client.close()
-
-      console.log('E-mail enviado com sucesso via SMTP')
-
-      // Log do envio bem-sucedido
-      await supabaseClient
-        .from('email_logs')
-        .insert({
-          destinatario: to,
-          assunto: subject,
-          status: 'enviado',
-          enviado_em: new Date().toISOString()
-        })
-
       return new Response(
         JSON.stringify({ 
           success: true, 
@@ -166,39 +55,13 @@ serve(async (req) => {
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
-
-    } catch (smtpError) {
-      console.error('Erro no envio SMTP:', smtpError)
+    } else {
+      await logEmailAttempt(emailData.to, emailData.subject, 'erro', result.error)
       
-      // Tratar diferentes tipos de erro SMTP
-      let errorMessage = 'Erro desconhecido no envio SMTP'
-      
-      if (smtpError.message.includes('authentication')) {
-        errorMessage = 'Erro de autenticação SMTP. Verifique usuário e senha.'
-      } else if (smtpError.message.includes('connection')) {
-        errorMessage = 'Erro de conexão SMTP. Verifique servidor e porta.'
-      } else if (smtpError.message.includes('timeout')) {
-        errorMessage = 'Timeout na conexão SMTP. Tente novamente.'
-      } else if (smtpError.message.includes('recipient')) {
-        errorMessage = 'Endereço de destinatário inválido.'
-      } else {
-        errorMessage = `Erro SMTP: ${smtpError.message}`
-      }
-      
-      await supabaseClient
-        .from('email_logs')
-        .insert({
-          destinatario: to,
-          assunto: subject,
-          status: 'erro',
-          erro: errorMessage,
-          enviado_em: new Date().toISOString()
-        })
-
       return new Response(
         JSON.stringify({ 
           success: false,
-          error: errorMessage
+          error: result.error
         }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
