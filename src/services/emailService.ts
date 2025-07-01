@@ -1,6 +1,4 @@
 
-import { supabase } from '@/integrations/supabase/client';
-
 export interface EmailData {
   to: string;
   subject: string;
@@ -18,45 +16,49 @@ export interface EmailResponse {
   error?: string;
 }
 
+// URL do Power Automate para envio de e-mails
+const POWER_AUTOMATE_URL = 'https://prod-15.westus.logic.azure.com:443/workflows/6dcbd557c39b4d74afe41a7f223caf2e/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=cyD7xWu4TpxXXsSWcH9h8BU5NptbrLkqPVCh0WrXasU';
+
 export const emailService = {
   async sendEmail(emailData: EmailData): Promise<EmailResponse> {
     try {
-      console.log('Enviando e-mail via SMTP:', {
+      console.log('Enviando e-mail via Power Automate:', {
         to: emailData.to,
         subject: emailData.subject
       });
 
-      const { data, error } = await supabase.functions.invoke('send-email', {
-        body: emailData
+      // Converter HTML para texto simples para mensagem
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = emailData.html;
+      const mensagem = tempDiv.textContent || tempDiv.innerText || emailData.html;
+
+      const response = await fetch(POWER_AUTOMATE_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          nome: emailData.subject, // Usar o assunto como nome por enquanto
+          email: emailData.to,
+          mensagem: mensagem
+        })
       });
 
-      if (error) {
-        console.error('Erro na Edge Function SMTP:', error);
-        return {
-          success: false,
-          error: error.message || 'Erro ao enviar email via SMTP'
-        };
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      console.log('Resposta do envio SMTP:', data);
+      console.log('E-mail enviado com sucesso via Power Automate');
       
-      // Verificar se a resposta indica sucesso
-      if (data && data.success === false) {
-        return {
-          success: false,
-          error: data.error || 'Erro desconhecido no envio SMTP'
-        };
-      }
-
       return {
         success: true,
-        message: data?.message || 'E-mail enviado com sucesso'
+        message: 'E-mail enviado com sucesso via Power Automate'
       };
     } catch (error) {
-      console.error('Erro ao chamar serviço SMTP:', error);
+      console.error('Erro ao enviar e-mail via Power Automate:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Erro desconhecido no envio SMTP'
+        error: error instanceof Error ? error.message : 'Erro desconhecido no envio via Power Automate'
       };
     }
   },
@@ -82,26 +84,38 @@ export const emailService = {
       corpoFinal = corpoFinal.replace(regex, value);
     });
 
-    // Converter quebras de linha para HTML
-    const htmlContent = corpoFinal.replace(/\n/g, '<br>');
-
-    return this.sendEmail({
+    console.log('Enviando e-mail de teste via Power Automate:', {
       to,
-      subject: assuntoFinal,
-      html: `
-        <html>
-          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-              <h2 style="color: #2563eb;">E-mail de Teste - Sistema de Orçamentos</h2>
-              ${htmlContent}
-              <hr style="margin: 20px 0; border: 1px solid #e5e7eb;">
-              <p style="font-size: 12px; color: #6b7280;">
-                Este é um e-mail de teste enviado via SMTP configurado no sistema.
-              </p>
-            </div>
-          </body>
-        </html>
-      `
+      subject: assuntoFinal
     });
+
+    try {
+      const response = await fetch(POWER_AUTOMATE_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          nome: 'E-mail de Teste - Sistema de Orçamentos',
+          email: to,
+          mensagem: `${assuntoFinal}\n\n${corpoFinal}\n\nEste é um e-mail de teste enviado via Power Automate.`
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return {
+        success: true,
+        message: 'E-mail de teste enviado com sucesso via Power Automate'
+      };
+    } catch (error) {
+      console.error('Erro ao enviar e-mail de teste:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Erro ao enviar e-mail de teste via Power Automate'
+      };
+    }
   }
 };
