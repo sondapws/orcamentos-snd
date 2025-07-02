@@ -16,8 +16,44 @@ export interface EmailResponse {
   error?: string;
 }
 
-// URL do Power Automate para envio de e-mails
+import { supabase } from '@/integrations/supabase/client';
+
+// URL padrão do Power Automate para envio de e-mails (fallback)
 const POWER_AUTOMATE_URL = 'https://prod-15.westus.logic.azure.com:443/workflows/6dcbd557c39b4d74afe41a7f223caf2e/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=cyD7xWu4TpxXXsSWcH9h8BU5NptbrLkqPVCh0WrXasU';
+
+// Função para buscar URL do webhook configurado
+const getWebhookUrl = async (): Promise<string> => {
+  try {
+    const { data: webhookConfig } = await supabase
+      .from('webhook_config')
+      .select('webhook_url')
+      .eq('ativo', true)
+      .limit(1)
+      .single();
+
+    return webhookConfig?.webhook_url || POWER_AUTOMATE_URL;
+  } catch (error) {
+    console.warn('Usando URL padrão do webhook:', error);
+    return POWER_AUTOMATE_URL;
+  }
+};
+
+// Função para registrar log de envio
+const logEmail = async (destinatario: string, assunto: string, status: 'enviado' | 'erro', erro?: string) => {
+  try {
+    await supabase
+      .from('email_logs')
+      .insert([{
+        destinatario,
+        assunto,
+        status,
+        erro,
+        enviado_em: new Date().toISOString()
+      }]);
+  } catch (error) {
+    console.error('Erro ao registrar log de e-mail:', error);
+  }
+};
 
 export const emailService = {
   async sendEmail(emailData: EmailData): Promise<EmailResponse> {
@@ -27,26 +63,29 @@ export const emailService = {
         subject: emailData.subject
       });
 
+      // Buscar URL do webhook configurado
+      const webhookUrl = await getWebhookUrl();
+
       // Converter HTML para texto simples para mensagem
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = emailData.html;
       const mensagem = tempDiv.textContent || tempDiv.innerText || emailData.html;
 
-      const response = await fetch(POWER_AUTOMATE_URL, {
+      const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
+        mode: 'no-cors',
         body: JSON.stringify({
-          nome: emailData.subject, // Usar o assunto como nome por enquanto
+          nome: emailData.subject,
           email: emailData.to,
-          mensagem: mensagem
+          mensagem: emailData.html // Enviar HTML completo
         })
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      // Registrar log de sucesso
+      await logEmail(emailData.to, emailData.subject, 'enviado');
 
       console.log('E-mail enviado com sucesso via Power Automate');
       
@@ -56,6 +95,15 @@ export const emailService = {
       };
     } catch (error) {
       console.error('Erro ao enviar e-mail via Power Automate:', error);
+      
+      // Registrar log de erro
+      await logEmail(
+        emailData.to, 
+        emailData.subject, 
+        'erro', 
+        error instanceof Error ? error.message : 'Erro desconhecido'
+      );
+      
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erro desconhecido no envio via Power Automate'
@@ -90,21 +138,24 @@ export const emailService = {
     });
 
     try {
-      const response = await fetch(POWER_AUTOMATE_URL, {
+      // Buscar URL do webhook configurado
+      const webhookUrl = await getWebhookUrl();
+
+      const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
+        mode: 'no-cors',
         body: JSON.stringify({
           nome: 'E-mail de Teste - Sistema de Orçamentos',
           email: to,
-          mensagem: `${assuntoFinal}\n\n${corpoFinal}\n\nEste é um e-mail de teste enviado via Power Automate.`
+          mensagem: corpoFinal // Enviar HTML do template
         })
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      // Registrar log de teste
+      await logEmail(to, `[TESTE] ${assuntoFinal}`, 'enviado');
 
       return {
         success: true,
@@ -112,6 +163,15 @@ export const emailService = {
       };
     } catch (error) {
       console.error('Erro ao enviar e-mail de teste:', error);
+      
+      // Registrar log de erro
+      await logEmail(
+        to, 
+        `[TESTE] ${assuntoFinal}`, 
+        'erro', 
+        error instanceof Error ? error.message : 'Erro ao enviar e-mail de teste'
+      );
+      
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erro ao enviar e-mail de teste via Power Automate'

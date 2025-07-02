@@ -227,6 +227,30 @@ export type Database = {
         }
         Relationships: []
       }
+      webhook_config: {
+        Row: {
+          ativo: boolean | null
+          created_at: string | null
+          id: string
+          updated_at: string | null
+          webhook_url: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          webhook_url: string
+        }
+        Update: {
+          ativo?: boolean | null
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          webhook_url?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
