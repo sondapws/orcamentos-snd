@@ -76,13 +76,17 @@ export const emailService = {
         headers: {
           'Content-Type': 'application/json'
         },
-        mode: 'no-cors',
         body: JSON.stringify({
           nome: emailData.subject,
           email: emailData.to,
           mensagem: emailData.html // Enviar HTML completo
         })
       });
+
+      // Verificar se a resposta foi bem-sucedida
+      if (!response.ok) {
+        throw new Error(`Erro HTTP: ${response.status} - ${response.statusText}`);
+      }
 
       // Registrar log de sucesso
       await logEmail(emailData.to, emailData.subject, 'enviado');
@@ -146,13 +150,17 @@ export const emailService = {
         headers: {
           'Content-Type': 'application/json'
         },
-        mode: 'no-cors',
         body: JSON.stringify({
           nome: 'E-mail de Teste - Sistema de Orçamentos',
           email: to,
           mensagem: corpoFinal // Enviar HTML do template
         })
       });
+
+      // Verificar se a resposta foi bem-sucedida
+      if (!response.ok) {
+        throw new Error(`Erro HTTP: ${response.status} - ${response.statusText}`);
+      }
 
       // Registrar log de teste
       await logEmail(to, `[TESTE] ${assuntoFinal}`, 'enviado');

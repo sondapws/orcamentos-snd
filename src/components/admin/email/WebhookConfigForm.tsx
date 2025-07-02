@@ -102,13 +102,16 @@ const WebhookConfigForm = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        mode: 'no-cors',
         body: JSON.stringify({
           nome: 'Teste do Sistema',
           email: 'teste@sistema.com',
           mensagem: 'Este é um teste do webhook do Power Automate.'
         }),
       });
+
+      if (!response.ok) {
+        throw new Error(`Erro HTTP: ${response.status} - ${response.statusText}`);
+      }
 
       toast({
         title: "Teste enviado",
