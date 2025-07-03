@@ -36,6 +36,237 @@ export type Database = {
         }
         Relationships: []
       }
+      calibracao_colunas: {
+        Row: {
+          considera_segmento: boolean | null
+          created_at: string | null
+          id: string
+          nome: string
+          regra_calculo: string | null
+          regra_id: string
+          tipo: string
+        }
+        Insert: {
+          considera_segmento?: boolean | null
+          created_at?: string | null
+          id?: string
+          nome: string
+          regra_calculo?: string | null
+          regra_id: string
+          tipo: string
+        }
+        Update: {
+          considera_segmento?: boolean | null
+          created_at?: string | null
+          id?: string
+          nome?: string
+          regra_calculo?: string | null
+          regra_id?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calibracao_colunas_regra_id_fkey"
+            columns: ["regra_id"]
+            isOneToOne: false
+            referencedRelation: "regras_precificacao"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      calibracao_valores: {
+        Row: {
+          coluna_id: string
+          created_at: string | null
+          id: string
+          segmento: string
+          valor: number
+        }
+        Insert: {
+          coluna_id: string
+          created_at?: string | null
+          id?: string
+          segmento: string
+          valor: number
+        }
+        Update: {
+          coluna_id?: string
+          created_at?: string | null
+          id?: string
+          segmento?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calibracao_valores_coluna_id_fkey"
+            columns: ["coluna_id"]
+            isOneToOne: false
+            referencedRelation: "calibracao_colunas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      config_prefeituras: {
+        Row: {
+          calibracao: number | null
+          created_at: string | null
+          id: string
+          quantidade_municipios: number
+          regra_id: string
+          sob_consulta: boolean | null
+        }
+        Insert: {
+          calibracao?: number | null
+          created_at?: string | null
+          id?: string
+          quantidade_municipios: number
+          regra_id: string
+          sob_consulta?: boolean | null
+        }
+        Update: {
+          calibracao?: number | null
+          created_at?: string | null
+          id?: string
+          quantidade_municipios?: number
+          regra_id?: string
+          sob_consulta?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "config_prefeituras_regra_id_fkey"
+            columns: ["regra_id"]
+            isOneToOne: false
+            referencedRelation: "regras_precificacao"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      config_saas: {
+        Row: {
+          created_at: string | null
+          devops: number
+          hosting: number
+          id: string
+          nome_plano: string
+          plano: string
+          regra_id: string
+          setup: number
+          volumetria_max: number | null
+          volumetria_min: number
+        }
+        Insert: {
+          created_at?: string | null
+          devops: number
+          hosting: number
+          id?: string
+          nome_plano: string
+          plano: string
+          regra_id: string
+          setup: number
+          volumetria_max?: number | null
+          volumetria_min: number
+        }
+        Update: {
+          created_at?: string | null
+          devops?: number
+          hosting?: number
+          id?: string
+          nome_plano?: string
+          plano?: string
+          regra_id?: string
+          setup?: number
+          volumetria_max?: number | null
+          volumetria_min?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "config_saas_regra_id_fkey"
+            columns: ["regra_id"]
+            isOneToOne: false
+            referencedRelation: "regras_precificacao"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      config_suporte: {
+        Row: {
+          ano: number
+          created_at: string | null
+          id: string
+          preco_unitario: number
+          quantidade_horas: number
+          regra_id: string
+          tipo_suporte: string
+          total: number
+        }
+        Insert: {
+          ano: number
+          created_at?: string | null
+          id?: string
+          preco_unitario: number
+          quantidade_horas: number
+          regra_id: string
+          tipo_suporte: string
+          total: number
+        }
+        Update: {
+          ano?: number
+          created_at?: string | null
+          id?: string
+          preco_unitario?: number
+          quantidade_horas?: number
+          regra_id?: string
+          tipo_suporte?: string
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "config_suporte_regra_id_fkey"
+            columns: ["regra_id"]
+            isOneToOne: false
+            referencedRelation: "regras_precificacao"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      config_va: {
+        Row: {
+          agregado: number
+          calibracao: number
+          created_at: string | null
+          fator: number
+          id: string
+          regra_id: string
+          va: number
+        }
+        Insert: {
+          agregado: number
+          calibracao: number
+          created_at?: string | null
+          fator: number
+          id?: string
+          regra_id: string
+          va: number
+        }
+        Update: {
+          agregado?: number
+          calibracao?: number
+          created_at?: string | null
+          fator?: number
+          id?: string
+          regra_id?: string
+          va?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "config_va_regra_id_fkey"
+            columns: ["regra_id"]
+            isOneToOne: false
+            referencedRelation: "regras_precificacao"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dados_produto_ano: {
         Row: {
           ano: number
@@ -226,6 +457,83 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      regras_precificacao: {
+        Row: {
+          ano: number
+          aplicativo_id: string
+          bloco_k_lu: number
+          bloco_k_ma: number
+          calibracao_lu: number
+          created_at: string | null
+          custo_base: number | null
+          custo_medio: number | null
+          custo_mensal: number
+          custo_percent: number | null
+          id: string
+          lu_ma_minima: number
+          lu_meses: number
+          margem_venda: number
+          qtd_clientes: number
+          receita_custo_percent: number | null
+          receita_mensal: number
+          reinf_lu: number
+          reinf_ma: number
+          updated_at: string | null
+        }
+        Insert: {
+          ano: number
+          aplicativo_id: string
+          bloco_k_lu: number
+          bloco_k_ma: number
+          calibracao_lu: number
+          created_at?: string | null
+          custo_base?: number | null
+          custo_medio?: number | null
+          custo_mensal: number
+          custo_percent?: number | null
+          id?: string
+          lu_ma_minima: number
+          lu_meses: number
+          margem_venda: number
+          qtd_clientes: number
+          receita_custo_percent?: number | null
+          receita_mensal: number
+          reinf_lu: number
+          reinf_ma: number
+          updated_at?: string | null
+        }
+        Update: {
+          ano?: number
+          aplicativo_id?: string
+          bloco_k_lu?: number
+          bloco_k_ma?: number
+          calibracao_lu?: number
+          created_at?: string | null
+          custo_base?: number | null
+          custo_medio?: number | null
+          custo_mensal?: number
+          custo_percent?: number | null
+          id?: string
+          lu_ma_minima?: number
+          lu_meses?: number
+          margem_venda?: number
+          qtd_clientes?: number
+          receita_custo_percent?: number | null
+          receita_mensal?: number
+          reinf_lu?: number
+          reinf_ma?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "regras_precificacao_aplicativo_id_fkey"
+            columns: ["aplicativo_id"]
+            isOneToOne: false
+            referencedRelation: "aplicativos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       webhook_config: {
         Row: {
