@@ -33,6 +33,26 @@ const RegrasNovaRegra = ({ onSuccess, onCancel }: NovaRegraProps) => {
   ];
 
   const dadosCalculados = calcularCampos(dados);
+  
+  // Verificar se o produto selecionado é Comply e-Docs
+  const produtoSelecionado = aplicativos.find(app => app.id === dados.aplicativo_id);
+  const isComplyEDocs = produtoSelecionado?.nome?.toLowerCase().includes('comply e-docs') || 
+                        produtoSelecionado?.nome?.toLowerCase().includes('comply e docs');
+
+  // Função para formatar valores monetários
+  const formatCurrency = (value: string) => {
+    const numericValue = value.replace(/\D/g, '');
+    const formattedValue = (parseInt(numericValue) / 100).toLocaleString('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+    return formattedValue;
+  };
+
+  // Função para converter valor formatado para número
+  const parseCurrency = (value: string) => {
+    return parseFloat(value.replace(/\./g, '').replace(',', '.')) || 0;
+  };
 
   const handleNext = () => {
     if (etapaAtual < 3) {
@@ -52,7 +72,16 @@ const RegrasNovaRegra = ({ onSuccess, onCancel }: NovaRegraProps) => {
         throw new Error('Produto e ano são obrigatórios');
       }
 
-      await criarRegra(dados as Omit<RegraPrecificacao, 'id' | 'created_at' | 'updated_at'>);
+      // Para Comply e-Docs, definir valores padrão para campos não utilizados
+      const dadosParaEnvio = isComplyEDocs ? {
+        ...dados,
+        bloco_k_lu: 0,
+        reinf_lu: 0,
+        bloco_k_ma: 0,
+        reinf_ma: 0
+      } : dados;
+
+      await criarRegra(dadosParaEnvio as Omit<RegraPrecificacao, 'id' | 'created_at' | 'updated_at'>);
       onSuccess();
     } catch (error) {
       console.error('Erro ao criar regra:', error);
@@ -66,6 +95,9 @@ const RegrasNovaRegra = ({ onSuccess, onCancel }: NovaRegraProps) => {
       case 2:
         return dados.calibracao_lu && dados.lu_meses && dados.lu_ma_minima && dados.margem_venda;
       case 3:
+        if (isComplyEDocs) {
+          return dados.receita_mensal && dados.custo_mensal && dados.qtd_clientes;
+        }
         return dados.receita_mensal && dados.custo_mensal && dados.qtd_clientes && 
                dados.bloco_k_lu && dados.reinf_lu && dados.bloco_k_ma && dados.reinf_ma;
       default:
@@ -130,39 +162,43 @@ const RegrasNovaRegra = ({ onSuccess, onCancel }: NovaRegraProps) => {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Calibração LU (%)</Label>
+                    <Label>Calibração LU</Label>
                     <Input
                       type="number"
                       step="0.01"
+                      placeholder="Digite a porcentagem (%)"
                       value={dados.calibracao_lu || ''}
                       onChange={(e) => setDados(prev => ({ ...prev, calibracao_lu: parseFloat(e.target.value) }))}
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label>LU (meses)</Label>
+                    <Label>LU</Label>
                     <Input
                       type="number"
+                      placeholder="Digite os meses"
                       value={dados.lu_meses || ''}
                       onChange={(e) => setDados(prev => ({ ...prev, lu_meses: parseInt(e.target.value) }))}
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label>LU x MA (mínima) (%)</Label>
+                    <Label>LU x MA (mínima)</Label>
                     <Input
                       type="number"
                       step="0.01"
+                      placeholder="Digite a porcentagem (%)"
                       value={dados.lu_ma_minima || ''}
                       onChange={(e) => setDados(prev => ({ ...prev, lu_ma_minima: parseFloat(e.target.value) }))}
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label>Margem de Venda (%)</Label>
+                    <Label>Margem de Venda</Label>
                     <Input
                       type="number"
                       step="0.01"
+                      placeholder="Digite a porcentagem (%)"
                       value={dados.margem_venda || ''}
                       onChange={(e) => setDados(prev => ({ ...prev, margem_venda: parseFloat(e.target.value) }))}
                     />
@@ -187,22 +223,28 @@ const RegrasNovaRegra = ({ onSuccess, onCancel }: NovaRegraProps) => {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Receita Mensal (R$)</Label>
+                    <Label>Receita Mensal</Label>
                     <Input
-                      type="number"
-                      step="0.01"
-                      value={dados.receita_mensal || ''}
-                      onChange={(e) => setDados(prev => ({ ...prev, receita_mensal: parseFloat(e.target.value) }))}
+                      type="text"
+                      placeholder="R$ 0,00"
+                      value={dados.receita_mensal ? formatCurrency(dados.receita_mensal.toString().replace(/\D/g, '').padStart(3, '0')) : ''}
+                      onChange={(e) => {
+                        const value = parseCurrency(e.target.value);
+                        setDados(prev => ({ ...prev, receita_mensal: value }));
+                      }}
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label>Custo Mensal (R$)</Label>
+                    <Label>Custo Mensal</Label>
                     <Input
-                      type="number"
-                      step="0.01"
-                      value={dados.custo_mensal || ''}
-                      onChange={(e) => setDados(prev => ({ ...prev, custo_mensal: parseFloat(e.target.value) }))}
+                      type="text"
+                      placeholder="R$ 0,00"
+                      value={dados.custo_mensal ? formatCurrency(dados.custo_mensal.toString().replace(/\D/g, '').padStart(3, '0')) : ''}
+                      onChange={(e) => {
+                        const value = parseCurrency(e.target.value);
+                        setDados(prev => ({ ...prev, custo_mensal: value }));
+                      }}
                     />
                   </div>
                   
@@ -210,50 +252,67 @@ const RegrasNovaRegra = ({ onSuccess, onCancel }: NovaRegraProps) => {
                     <Label>Qtd Clientes</Label>
                     <Input
                       type="number"
+                      placeholder="Digite a quantidade"
                       value={dados.qtd_clientes || ''}
                       onChange={(e) => setDados(prev => ({ ...prev, qtd_clientes: parseInt(e.target.value) }))}
                     />
                   </div>
                   
-                  <div className="space-y-2">
-                    <Label>Bloco K LU (R$)</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={dados.bloco_k_lu || ''}
-                      onChange={(e) => setDados(prev => ({ ...prev, bloco_k_lu: parseFloat(e.target.value) }))}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label>REINF LU (R$)</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={dados.reinf_lu || ''}
-                      onChange={(e) => setDados(prev => ({ ...prev, reinf_lu: parseFloat(e.target.value) }))}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label>Bloco K MA (R$) - será dividido por 12</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={dados.bloco_k_ma || ''}
-                      onChange={(e) => setDados(prev => ({ ...prev, bloco_k_ma: parseFloat(e.target.value) }))}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label>REINF MA (R$) - será dividido por 12</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={dados.reinf_ma || ''}
-                      onChange={(e) => setDados(prev => ({ ...prev, reinf_ma: parseFloat(e.target.value) }))}
-                    />
-                  </div>
+                  {!isComplyEDocs && (
+                    <>
+                      <div className="space-y-2">
+                        <Label>Bloco K LU</Label>
+                        <Input
+                          type="text"
+                          placeholder="R$ 0,00"
+                          value={dados.bloco_k_lu ? formatCurrency(dados.bloco_k_lu.toString().replace(/\D/g, '').padStart(3, '0')) : ''}
+                          onChange={(e) => {
+                            const value = parseCurrency(e.target.value);
+                            setDados(prev => ({ ...prev, bloco_k_lu: value }));
+                          }}
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label>REINF LU</Label>
+                        <Input
+                          type="text"
+                          placeholder="R$ 0,00"
+                          value={dados.reinf_lu ? formatCurrency(dados.reinf_lu.toString().replace(/\D/g, '').padStart(3, '0')) : ''}
+                          onChange={(e) => {
+                            const value = parseCurrency(e.target.value);
+                            setDados(prev => ({ ...prev, reinf_lu: value }));
+                          }}
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label>Bloco K MA</Label>
+                        <Input
+                          type="text"
+                          placeholder="R$ 0,00 (será dividido por 12)"
+                          value={dados.bloco_k_ma ? formatCurrency(dados.bloco_k_ma.toString().replace(/\D/g, '').padStart(3, '0')) : ''}
+                          onChange={(e) => {
+                            const value = parseCurrency(e.target.value);
+                            setDados(prev => ({ ...prev, bloco_k_ma: value }));
+                          }}
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label>REINF MA</Label>
+                        <Input
+                          type="text"
+                          placeholder="R$ 0,00 (será dividido por 12)"
+                          value={dados.reinf_ma ? formatCurrency(dados.reinf_ma.toString().replace(/\D/g, '').padStart(3, '0')) : ''}
+                          onChange={(e) => {
+                            const value = parseCurrency(e.target.value);
+                            setDados(prev => ({ ...prev, reinf_ma: value }));
+                          }}
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 {/* Campos Calculados Finais */}
