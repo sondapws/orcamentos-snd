@@ -43,8 +43,29 @@ const ConfigSuporte = ({ regraId }: ConfigSuporteProps) => {
     }
   };
 
-  const handleAtualizarConfig = async (id: string, campo: string, valor: any) => {
-    await atualizarConfig(id, { [campo]: valor });
+  const [tempValues, setTempValues] = useState<Record<string, any>>({});
+
+  const handleInputChange = (id: string, campo: string, valor: any) => {
+    setTempValues(prev => ({
+      ...prev,
+      [`${id}-${campo}`]: valor
+    }));
+  };
+
+  const handleInputBlur = async (id: string, campo: string) => {
+    const key = `${id}-${campo}`;
+    if (tempValues[key] !== undefined) {
+      await atualizarConfig(id, { [campo]: tempValues[key] });
+      setTempValues(prev => {
+        const { [key]: _, ...rest } = prev;
+        return rest;
+      });
+    }
+  };
+
+  const getInputValue = (id: string, campo: string, defaultValue: any) => {
+    const key = `${id}-${campo}`;
+    return tempValues[key] !== undefined ? tempValues[key] : defaultValue;
   };
 
   const formatCurrency = (value: number) => {
@@ -160,16 +181,18 @@ const ConfigSuporte = ({ regraId }: ConfigSuporteProps) => {
                     <TableCell>
                       <Input
                         type="number"
-                        value={config.ano}
-                        onChange={(e) => handleAtualizarConfig(config.id!, 'ano', parseInt(e.target.value))}
+                        value={getInputValue(config.id!, 'ano', config.ano)}
+                        onChange={(e) => handleInputChange(config.id!, 'ano', parseInt(e.target.value))}
+                        onBlur={() => handleInputBlur(config.id!, 'ano')}
                         className="w-20"
                         min={new Date().getFullYear()}
                       />
                     </TableCell>
                     <TableCell>
                       <Input
-                        value={config.tipo_suporte}
-                        onChange={(e) => handleAtualizarConfig(config.id!, 'tipo_suporte', e.target.value)}
+                        value={getInputValue(config.id!, 'tipo_suporte', config.tipo_suporte)}
+                        onChange={(e) => handleInputChange(config.id!, 'tipo_suporte', e.target.value)}
+                        onBlur={() => handleInputBlur(config.id!, 'tipo_suporte')}
                         className="min-w-40"
                       />
                     </TableCell>
@@ -177,8 +200,9 @@ const ConfigSuporte = ({ regraId }: ConfigSuporteProps) => {
                       <Input
                         type="number"
                         step="0.5"
-                        value={config.quantidade_horas}
-                        onChange={(e) => handleAtualizarConfig(config.id!, 'quantidade_horas', parseFloat(e.target.value))}
+                        value={getInputValue(config.id!, 'quantidade_horas', config.quantidade_horas)}
+                        onChange={(e) => handleInputChange(config.id!, 'quantidade_horas', parseFloat(e.target.value))}
+                        onBlur={() => handleInputBlur(config.id!, 'quantidade_horas')}
                         className="w-24"
                       />
                     </TableCell>
@@ -186,8 +210,9 @@ const ConfigSuporte = ({ regraId }: ConfigSuporteProps) => {
                       <Input
                         type="number"
                         step="0.01"
-                        value={config.preco_unitario}
-                        onChange={(e) => handleAtualizarConfig(config.id!, 'preco_unitario', parseFloat(e.target.value))}
+                        value={getInputValue(config.id!, 'preco_unitario', config.preco_unitario)}
+                        onChange={(e) => handleInputChange(config.id!, 'preco_unitario', parseFloat(e.target.value))}
+                        onBlur={() => handleInputBlur(config.id!, 'preco_unitario')}
                         className="w-32"
                       />
                     </TableCell>

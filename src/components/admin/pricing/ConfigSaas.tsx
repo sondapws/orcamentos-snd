@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,8 +13,29 @@ interface ConfigSaasProps {
 const ConfigSaas = ({ regraId }: ConfigSaasProps) => {
   const { configs, loading, atualizarConfig } = useConfigSaas(regraId);
 
-  const handleAtualizarConfig = async (id: string, campo: string, valor: number) => {
-    await atualizarConfig(id, { [campo]: valor });
+  const [tempValues, setTempValues] = useState<Record<string, number>>({});
+
+  const handleInputChange = (id: string, campo: string, valor: number) => {
+    setTempValues(prev => ({
+      ...prev,
+      [`${id}-${campo}`]: valor
+    }));
+  };
+
+  const handleInputBlur = async (id: string, campo: string) => {
+    const key = `${id}-${campo}`;
+    if (tempValues[key] !== undefined) {
+      await atualizarConfig(id, { [campo]: tempValues[key] });
+      setTempValues(prev => {
+        const { [key]: _, ...rest } = prev;
+        return rest;
+      });
+    }
+  };
+
+  const getInputValue = (id: string, campo: string, defaultValue: number) => {
+    const key = `${id}-${campo}`;
+    return tempValues[key] !== undefined ? tempValues[key] : defaultValue;
   };
 
   const formatCurrency = (value: number) => {
@@ -91,8 +112,9 @@ const ConfigSaas = ({ regraId }: ConfigSaasProps) => {
                         <Input
                           type="number"
                           step="0.01"
-                          value={config.hosting}
-                          onChange={(e) => handleAtualizarConfig(config.id!, 'hosting', parseFloat(e.target.value) || 0)}
+                          value={getInputValue(config.id!, 'hosting', config.hosting)}
+                          onChange={(e) => handleInputChange(config.id!, 'hosting', parseFloat(e.target.value) || 0)}
+                          onBlur={() => handleInputBlur(config.id!, 'hosting')}
                           className="w-32"
                         />
                       </TableCell>
@@ -100,8 +122,9 @@ const ConfigSaas = ({ regraId }: ConfigSaasProps) => {
                         <Input
                           type="number"
                           step="0.01"
-                          value={config.devops}
-                          onChange={(e) => handleAtualizarConfig(config.id!, 'devops', parseFloat(e.target.value) || 0)}
+                          value={getInputValue(config.id!, 'devops', config.devops)}
+                          onChange={(e) => handleInputChange(config.id!, 'devops', parseFloat(e.target.value) || 0)}
+                          onBlur={() => handleInputBlur(config.id!, 'devops')}
                           className="w-32"
                         />
                       </TableCell>
@@ -109,8 +132,9 @@ const ConfigSaas = ({ regraId }: ConfigSaasProps) => {
                         <Input
                           type="number"
                           step="0.01"
-                          value={config.setup}
-                          onChange={(e) => handleAtualizarConfig(config.id!, 'setup', parseFloat(e.target.value) || 0)}
+                          value={getInputValue(config.id!, 'setup', config.setup)}
+                          onChange={(e) => handleInputChange(config.id!, 'setup', parseFloat(e.target.value) || 0)}
+                          onBlur={() => handleInputBlur(config.id!, 'setup')}
                           className="w-32"
                         />
                       </TableCell>
