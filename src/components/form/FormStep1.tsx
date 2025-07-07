@@ -18,8 +18,10 @@ interface FormStep1Props {
 const FormStep1: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   
-  // Get municipalities for selected state
-  const municipiosDisponiveis = data.uf ? municipiosPorEstado[data.uf] || [] : [];
+  // Get municipalities for selected state and sort alphabetically
+  const municipiosDisponiveis = data.uf 
+    ? (municipiosPorEstado[data.uf] || []).sort((a, b) => a.localeCompare(b, 'pt-BR'))
+    : [];
   
   const handleEstadoChange = (value: string) => {
     // Clear municipality when state changes
