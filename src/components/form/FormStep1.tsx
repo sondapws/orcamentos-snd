@@ -153,62 +153,57 @@ const FormStep1: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
               )}
             </div>
 
-            {/* Location Fields - Estado primeiro, depois Município */}
-            <div className="space-y-4">
+            {/* Location Fields - Estado e Município na mesma linha */}
+            <div className="space-y-2">
               <Label className="text-gray-700 font-medium">
                 Localização (Estado/Município) <span className="text-red-500">*</span>
               </Label>
-              
-              {/* Estado Field */}
-              <div className="space-y-2">
-                <Label htmlFor="uf" className="text-gray-700 font-medium text-sm">
-                  Estado <span className="text-red-500">*</span>
-                </Label>
-                <Select value={data.uf} onValueChange={handleEstadoChange}>
-                  <SelectTrigger className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${
-                    errors.uf ? 'border-red-500' : ''
-                  }`}>
-                    <SelectValue placeholder="Selecione o estado" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {estadosBrasil.map(estado => (
-                      <SelectItem key={estado.value} value={estado.value}>
-                        {estado.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.uf && (
-                  <p className="text-red-500 text-sm">{errors.uf}</p>
-                )}
-              </div>
-              
-              {/* Município Field */}
-              <div className="space-y-2">
-                <Label htmlFor="municipio" className="text-gray-700 font-medium text-sm">
-                  Município <span className="text-red-500">*</span>
-                </Label>
-                <Select 
-                  value={data.municipio} 
-                  onValueChange={(value) => onUpdate({ municipio: value })}
-                  disabled={!data.uf}
-                >
-                  <SelectTrigger className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${
-                    errors.municipio ? 'border-red-500' : ''
-                  }`}>
-                    <SelectValue placeholder={data.uf ? "Selecione o município" : "Primeiro selecione o estado"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {municipiosDisponiveis.map(municipio => (
-                      <SelectItem key={municipio} value={municipio}>
-                        {municipio}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.municipio && (
-                  <p className="text-red-500 text-sm">{errors.municipio}</p>
-                )}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {/* Estado Field */}
+                <div>
+                  <Select value={data.uf} onValueChange={handleEstadoChange}>
+                    <SelectTrigger className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${
+                      errors.uf ? 'border-red-500' : ''
+                    }`}>
+                      <SelectValue placeholder="Estado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {estadosBrasil.map(estado => (
+                        <SelectItem key={estado.value} value={estado.value}>
+                          {estado.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.uf && (
+                    <p className="text-red-500 text-sm">{errors.uf}</p>
+                  )}
+                </div>
+                
+                {/* Município Field */}
+                <div className="md:col-span-3">
+                  <Select 
+                    value={data.municipio} 
+                    onValueChange={(value) => onUpdate({ municipio: value })}
+                    disabled={!data.uf}
+                  >
+                    <SelectTrigger className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${
+                      errors.municipio ? 'border-red-500' : ''
+                    }`}>
+                      <SelectValue placeholder={data.uf ? "Selecione o município" : "Primeiro selecione o estado"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {municipiosDisponiveis.map(municipio => (
+                        <SelectItem key={municipio} value={municipio}>
+                          {municipio}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.municipio && (
+                    <p className="text-red-500 text-sm">{errors.municipio}</p>
+                  )}
+                </div>
               </div>
             </div>
 
