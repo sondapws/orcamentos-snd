@@ -2,6 +2,7 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { FieldSpeechButton } from '@/components/ui/field-speech-button';
 
 interface AbrangenciaSectionProps {
   quantidadeEmpresas: number;
@@ -20,7 +21,14 @@ const AbrangenciaSection: React.FC<AbrangenciaSectionProps> = ({
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="quantidadeEmpresas">Quantidade de Empresas (Matriz)</Label>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="quantidadeEmpresas">Quantidade de Empresas (Matriz)</Label>
+            <FieldSpeechButton
+              fieldId="quantidadeEmpresas"
+              label="Quantidade de Empresas"
+              value={quantidadeEmpresas}
+            />
+          </div>
           <Input
             id="quantidadeEmpresas"
             type="number"
@@ -32,7 +40,14 @@ const AbrangenciaSection: React.FC<AbrangenciaSectionProps> = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="quantidadeUfs">Quantidade de UFs</Label>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="quantidadeUfs">Quantidade de UFs</Label>
+            <FieldSpeechButton
+              fieldId="quantidadeUfs"
+              label="Quantidade de UFs"
+              value={quantidadeUfs}
+            />
+          </div>
           <Input
             id="quantidadeUfs"
             type="number"

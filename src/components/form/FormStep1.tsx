@@ -8,6 +8,7 @@ import { Step1Data } from '@/types/formData';
 import { formatCNPJ, validateCNPJ } from '@/utils/cnpjMask';
 import { validateEmail, validateCorporateEmail } from '@/utils/emailValidation';
 import { estadosBrasil, municipiosPorEstado } from '@/data/formOptions';
+import { FieldSpeechButton } from '@/components/ui/field-speech-button';
 
 interface FormStep1Props {
   data: Step1Data;
@@ -106,7 +107,14 @@ const FormStep1: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
           <div className="space-y-6">
             {/* CRM Field */}
             <div className="space-y-2">
-              <Label htmlFor="crm" className="text-gray-700 font-medium">CRM:</Label>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="crm" className="text-gray-700 font-medium">CRM:</Label>
+                <FieldSpeechButton
+                  fieldId="crm"
+                  label="CRM"
+                  value={data.crm || ''}
+                />
+              </div>
               <Input
                 id="crm"
                 value={data.crm || ''}
@@ -118,9 +126,16 @@ const FormStep1: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
 
             {/* Razão Social Field */}
             <div className="space-y-2">
-              <Label htmlFor="razaoSocial" className="text-gray-700 font-medium">
-                Razão Social <span className="text-red-500">*</span>
-              </Label>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="razaoSocial" className="text-gray-700 font-medium">
+                  Razão Social <span className="text-red-500">*</span>
+                </Label>
+                <FieldSpeechButton
+                  fieldId="razaoSocial"
+                  label="Razão Social"
+                  value={data.razaoSocial}
+                />
+              </div>
               <Input
                 id="razaoSocial"
                 value={data.razaoSocial}
@@ -137,9 +152,16 @@ const FormStep1: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
 
             {/* CNPJ Field */}
             <div className="space-y-2">
-              <Label htmlFor="cnpj" className="text-gray-700 font-medium">
-                CNPJ <span className="text-red-500">*</span>
-              </Label>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="cnpj" className="text-gray-700 font-medium">
+                  CNPJ <span className="text-red-500">*</span>
+                </Label>
+                <FieldSpeechButton
+                  fieldId="cnpj"
+                  label="CNPJ"
+                  value={data.cnpj}
+                />
+              </div>
               <Input
                 id="cnpj"
                 value={data.cnpj}
@@ -157,9 +179,16 @@ const FormStep1: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
 
             {/* Location Fields - Estado e Município na mesma linha */}
             <div className="space-y-2">
-              <Label className="text-gray-700 font-medium">
-                Localização (Estado/Município) <span className="text-red-500">*</span>
-              </Label>
+              <div className="flex items-center gap-2">
+                <Label className="text-gray-700 font-medium">
+                  Localização (Estado/Município) <span className="text-red-500">*</span>
+                </Label>
+                <FieldSpeechButton
+                  fieldId="localizacao"
+                  label="Localização"
+                  value={data.uf && data.municipio ? `${data.uf} - ${data.municipio}` : data.uf || data.municipio || ''}
+                />
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {/* Estado Field */}
                 <div>
@@ -211,9 +240,16 @@ const FormStep1: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
 
             {/* Responsável Field */}
             <div className="space-y-2">
-              <Label htmlFor="responsavel" className="text-gray-700 font-medium">
-                Responsável pelas Informações (Nome Completo) <span className="text-red-500">*</span>
-              </Label>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="responsavel" className="text-gray-700 font-medium">
+                  Responsável pelas Informações (Nome Completo) <span className="text-red-500">*</span>
+                </Label>
+                <FieldSpeechButton
+                  fieldId="responsavel"
+                  label="Responsável pelas Informações"
+                  value={data.responsavel}
+                />
+              </div>
               <Input
                 id="responsavel"
                 value={data.responsavel}
@@ -230,9 +266,16 @@ const FormStep1: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
 
             {/* Email Field */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-gray-700 font-medium">
-                E-mail Corporativo <span className="text-red-500">*</span>
-              </Label>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="email" className="text-gray-700 font-medium">
+                  E-mail Corporativo <span className="text-red-500">*</span>
+                </Label>
+                <FieldSpeechButton
+                  fieldId="email"
+                  label="E-mail Corporativo"
+                  value={data.email}
+                />
+              </div>
               <Input
                 id="email"
                 type="email"
