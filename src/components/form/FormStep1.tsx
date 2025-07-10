@@ -87,7 +87,7 @@ const FormStep1: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
       {/* Background decorative elements */}
       <div className="fixed right-0 top-1/2 -translate-y-1/2 w-96 h-96 opacity-10 pointer-events-none z-0">
         <img 
-          src="/lovable-uploads/a794b093-7b63-4034-afb5-988846dd828b.png" 
+          src="/lovable-uploads/3cb78bc3-ef63-4825-9fde-9f402df85f7b.png" 
           alt="Background decoration"
           className="w-full h-full object-contain"
         />

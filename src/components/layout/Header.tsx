@@ -8,7 +8,7 @@ const Header: React.FC = () => {
       {/* Background decorative elements */}
       <div className="absolute right-0 top-0 w-96 h-full opacity-20">
         <img 
-          src="/lovable-uploads/a794b093-7b63-4034-afb5-988846dd828b.png" 
+          src="/lovable-uploads/3cb78bc3-ef63-4825-9fde-9f402df85f7b.png" 
           alt="Logo N"
           className="absolute right-8 top-8 w-32 h-32 opacity-30"
         />
@@ -19,7 +19,7 @@ const Header: React.FC = () => {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <img 
-                src="/lovable-uploads/a794b093-7b63-4034-afb5-988846dd828b.png" 
+                src="/lovable-uploads/3cb78bc3-ef63-4825-9fde-9f402df85f7b.png" 
                 alt="Sonda Logo"
                 className="w-8 h-8"
               />
