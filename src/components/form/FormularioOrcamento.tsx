@@ -67,16 +67,7 @@ const QuoteForm: React.FC = () => {
           {/* Card flutuante que envolve todo o formulário */}
           <Card className="bg-white shadow-lg border border-gray-200 rounded-lg overflow-hidden">
             {/* Header integrado no card */}
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white relative overflow-hidden">
-              {/* Background decorative elements */}
-              <div className="absolute right-0 top-0 w-96 h-full opacity-20">
-                <img 
-                  src="/lovable-uploads/3cb78bc3-ef63-4825-9fde-9f402df85f7b.png" 
-                  alt="Logo N"
-                  className="absolute right-8 top-8 w-32 h-32 opacity-30"
-                />
-              </div>
-              
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white relative overflow-hidden">                        
               <div className="container mx-auto px-6 py-8 relative z-10">
                 <div className="flex justify-between items-start mb-6">
                   <div>
@@ -84,7 +75,7 @@ const QuoteForm: React.FC = () => {
                       <img 
                         src="/images/logo-sonda.png" 
                         alt="Sonda Logo"
-                        className="w-40 h-15"
+                        className="w-35 h-20"
                       />                      
                     </div>
                   </div>
