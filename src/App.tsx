@@ -12,7 +12,8 @@ import Dashboard from "./pages/admin/Dashboard";
 import EmailConfig from "./pages/admin/EmailConfig";
 import Precificacao from "./pages/admin/Precificacao";
 import Aplicativos from "./pages/admin/Aplicativos";
-import DadosProdutos from "./pages/admin/DadosProdutos";
+
+import UserConfig from "./pages/admin/UserConfig";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
@@ -35,7 +36,8 @@ const App = () => (
             <Route path="/admin/email-config" element={<ProtectedRoute><EmailConfig /></ProtectedRoute>} />
             <Route path="/admin/precificacao" element={<ProtectedRoute><Precificacao /></ProtectedRoute>} />
             <Route path="/admin/aplicativos" element={<ProtectedRoute><Aplicativos /></ProtectedRoute>} />
-            <Route path="/admin/dados-produtos" element={<ProtectedRoute><DadosProdutos /></ProtectedRoute>} />
+
+            <Route path="/admin/user-config" element={<ProtectedRoute><UserConfig /></ProtectedRoute>} />
             
             {/* Redirecionamento para dashboard se já autenticado */}
             <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />

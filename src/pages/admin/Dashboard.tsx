@@ -4,7 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '@/components/admin/LayoutAdmin';
-import { Mail, Calculator, FileText, Users } from 'lucide-react';
+import QuickStats from '@/components/admin/QuickStats';
+import { Mail, Calculator, FileText, Users, Activity, Settings } from 'lucide-react';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -12,61 +13,57 @@ const Dashboard = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600">Bem-vindo ao painel administrativo</p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+            <p className="text-gray-600">Bem-vindo ao painel administrativo</p>
+          </div>
+          <Button onClick={() => navigate('/admin/user-config')} variant="outline">
+            <Settings className="h-4 w-4 mr-2" />
+            Configurações
+          </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/admin/email-config')}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Configuração de E-mail</CardTitle>
-              <Mail className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">SMTP</div>
-              <p className="text-xs text-muted-foreground">
-                Configurar templates e envio
-              </p>
-            </CardContent>
-          </Card>
+        {/* Estatísticas Rápidas */}
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 mb-3">Estatísticas Rápidas</h2>
+          <QuickStats />
+        </div>
 
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/admin/precificacao')}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Precificação</CardTitle>
-              <Calculator className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">2025</div>
-              <p className="text-xs text-muted-foreground">
-                Sistema de precificação
-              </p>
-            </CardContent>
-          </Card>
 
+
+        {/* Atividade Recente */}
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 mb-3">Atividade Recente</h2>
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Orçamentos</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">45</div>
-              <p className="text-xs text-muted-foreground">
-                Pendentes de aprovação
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Usuários</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">12</div>
-              <p className="text-xs text-muted-foreground">
-                Administradores ativos
-              </p>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-3 mb-4">
+                <Activity className="h-5 w-5 text-blue-600" />
+                <h3 className="font-medium">Últimas Ações</h3>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                  <div>
+                    <p className="text-sm font-medium">Novo orçamento criado</p>
+                    <p className="text-xs text-gray-500">Cliente: Empresa XYZ</p>
+                  </div>
+                  <span className="text-xs text-gray-400">5 min atrás</span>
+                </div>
+                <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                  <div>
+                    <p className="text-sm font-medium">Configuração de email atualizada</p>
+                    <p className="text-xs text-gray-500">SMTP configurado</p>
+                  </div>
+                  <span className="text-xs text-gray-400">1 hora atrás</span>
+                </div>
+                <div className="flex items-center justify-between py-2">
+                  <div>
+                    <p className="text-sm font-medium">Backup realizado</p>
+                    <p className="text-xs text-gray-500">Backup automático diário</p>
+                  </div>
+                  <span className="text-xs text-gray-400">2 horas atrás</span>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>

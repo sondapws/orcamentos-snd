@@ -1,96 +1,68 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
-import { LogOut, Menu, User } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useSidebar } from '@/hooks/useSidebar';
+import Sidebar from './Sidebar';
+import Breadcrumb from './Breadcrumb';
+import NotificationBell from './NotificationBell';
+import ThemeToggle from './ThemeToggle';
+import { User } from 'lucide-react';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const { signOut, user } = useAuth();
-
-  const handleLogout = async () => {
-    await signOut();
-    toast({
-      title: "Logout realizado",
-      description: "Você foi desconectado com sucesso.",
-    });
-    navigate('/auth');
-  };
+  const { isCollapsed, toggle } = useSidebar();
+  const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-blue-600 text-white shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <Menu className="h-6 w-6 mr-3" />
-              <h1 className="text-xl font-bold">Painel Administrativo</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                onClick={() => navigate('/admin/dashboard')}
-                className="text-white hover:bg-blue-700"
-              >
-                Dashboard
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => navigate('/admin/aplicativos')}
-                className="text-white hover:bg-blue-700"
-              >
-                Aplicativos
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => navigate('/admin/dados-produtos')}
-                className="text-white hover:bg-blue-700"
-              >
-                Dados Produtos
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => navigate('/admin/email-config')}
-                className="text-white hover:bg-blue-700"
-              >
-                E-mails
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => navigate('/admin/precificacao')}
-                className="text-white hover:bg-blue-700"
-              >
-                Precificação
-              </Button>
-              <div className="flex items-center space-x-2">
-                <User className="h-4 w-4" />
-                <span className="text-sm">{user?.email}</span>
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar */}
+      <Sidebar isCollapsed={isCollapsed} onToggle={toggle} />
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {/* Top Header */}
+        <header className="bg-white border-b border-gray-200 px-6 py-4">
+          <div className="flex justify-between items-center">
+            <div className="space-y-2">
+
+              <div>
+                <h1 className="text-2xl font-bold text-blue-600">Painel Administrativo</h1>
+                <p className="text-sm text-gray-600">Gerencie sua aplicação</p>
               </div>
-              <Button
-                variant="ghost"
-                onClick={handleLogout}
-                className="text-white hover:bg-blue-700"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Sair
-              </Button>
+
+            </div>
+
+            {/* User Info */}
+            <div className="flex items-center space-x-4">
+              <ThemeToggle />
+              <NotificationBell />
+
+              <div className="flex items-center space-x-3 bg-gray-50 px-4 py-2 rounded-lg">
+                <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full">
+                  <User className="h-4 w-4 text-blue-600" />
+                </div>
+                <div className="text-sm">
+                  <p className="font-medium text-gray-900">Usuário</p>
+                  <p className="text-gray-600">{user?.email}</p>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          {children}
-        </div>
-      </main>
+        {/* Page Content */}
+        <main className="flex-1">
+          <div className="p-6">
+            <Breadcrumb />
+            <div className="p-6">
+              {children}
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
   );
 };
