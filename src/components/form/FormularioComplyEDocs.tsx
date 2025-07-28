@@ -18,12 +18,12 @@ interface FormStep1Props {
 
 const FormStep1: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
   const [errors, setErrors] = React.useState<Record<string, string>>({});
-  
+
   // Get municipalities for selected state and sort alphabetically
-  const municipiosDisponiveis = data.uf 
+  const municipiosDisponiveis = data.uf
     ? (municipiosPorEstado[data.uf] || []).sort((a, b) => a.localeCompare(b, 'pt-BR'))
     : [];
-  
+
   const handleEstadoChange = (value: string) => {
     // Clear municipality when state changes
     onUpdate({ uf: value, municipio: '' });
@@ -76,7 +76,7 @@ const FormStep1: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
   const handleCNPJChange = (value: string) => {
     const formatted = formatCNPJ(value);
     onUpdate({ cnpj: formatted });
-    
+
     if (errors.cnpj && validateCNPJ(formatted)) {
       setErrors(prev => ({ ...prev, cnpj: '' }));
     }
@@ -84,22 +84,13 @@ const FormStep1: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
 
   return (
     <div className="form-step relative">
-      {/* Background decorative elements */}
-      <div className="fixed right-12 top-1/2 -translate-y-1/2 w-96 h-96 opacity-10 pointer-events-none z-0">
-        <img 
-          src="/images/n-sonda-azul.png" 
-          alt="Background decoration"
-          className="w-full h-full object-contain"
-        />
-      </div>
-
       <div className="relative z-10">
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
             <span className="text-red-500 text-sm">*</span>
             <span className="text-gray-600 text-sm">Obrigatória</span>
           </div>
-          
+
           <h2 className="text-2xl font-bold text-blue-600 mb-2">Identificação</h2>
         </div>
 
@@ -141,9 +132,8 @@ const FormStep1: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
                 value={data.razaoSocial}
                 onChange={(e) => onUpdate({ razaoSocial: e.target.value })}
                 placeholder="Insira sua resposta"
-                className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${
-                  errors.razaoSocial ? 'border-red-500' : ''
-                }`}
+                className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${errors.razaoSocial ? 'border-red-500' : ''
+                  }`}
               />
               {errors.razaoSocial && (
                 <p className="text-red-500 text-sm">{errors.razaoSocial}</p>
@@ -168,9 +158,8 @@ const FormStep1: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
                 onChange={(e) => handleCNPJChange(e.target.value)}
                 placeholder="Insira sua resposta"
                 maxLength={18}
-                className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${
-                  errors.cnpj ? 'border-red-500' : ''
-                }`}
+                className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${errors.cnpj ? 'border-red-500' : ''
+                  }`}
               />
               {errors.cnpj && (
                 <p className="text-red-500 text-sm">{errors.cnpj}</p>
@@ -193,9 +182,8 @@ const FormStep1: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
                 {/* Estado Field */}
                 <div>
                   <Select value={data.uf} onValueChange={handleEstadoChange}>
-                    <SelectTrigger className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${
-                      errors.uf ? 'border-red-500' : ''
-                    }`}>
+                    <SelectTrigger className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${errors.uf ? 'border-red-500' : ''
+                      }`}>
                       <SelectValue placeholder="Estado" />
                     </SelectTrigger>
                     <SelectContent>
@@ -210,17 +198,16 @@ const FormStep1: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
                     <p className="text-red-500 text-sm">{errors.uf}</p>
                   )}
                 </div>
-                
+
                 {/* Município Field */}
                 <div className="md:col-span-3">
-                  <Select 
-                    value={data.municipio} 
+                  <Select
+                    value={data.municipio}
                     onValueChange={(value) => onUpdate({ municipio: value })}
                     disabled={!data.uf}
                   >
-                    <SelectTrigger className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${
-                      errors.municipio ? 'border-red-500' : ''
-                    }`}>
+                    <SelectTrigger className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${errors.municipio ? 'border-red-500' : ''
+                      }`}>
                       <SelectValue placeholder={data.uf ? "Selecione o município" : "Primeiro selecione o estado"} />
                     </SelectTrigger>
                     <SelectContent>
@@ -255,9 +242,8 @@ const FormStep1: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
                 value={data.responsavel}
                 onChange={(e) => onUpdate({ responsavel: e.target.value })}
                 placeholder="Insira sua resposta"
-                className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${
-                  errors.responsavel ? 'border-red-500' : ''
-                }`}
+                className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${errors.responsavel ? 'border-red-500' : ''
+                  }`}
               />
               {errors.responsavel && (
                 <p className="text-red-500 text-sm">{errors.responsavel}</p>
@@ -282,9 +268,8 @@ const FormStep1: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
                 value={data.email}
                 onChange={(e) => onUpdate({ email: e.target.value })}
                 placeholder="Insira um endereço de email"
-                className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${
-                  errors.email ? 'border-red-500' : ''
-                }`}
+                className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${errors.email ? 'border-red-500' : ''
+                  }`}
               />
               {errors.email && (
                 <p className="text-red-500 text-sm">{errors.email}</p>
@@ -293,8 +278,8 @@ const FormStep1: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
           </div>
 
           <div className="flex justify-start pt-6">
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 rounded-lg font-medium"
             >
               Avançar
