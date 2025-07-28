@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { useRegrasPrecificacao } from '@/hooks/useRegrasPrecificacao';
 import { Trash2, Plus, Settings } from 'lucide-react';
-import EditRegraDialog from './EditRegraDialog';
+import EditRegraDialog from './DialogEditarRegra';
 
 interface RegrasListagemProps {
   onNovaRegra: () => void;

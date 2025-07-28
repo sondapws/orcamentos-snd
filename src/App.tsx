@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
-import QuoteForm from "./components/form/QuoteForm";
+import QuoteForm from "./components/form/FormularioOrcamento";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/admin/Dashboard";
 import EmailConfig from "./pages/admin/EmailConfig";

@@ -1,13 +1,13 @@
 
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import AdminLayout from '@/components/admin/AdminLayout';
-import RegrasListagem from '@/components/admin/pricing/RegrasListagem';
-import RegrasNovaRegra from '@/components/admin/pricing/RegrasNovaRegra';
-import ConfigPrefeituras from '@/components/admin/pricing/ConfigPrefeituras';
-import ConfigSaas from '@/components/admin/pricing/ConfigSaas';
-import ConfigSuporte from '@/components/admin/pricing/ConfigSuporte';
-import ConfigVA from '@/components/admin/pricing/ConfigVA';
+import AdminLayout from '@/components/admin/LayoutAdmin';
+import RegrasListagem from '@/components/admin/pricing/ListagemRegras';
+import RegrasNovaRegra from '@/components/admin/pricing/NovaRegraRegras';
+import ConfigPrefeituras from '@/components/admin/pricing/ConfiguracaoPrefeituras';
+import ConfigSaas from '@/components/admin/pricing/ConfiguracaoSaas';
+import ConfigSuporte from '@/components/admin/pricing/ConfiguracaoSuporte';
+import ConfigVA from '@/components/admin/pricing/ConfiguracaoVA';
 
 const Precificacao = () => {
   const [modo, setModo] = useState<'listagem' | 'nova' | 'editar'>('listagem');

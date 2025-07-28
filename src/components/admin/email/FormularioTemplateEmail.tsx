@@ -4,10 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Eye, EyeOff } from 'lucide-react';
-import TestEmailDialog from '../TestEmailDialog';
-import EmailEditor from './EmailEditor';
-import EmailPreview from './EmailPreview';
-import TemplateVariables from './TemplateVariables';
+import TestEmailDialog from '../DialogTesteEmail';
+import EmailEditor from './EditorEmail';
+import EmailPreview from './PreviewEmail';
+import TemplateVariables from './VariaveisTemplate';
 
 interface EmailTemplate {
   assunto: string;

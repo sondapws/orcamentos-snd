@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
-import AdminLayout from '@/components/admin/AdminLayout';
-import DadosProdutoTable from '@/components/admin/produtos/DadosProdutoTable';
-import DadosProdutoForm from '@/components/admin/produtos/DadosProdutoForm';
+import AdminLayout from '@/components/admin/LayoutAdmin';
+import DadosProdutoTable from '@/components/admin/produtos/TabelaDadosProduto';
+import DadosProdutoForm from '@/components/admin/produtos/FormularioDadosProduto';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 

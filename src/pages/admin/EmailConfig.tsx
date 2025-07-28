@@ -2,10 +2,10 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2 } from 'lucide-react';
-import AdminLayout from '@/components/admin/AdminLayout';
-import EmailTemplateForm from '@/components/admin/email/EmailTemplateForm';
-import EmailLogsViewer from '@/components/admin/email/EmailLogsViewer';
-import WebhookConfigForm from '@/components/admin/email/WebhookConfigForm';
+import AdminLayout from '@/components/admin/LayoutAdmin';
+import EmailTemplateForm from '@/components/admin/email/FormularioTemplateEmail';
+import EmailLogsViewer from '@/components/admin/email/VisualizadorLogsEmail';
+import WebhookConfigForm from '@/components/admin/email/FormularioConfiguracaoWebhook';
 import { useEmailConfig } from '@/hooks/useEmailConfig';
 
 const EmailConfig = () => {

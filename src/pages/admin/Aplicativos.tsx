@@ -1,7 +1,7 @@
 
 import React from 'react';
-import AdminLayout from '@/components/admin/AdminLayout';
-import AplicativosList from '@/components/admin/aplicativos/AplicativosList';
+import AdminLayout from '@/components/admin/LayoutAdmin';
+import AplicativosList from '@/components/admin/aplicativos/ListaAplicativos';
 
 const Aplicativos = () => {
   return (

@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
 import { useFormData } from '@/hooks/useFormData';
-import StepIndicator from './StepIndicator';
-import FormStep1 from './FormStep1';
-import FormStep2 from './FormStep2';
+import StepIndicator from './IndicadorEtapas';
+import FormStep1 from './FormularioComplyEDocs';
+import FormStep2 from './FormularioComplyEDocs2';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MoreHorizontal, Volume2, RotateCcw, ExternalLink } from 'lucide-react';

@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Pencil, Trash2, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAplicativos } from '@/hooks/useAplicativos';
-import AplicativosForm from './AplicativosForm';
+import AplicativosForm from './FormularioAplicativos';
 
 const AplicativosList: React.FC = () => {
   const [showForm, setShowForm] = useState(false);

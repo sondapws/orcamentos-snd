@@ -3,11 +3,11 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Calculator } from 'lucide-react';
 import { Step2Data } from '@/types/formData';
-import SegmentSelector from './sections/SegmentSelector';
-import ScopeSelector from './sections/ScopeSelector';
-import AutomationSection from './sections/AutomationSection';
-import AbrangenciaSection from './sections/AbrangenciaSection';
-import ConfiguracaoSection from './sections/ConfiguracaoSection';
+import SegmentSelector from './sections/SeletorSegmento';
+import ScopeSelector from './sections/SeletorEscopo';
+import AutomationSection from './sections/SecaoAutomacao';
+import AbrangenciaSection from './sections/SecaoAbrangencia';
+import ConfiguracaoSection from './sections/SecaoConfiguracao';
 
 interface FormStep2Props {
   data: Step2Data;
