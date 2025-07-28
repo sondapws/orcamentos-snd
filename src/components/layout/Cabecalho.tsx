@@ -19,14 +19,10 @@ const Header: React.FC = () => {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <img 
-                src="/lovable-uploads/3cb78bc3-ef63-4825-9fde-9f402df85f7b.png" 
+                src="/images/logo-sonda.png" 
                 alt="Sonda Logo"
-                className="w-8 h-8"
-              />
-              <div>
-                <div className="text-2xl font-bold">SONDA.</div>
-                <div className="text-sm opacity-90">make it easy</div>
-              </div>
+                className="w-12 h-12"
+              />              
             </div>
           </div>
           
