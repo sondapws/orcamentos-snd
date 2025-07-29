@@ -16,7 +16,7 @@ interface FormStep2Props {
   onSubmit: () => void;
 }
 
-const FormStep2: React.FC<FormStep2Props> = ({ data, onUpdate, onPrev, onSubmit }) => {
+const FormularioComplyEDocs2: React.FC<FormStep2Props> = ({ data, onUpdate, onPrev, onSubmit }) => {
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [quantidadePrefeiturasInbound, setQuantidadePrefeiturasInbound] = React.useState(0);
   const [quantidadePrefeiturasOutbound, setQuantidadePrefeiturasOutbound] = React.useState(0);
@@ -57,10 +57,10 @@ const FormStep2: React.FC<FormStep2Props> = ({ data, onUpdate, onPrev, onSubmit 
 
   const handleCheckboxChange = (field: string, value: string, checked: boolean) => {
     const currentArray = (data[field as keyof Step2Data] as string[]) || [];
-    const newArray = checked 
+    const newArray = checked
       ? [...currentArray, value]
       : currentArray.filter(item => item !== value);
-    
+
     onUpdate({ [field]: newArray });
   };
 
@@ -82,8 +82,8 @@ const FormStep2: React.FC<FormStep2Props> = ({ data, onUpdate, onPrev, onSubmit 
     <div className="form-step relative">
       {/* Background decorative elements */}
       <div className="fixed right-0 top-1/2 -translate-y-1/2 w-96 h-96 opacity-10 pointer-events-none z-0">
-        <img 
-          src="/lovable-uploads/3cb78bc3-ef63-4825-9fde-9f402df85f7b.png" 
+        <img
+          src="/lovable-uploads/3cb78bc3-ef63-4825-9fde-9f402df85f7b.png"
           alt="Background decoration"
           className="w-full h-full object-contain"
         />
@@ -95,13 +95,13 @@ const FormStep2: React.FC<FormStep2Props> = ({ data, onUpdate, onPrev, onSubmit 
             <span className="text-red-500 text-sm">*</span>
             <span className="text-gray-600 text-sm">Obrigatória</span>
           </div>
-          
+
           <h2 className="text-2xl font-bold text-blue-600 mb-2">Questionário Técnico</h2>
           <p className="text-gray-600">Informe os detalhes técnicos para calcularmos seu orçamento personalizado</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
-          <SegmentSelector 
+          <SegmentSelector
             value={data.segmento}
             onChange={(value) => onUpdate({ segmento: value as any })}
             error={errors.segmento}
@@ -141,18 +141,18 @@ const FormStep2: React.FC<FormStep2Props> = ({ data, onUpdate, onPrev, onSubmit 
 
           {/* Buttons */}
           <div className="flex gap-4 pt-6">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={onPrev}
               className="flex items-center gap-2 border-gray-300 text-gray-600 hover:bg-gray-50"
             >
               <ArrowLeft className="w-4 h-4" />
               Voltar
             </Button>
-            
-            <Button 
-              type="submit" 
+
+            <Button
+              type="submit"
               className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
               size="lg"
             >
@@ -166,4 +166,4 @@ const FormStep2: React.FC<FormStep2Props> = ({ data, onUpdate, onPrev, onSubmit 
   );
 };
 
-export default FormStep2;
+export default FormularioComplyEDocs2;

@@ -16,7 +16,7 @@ interface FormStep1Props {
   onNext: () => void;
 }
 
-const FormStep1: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
+const FormularioComplyEDocs: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
   const [errors, setErrors] = React.useState<Record<string, string>>({});
 
   // Get municipalities for selected state and sort alphabetically
@@ -291,4 +291,4 @@ const FormStep1: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
   );
 };
 
-export default FormStep1;
+export default FormularioComplyEDocs;

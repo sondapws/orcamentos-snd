@@ -67,7 +67,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
 
   return (
     <div className={cn(
-      "bg-blue-600 border-r border-blue-700 flex flex-col transition-all duration-300 ease-in-out",
+      "bg-blue-600 flex flex-col transition-all duration-300 ease-in-out",
       isCollapsed ? "w-16" : "w-64"
     )}>
       {/* Header com Logo */}
@@ -84,7 +84,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
             <img
               src="/images/logo-sonda-16x16.png"
               alt="Sonda Logo"
-              className="h-6 w-6 bg-white rounded p-1 shadow"
+              className="h-6 w-6 bg-white rounded p-1"
             />
           )}
         </div>
@@ -92,7 +92,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
           variant="ghost"
           size="sm"
           onClick={onToggle}
-          className="h-6 w-6 absolute -right-3 top-1/2 transform -translate-y-1/2 text-white hover:bg-blue-700 bg-blue-600 border border-blue-700"
+          className="h-6 w-6 absolute -right-3 top-1/2 transform -translate-y-1/2 text-white hover:bg-blue-700 bg-blue-600"
         >
           {isCollapsed ? (
             <ChevronRight className="h-3 w-3" />
