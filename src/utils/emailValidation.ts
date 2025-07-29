@@ -17,3 +17,7 @@ export const validateCorporateEmail = (email: string): boolean => {
   const domain = email.toLowerCase().split('@')[1];
   return !freeEmailProviders.includes(domain);
 };
+
+export const requiresApproval = (email: string): boolean => {
+  return !isSondaEmail(email);
+};

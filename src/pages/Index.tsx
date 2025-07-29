@@ -1,52 +1,69 @@
 
 import { Button } from "@/components/ui/button";
-import { Calculator, Settings, Users } from "lucide-react";
+import { Calculator } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+    <div className="min-h-screen bg-white flex items-center justify-center">
       <main className="container mx-auto px-4">
+        <div className="mb-12 flex justify-center">
+          <img
+            src="/images/sonda-logo.png"
+            alt="Sonda Logo"
+            className="h-[120px] w-auto"
+          />
+        </div>
+
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Sistema de Orçamentos Inteligente
+          <h1 className="text-4xl font-bold text-gray-600 mb-4">
+            Sistema de Orçamentos
           </h1>
           <p className="text-xl text-gray-600 mb-8">
             Gere orçamentos personalizados de forma rápida e eficiente
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              size="lg" 
-              onClick={() => navigate('/orcamento')}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              <Calculator className="mr-2 h-5 w-5" />
-              Solicitar Orçamento
-            </Button>
-            {user ? (
-              <Button 
-                size="lg" 
-                variant="outline"
-                onClick={() => navigate('/admin/dashboard')}
-              >
-                <Settings className="mr-2 h-5 w-5" />
-                Acessar Painel Admin
-              </Button>
-            ) : (
-              <Button 
-                size="lg" 
-                variant="outline"
-                onClick={() => navigate('/auth')}
-              >
-                <Users className="mr-2 h-5 w-5" />
-                Login Administrativo
-              </Button>
-            )}
+
+          {/* Seção de Produtos */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-6">Escolha o Produto</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+              {/* Comply e-DOCS */}
+              <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+                <h3 className="text-xl font-semibold text-blue-600 mb-3">Comply e-DOCS</h3>
+                <p className="text-gray-600 mb-4">
+                  Sistema de gestão de documentos fiscais eletrônicos
+                </p>
+                <Button
+                  size="lg"
+                  onClick={() => navigate('/orcamento')}
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                >
+                  <Calculator className="mr-2 h-5 w-5" />
+                  Solicitar Orçamento E-Docs
+                </Button>
+              </div>
+
+              {/* Comply Fiscal */}
+              <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+                <h3 className="text-xl font-semibold text-blue-600 mb-3">Comply Fiscal</h3>
+                <p className="text-gray-600 mb-4">
+                  Orçamento para soluções de gestão tributária fiscal
+                </p>
+                <Button
+                  size="lg"
+                  onClick={() => navigate('/orcamento-fiscal')}
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                >
+                  <Calculator className="mr-2 h-5 w-5" />
+                  Solicitar Orçamento Fiscal
+                </Button>
+              </div>
+            </div>
           </div>
+
+
         </div>
       </main>
     </div>

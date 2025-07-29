@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import QuoteForm from "./components/form/FormularioOrcamento";
+import FormularioFiscal from "./pages/FormularioFiscal";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/admin/Dashboard";
 import EmailConfig from "./pages/admin/EmailConfig";
@@ -29,6 +30,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/orcamento" element={<QuoteForm />} />
+            <Route path="/orcamento-fiscal" element={<FormularioFiscal />} />
             <Route path="/auth" element={<Auth />} />
             
             {/* Rotas administrativas protegidas */}
