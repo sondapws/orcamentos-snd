@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '@/components/admin/LayoutAdmin';
 import QuickStats from '@/components/admin/QuickStats';
-import { Mail, Calculator, FileText, Users, Activity, Settings } from 'lucide-react';
+import { Mail, Calculator, FileText, Users, Activity } from 'lucide-react';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -18,10 +18,6 @@ const Dashboard = () => {
             <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
             <p className="text-gray-600">Bem-vindo ao painel administrativo</p>
           </div>
-          <Button onClick={() => navigate('/admin/user-config')} variant="outline">
-            <Settings className="h-4 w-4 mr-2" />
-            Configurações
-          </Button>
         </div>
 
         {/* Estatísticas Rápidas */}

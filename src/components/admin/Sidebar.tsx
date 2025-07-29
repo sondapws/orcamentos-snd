@@ -2,15 +2,16 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  Home, 
+import {
+  ChevronLeft,
+  ChevronRight,
+  Home,
   Smartphone,
-  Mail, 
+  Mail,
   Calculator,
   User,
-  LogOut
+  LogOut,
+  CheckCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
@@ -43,69 +44,62 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
       path: '/admin/dashboard'
     },
     {
-      icon: Smartphone,
-      label: 'Aplicativos',
-      path: '/admin/aplicativos'
+      icon: CheckCircle,
+      label: 'Aprovações',
+      path: '/admin/aprovacoes'
     },
-
+    {
+      icon: Calculator,
+      label: 'Precificação',
+      path: '/admin/precificacao'
+    },
     {
       icon: Mail,
       label: 'E-mails',
       path: '/admin/email-config'
     },
     {
-      icon: Calculator,
-      label: 'Precificação',
-      path: '/admin/precificacao'
+      icon: Smartphone,
+      label: 'Aplicativos',
+      path: '/admin/aplicativos'
     }
   ];
 
   return (
     <div className={cn(
-      "bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ease-in-out",
+      "bg-blue-600 border-r border-blue-700 flex flex-col transition-all duration-300 ease-in-out",
       isCollapsed ? "w-16" : "w-64"
     )}>
       {/* Header com Logo */}
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center justify-between">
+      <div className="p-4 border-b border-blue-700 relative">
+        <div className="flex items-center justify-center">
           {!isCollapsed && (
-            <div className="flex items-center space-x-3">
-              <img 
-                src="/images/logo-sonda.png" 
-                alt="Sonda Logo" 
-                className="h-8 w-auto"
-              />
-              <span className="font-bold text-gray-900">Sonda Admin</span>
-            </div>
+            <img
+              src="/images/logo-sonda.png"
+              alt="Sonda Logo"
+              className="h-12 w-auto scale-150"
+            />
           )}
           {isCollapsed && (
-            <div className="flex items-center justify-between w-full">
-              <img 
-                src="/images/logo-sonda-16x16.png" 
-                alt="Sonda Logo" 
-                className="h-6 w-6"
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onToggle}
-                className="p-1 h-6 w-6"
-              >
-                <ChevronRight className="h-3 w-3" />
-              </Button>
-            </div>
-          )}
-          {!isCollapsed && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onToggle}
-              className="p-1 h-6 w-6"
-            >
-              <ChevronLeft className="h-3 w-3" />
-            </Button>
+            <img
+              src="/images/logo-sonda-16x16.png"
+              alt="Sonda Logo"
+              className="h-6 w-6 bg-white rounded p-1 shadow"
+            />
           )}
         </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onToggle}
+          className="h-6 w-6 absolute -right-3 top-1/2 transform -translate-y-1/2 text-white hover:bg-blue-700 bg-blue-600 border border-blue-700"
+        >
+          {isCollapsed ? (
+            <ChevronRight className="h-3 w-3" />
+          ) : (
+            <ChevronLeft className="h-3 w-3" />
+          )}
+        </Button>
       </div>
 
       {/* Menu Items */}
@@ -113,15 +107,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
-          
+
           const buttonContent = (
             <Button
               key={item.path}
               variant={isActive ? "secondary" : "ghost"}
               className={cn(
-                "w-full",
+                "w-full text-white hover:bg-blue-700",
                 isCollapsed ? "justify-center px-2" : "justify-start px-3",
-                isActive && "bg-blue-50 text-blue-700 border-blue-200"
+                isActive && "bg-blue-800 text-white"
               )}
               onClick={() => navigate(item.path)}
             >
@@ -148,14 +142,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
       </nav>
 
       {/* User Actions */}
-      <div className="p-2 border-t border-gray-200 space-y-1">
+      <div className="p-2 border-t border-blue-700 space-y-1">
         {isCollapsed ? (
           <>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="w-full justify-center px-2"
+                  className="w-full justify-center px-2 text-white hover:bg-blue-700"
                   onClick={() => navigate('/admin/user-config')}
                 >
                   <User className="h-4 w-4" />
@@ -165,12 +159,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
                 <p>Configurações</p>
               </TooltipContent>
             </Tooltip>
-            
+
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="w-full justify-center px-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                  className="w-full justify-center px-2 text-red-300 hover:text-red-200 hover:bg-blue-700"
                   onClick={handleLogout}
                 >
                   <LogOut className="h-4 w-4" />
@@ -185,16 +179,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
           <>
             <Button
               variant="ghost"
-              className="w-full justify-start px-3"
+              className="w-full justify-start px-3 text-white hover:bg-blue-700"
               onClick={() => navigate('/admin/user-config')}
             >
               <User className="h-4 w-4 mr-3" />
               <span>Configurações</span>
             </Button>
-            
+
             <Button
               variant="ghost"
-              className="w-full justify-start px-3 text-red-600 hover:text-red-700 hover:bg-red-50"
+              className="w-full justify-start px-3 text-red-300 hover:text-red-200 hover:bg-blue-700"
               onClick={handleLogout}
             >
               <LogOut className="h-4 w-4 mr-3" />
