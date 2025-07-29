@@ -90,31 +90,7 @@ const FormularioComplyFiscal: React.FC<FormStep1FiscalProps> = ({ data, onUpdate
             <span className="text-gray-600 text-sm">Obrigatória</span>
           </div>
 
-          <h2 className="text-2xl font-bold text-blue-600 mb-2">Identificação</h2>
-          <div className="mb-4">
-            <p className="text-gray-600 mb-2">
-              Conheça o nosso produto COMPLY:{' '}
-              <a 
-                href="https://aplicativos.sonda.com/SitePages/produto3.aspx?produto=comply&page=home" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-800 underline"
-              >
-                Página do Produto
-              </a>
-            </p>
-            <p className="text-gray-600">
-              Escopo do Produto:{' '}
-              <a 
-                href="https://aplicativos.sonda.com/SitePages/produto3.aspx?produto=comply&page=escopoproduto" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-800 underline"
-              >
-                Ver Escopo Completo
-              </a>
-            </p>
-          </div>
+          <h2 className="text-2xl font-bold text-blue-600 mb-2">Identificação</h2>          
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
