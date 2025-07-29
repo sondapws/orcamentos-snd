@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '@/components/admin/LayoutAdmin';
 import QuickStats from '@/components/admin/QuickStats';
+import TestApprovalSystem from '@/components/admin/TestApprovalSystem';
 import { Mail, Calculator, FileText, Users, Activity } from 'lucide-react';
 
 const Dashboard = () => {
@@ -24,6 +25,12 @@ const Dashboard = () => {
         <div>
           <h2 className="text-lg font-semibold text-gray-900 mb-3">Estatísticas Rápidas</h2>
           <QuickStats />
+        </div>
+
+        {/* Teste do Sistema de Aprovação */}
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 mb-3">Sistema de Aprovação</h2>
+          <TestApprovalSystem />
         </div>
 
 

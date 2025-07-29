@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Calculator, Clock } from 'lucide-react';
 import { Step2DataFiscal, FormDataFiscal } from '@/types/formDataFiscal';
-import { requiresApproval } from '@/utils/emailValidation';
+import { isSondaEmail } from '@/utils/emailValidation';
 import { approvalService } from '@/services/approvalService';
 import SegmentSelectorFiscal from './sections/SeletorSegmentoFiscal';
 import ScopeSelectorFiscal from './sections/SeletorEscopoFiscal';
@@ -63,12 +63,13 @@ const FormularioComplyFiscal2: React.FC<FormStep2FiscalProps> = ({
     
     try {
       const completeFormData: FormDataFiscal = { ...formData, ...data };
-      const needsApproval = requiresApproval(formData.email);
+      const isSondaUser = isSondaEmail(formData.email);
 
-      if (needsApproval) {
-        // Submeter para aprovação
-        const quoteId = approvalService.submitForApproval(completeFormData as any);
+      if (!isSondaUser) {
+        // Outros domínios - submeter para aprovação
+        const quoteId = await approvalService.submitForApproval(completeFormData as any, 'comply_fiscal');
         setSubmissionStatus('pending');
+        console.log('Orçamento enviado para aprovação com ID:', quoteId);
         
         // Simular delay para mostrar feedback
         setTimeout(() => {
@@ -77,6 +78,7 @@ const FormularioComplyFiscal2: React.FC<FormStep2FiscalProps> = ({
       } else {
         // Email @sonda.com - enviar diretamente
         setSubmissionStatus('approved');
+        console.log('E-mail @sonda.com detectado - enviando orçamento diretamente');
         setTimeout(() => {
           setIsSubmitting(false);
           onSubmit();

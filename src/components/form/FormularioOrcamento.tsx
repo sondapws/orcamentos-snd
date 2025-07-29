@@ -13,6 +13,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { isSondaEmail } from '@/utils/emailValidation';
+import { approvalService } from '@/services/approvalService';
 
 const QuoteForm: React.FC = () => {
   const { formData, updateFormData, nextStep, prevStep, completeForm, clearFormData } = useFormData();
@@ -26,10 +28,28 @@ const QuoteForm: React.FC = () => {
     updateFormData(data);
   };
 
-  const handleFormSubmit = () => {
+  const handleFormSubmit = async () => {
     completeForm();
     console.log('Formulário completo:', formData);
-    // Aqui implementaremos a lógica de envio/cálculo
+
+    try {
+      // Verificar se é e-mail @sonda.com
+      const isSondaUser = isSondaEmail(formData.email);
+
+      if (isSondaUser) {
+        // E-mail @sonda.com - enviar diretamente
+        console.log('E-mail @sonda.com detectado - enviando orçamento diretamente');
+        // Aqui você pode implementar o envio direto do e-mail
+        // await emailService.sendQuoteDirectly(formData);
+      } else {
+        // Outros domínios - enviar para aprovação
+        console.log('E-mail externo detectado - enviando para aprovação no portal administrativo');
+        const quoteId = await approvalService.submitForApproval(formData, 'comply_edocs');
+        console.log('Orçamento enviado para aprovação com ID:', quoteId);
+      }
+    } catch (error) {
+      console.error('Erro ao processar formulário:', error);
+    }
   };
 
   const handleTextToSpeech = () => {

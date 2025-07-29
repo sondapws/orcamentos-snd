@@ -1,7 +1,9 @@
 
 export const validateEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
+  const isValid = emailRegex.test(email);
+  console.log(`Validando e-mail "${email}": ${isValid ? 'VÁLIDO' : 'INVÁLIDO'}`);
+  return isValid;
 };
 
 export const isSondaEmail = (email: string): boolean => {
@@ -15,6 +17,12 @@ export const validateCorporateEmail = (email: string): boolean => {
   ];
   
   const domain = email.toLowerCase().split('@')[1];
+  
+  // @sonda.com é sempre considerado e-mail corporativo válido
+  if (domain === 'sonda.com') {
+    return true;
+  }
+  
   return !freeEmailProviders.includes(domain);
 };
 

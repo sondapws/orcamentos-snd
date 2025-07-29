@@ -1,157 +1,276 @@
-import { FormDataFiscal } from '@/types/formDataFiscal';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PendingQuote {
   id: string;
-  formData: any;
-  submittedAt: Date;
+  form_data: any;
+  product_type: 'comply_edocs' | 'comply_fiscal';
+  submitted_at: string;
   status: 'pending' | 'approved' | 'rejected';
-  approvedBy?: string;
-  approvedAt?: Date;
-  rejectedBy?: string;
-  rejectedAt?: Date;
-  rejectionReason?: string;
+  approved_by?: string;
+  approved_at?: string;
+  rejected_by?: string;
+  rejected_at?: string;
+  rejection_reason?: string;
 }
 
 interface ApprovalNotification {
   id: string;
   type: 'new_quote_pending' | 'quote_approved' | 'quote_rejected';
   message: string;
-  createdAt: Date;
+  quote_id: string;
   read: boolean;
-  quoteId: string;
+  created_at: string;
 }
 
 interface ApprovalSettings {
-  emailNotifications: boolean;
-  approverEmail: string;
-  autoApprovalDomains: string[];
+  id: string;
+  email_notifications: boolean;
+  approver_email: string;
+  auto_approval_domains: string[];
 }
 
 class ApprovalService {
-  private pendingQuotes: PendingQuote[] = [];
-  private notifications: ApprovalNotification[] = [];
-  private settings: ApprovalSettings = {
-    emailNotifications: true,
-    approverEmail: 'admin@sonda.com',
-    autoApprovalDomains: ['sonda.com']
-  };
 
   // Submeter orçamento para aprovação
-  submitForApproval(formData: any): string {
-    const quoteId = this.generateId();
-    const pendingQuote: PendingQuote = {
-      id: quoteId,
-      formData,
-      submittedAt: new Date(),
-      status: 'pending'
-    };
+  async submitForApproval(formData: any, productType: 'comply_edocs' | 'comply_fiscal' = 'comply_edocs'): Promise<string> {
+    try {
+      // Inserir orçamento pendente no banco
+      const { data: quote, error: quoteError } = await supabase
+        .from('pending_quotes')
+        .insert({
+          form_data: formData,
+          product_type: productType,
+          status: 'pending'
+        })
+        .select()
+        .single();
 
-    this.pendingQuotes.push(pendingQuote);
-    this.createNotification('new_quote_pending', `Novo orçamento pendente de aprovação para ${formData.razaoSocial}`, quoteId);
-    
-    if (this.settings.emailNotifications) {
-      this.sendApprovalEmail(pendingQuote);
+      if (quoteError) throw quoteError;
+
+      // Criar notificação
+      await this.createNotification(
+        'new_quote_pending',
+        `Novo orçamento pendente de aprovação para ${formData.razaoSocial}`,
+        quote.id
+      );
+
+      // Verificar se deve enviar e-mail
+      const settings = await this.getSettings();
+      if (settings?.email_notifications) {
+        await this.sendApprovalEmail(quote);
+      }
+
+      return quote.id;
+    } catch (error) {
+      console.error('Erro ao submeter orçamento para aprovação:', error);
+      throw error;
     }
-
-    return quoteId;
   }
 
   // Aprovar orçamento
-  approveQuote(quoteId: string, approvedBy: string): boolean {
-    const quote = this.pendingQuotes.find(q => q.id === quoteId);
-    if (!quote) return false;
+  async approveQuote(quoteId: string, approvedBy: string): Promise<boolean> {
+    try {
+      // Atualizar status do orçamento
+      const { data: quote, error: updateError } = await supabase
+        .from('pending_quotes')
+        .update({
+          status: 'approved',
+          approved_by: approvedBy,
+          approved_at: new Date().toISOString()
+        })
+        .eq('id', quoteId)
+        .select()
+        .single();
 
-    quote.status = 'approved';
-    quote.approvedBy = approvedBy;
-    quote.approvedAt = new Date();
+      if (updateError) throw updateError;
 
-    this.createNotification('quote_approved', `Orçamento aprovado para ${quote.formData.razaoSocial}`, quoteId);
-    this.sendQuoteEmail(quote.formData);
+      // Criar notificação
+      await this.createNotification(
+        'quote_approved',
+        `Orçamento aprovado para ${quote.form_data.razaoSocial}`,
+        quoteId
+      );
 
-    return true;
+      // Enviar e-mail com orçamento
+      await this.sendQuoteEmail(quote.form_data);
+
+      return true;
+    } catch (error) {
+      console.error('Erro ao aprovar orçamento:', error);
+      return false;
+    }
   }
 
   // Rejeitar orçamento
-  rejectQuote(quoteId: string, rejectedBy: string, reason: string): boolean {
-    const quote = this.pendingQuotes.find(q => q.id === quoteId);
-    if (!quote) return false;
+  async rejectQuote(quoteId: string, rejectedBy: string, reason: string): Promise<boolean> {
+    try {
+      // Atualizar status do orçamento
+      const { data: quote, error: updateError } = await supabase
+        .from('pending_quotes')
+        .update({
+          status: 'rejected',
+          rejected_by: rejectedBy,
+          rejected_at: new Date().toISOString(),
+          rejection_reason: reason
+        })
+        .eq('id', quoteId)
+        .select()
+        .single();
 
-    quote.status = 'rejected';
-    quote.rejectedBy = rejectedBy;
-    quote.rejectedAt = new Date();
-    quote.rejectionReason = reason;
+      if (updateError) throw updateError;
 
-    this.createNotification('quote_rejected', `Orçamento rejeitado para ${quote.formData.razaoSocial}`, quoteId);
+      // Criar notificação
+      await this.createNotification(
+        'quote_rejected',
+        `Orçamento rejeitado para ${quote.form_data.razaoSocial}`,
+        quoteId
+      );
 
-    return true;
+      return true;
+    } catch (error) {
+      console.error('Erro ao rejeitar orçamento:', error);
+      return false;
+    }
   }
 
   // Obter orçamentos pendentes
-  getPendingQuotes(): PendingQuote[] {
-    return this.pendingQuotes.filter(q => q.status === 'pending');
+  async getPendingQuotes(): Promise<PendingQuote[]> {
+    try {
+      const { data, error } = await supabase
+        .from('pending_quotes')
+        .select('*')
+        .eq('status', 'pending')
+        .order('submitted_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Erro ao buscar orçamentos pendentes:', error);
+      return [];
+    }
   }
 
   // Obter todas as notificações
-  getNotifications(): ApprovalNotification[] {
-    return this.notifications.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  async getNotifications(): Promise<ApprovalNotification[]> {
+    try {
+      const { data, error } = await supabase
+        .from('approval_notifications')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Erro ao buscar notificações:', error);
+      return [];
+    }
   }
 
   // Marcar notificação como lida
-  markNotificationAsRead(notificationId: string): void {
-    const notification = this.notifications.find(n => n.id === notificationId);
-    if (notification) {
-      notification.read = true;
+  async markNotificationAsRead(notificationId: string): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from('approval_notifications')
+        .update({ read: true })
+        .eq('id', notificationId);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Erro ao marcar notificação como lida:', error);
     }
   }
 
   // Obter configurações
-  getSettings(): ApprovalSettings {
-    return { ...this.settings };
+  async getSettings(): Promise<ApprovalSettings | null> {
+    try {
+      const { data, error } = await supabase
+        .from('approval_settings')
+        .select('*')
+        .limit(1)
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Erro ao buscar configurações:', error);
+      return null;
+    }
   }
 
   // Atualizar configurações
-  updateSettings(newSettings: Partial<ApprovalSettings>): void {
-    this.settings = { ...this.settings, ...newSettings };
+  async updateSettings(newSettings: Partial<ApprovalSettings>): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('approval_settings')
+        .update(newSettings)
+        .eq('id', newSettings.id);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Erro ao atualizar configurações:', error);
+      return false;
+    }
   }
 
   // Verificar se email precisa de aprovação
-  requiresApproval(email: string): boolean {
-    const domain = email.toLowerCase().split('@')[1];
-    return !this.settings.autoApprovalDomains.includes(domain);
+  async requiresApproval(email: string): Promise<boolean> {
+    try {
+      const settings = await this.getSettings();
+      if (!settings) return true; // Se não conseguir buscar configurações, requer aprovação por segurança
+
+      const domain = email.toLowerCase().split('@')[1];
+      return !settings.auto_approval_domains.includes(domain);
+    } catch (error) {
+      console.error('Erro ao verificar se requer aprovação:', error);
+      return true; // Em caso de erro, requer aprovação por segurança
+    }
   }
 
-  private generateId(): string {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
-  }
+  private async createNotification(type: ApprovalNotification['type'], message: string, quoteId: string): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from('approval_notifications')
+        .insert({
+          type,
+          message,
+          quote_id: quoteId,
+          read: false
+        });
 
-  private createNotification(type: ApprovalNotification['type'], message: string, quoteId: string): void {
-    const notification: ApprovalNotification = {
-      id: this.generateId(),
-      type,
-      message,
-      createdAt: new Date(),
-      read: false,
-      quoteId
-    };
-    this.notifications.push(notification);
+      if (error) throw error;
+    } catch (error) {
+      console.error('Erro ao criar notificação:', error);
+    }
   }
 
   private async sendApprovalEmail(quote: PendingQuote): Promise<void> {
-    // Simular envio de email para aprovador
-    console.log(`Email enviado para ${this.settings.approverEmail}:`, {
-      subject: `Novo orçamento pendente de aprovação - ${quote.formData.razaoSocial}`,
-      body: `
-        Um novo orçamento foi submetido e aguarda aprovação:
-        
-        Empresa: ${quote.formData.razaoSocial}
-        CNPJ: ${quote.formData.cnpj}
-        Responsável: ${quote.formData.responsavel}
-        Email: ${quote.formData.email}
-        Data: ${quote.submittedAt.toLocaleString('pt-BR')}
-        
-        Acesse o painel administrativo para revisar e aprovar.
-      `
-    });
+    try {
+      const settings = await this.getSettings();
+      if (!settings) return;
+
+      // Simular envio de email para aprovador
+      console.log(`Email enviado para ${settings.approver_email}:`, {
+        subject: `Novo orçamento pendente de aprovação - ${quote.form_data.razaoSocial}`,
+        body: `
+          Um novo orçamento foi submetido e aguarda aprovação:
+          
+          Empresa: ${quote.form_data.razaoSocial}
+          CNPJ: ${quote.form_data.cnpj}
+          Responsável: ${quote.form_data.responsavel}
+          Email: ${quote.form_data.email}
+          Produto: ${quote.product_type === 'comply_edocs' ? 'Comply e-DOCS' : 'Comply Fiscal'}
+          Data: ${new Date(quote.submitted_at).toLocaleString('pt-BR')}
+          
+          Acesse o painel administrativo para revisar e aprovar.
+        `
+      });
+
+      // Aqui você pode integrar com o serviço de e-mail real
+      // await emailService.sendEmail({...});
+    } catch (error) {
+      console.error('Erro ao enviar e-mail de aprovação:', error);
+    }
   }
 
   private async sendQuoteEmail(formData: any): Promise<void> {

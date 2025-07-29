@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Step1DataFiscal } from '@/types/formDataFiscal';
 import { formatCNPJ, validateCNPJ } from '@/utils/cnpjMask';
-import { validateEmail, validateCorporateEmail } from '@/utils/emailValidation';
+import { validateEmail } from '@/utils/emailValidation';
 import { estadosBrasil, municipiosPorEstado } from '@/data/formOptions';
 import { FieldSpeechButton } from '@/components/ui/field-speech-button';
 
@@ -57,9 +57,13 @@ const FormularioComplyFiscal: React.FC<FormStep1FiscalProps> = ({ data, onUpdate
       newErrors.email = 'E-mail é obrigatório';
     } else if (!validateEmail(data.email)) {
       newErrors.email = 'E-mail inválido';
-    } else if (!validateCorporateEmail(data.email)) {
-      newErrors.email = 'Utilize um e-mail corporativo';
+      console.log('E-mail rejeitado pela validação básica:', data.email);
+    } else {
+      console.log('E-mail aprovado:', data.email);
+      // Garantir que não há erro de e-mail se passou na validação
+      delete newErrors.email;
     }
+    // Todos os e-mails válidos são aceitos - a lógica de aprovação é aplicada apenas no final
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -90,7 +94,7 @@ const FormularioComplyFiscal: React.FC<FormStep1FiscalProps> = ({ data, onUpdate
             <span className="text-gray-600 text-sm">Obrigatória</span>
           </div>
 
-          <h2 className="text-2xl font-bold text-blue-600 mb-2">Identificação</h2>          
+          <h2 className="text-2xl font-bold text-blue-600 mb-2">Identificação</h2>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -265,7 +269,19 @@ const FormularioComplyFiscal: React.FC<FormStep1FiscalProps> = ({ data, onUpdate
                 id="email"
                 type="email"
                 value={data.email}
-                onChange={(e) => onUpdate({ email: e.target.value })}
+                onChange={(e) => {
+                  const email = e.target.value;
+                  onUpdate({ email });
+                  
+                  // Limpar erro de e-mail em tempo real se for válido
+                  if (validateEmail(email)) {
+                    setErrors(prev => {
+                      const newErrors = { ...prev };
+                      delete newErrors.email;
+                      return newErrors;
+                    });
+                  }
+                }}
                 placeholder="Insira um endereço de email"
                 className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${errors.email ? 'border-red-500' : ''
                   }`}

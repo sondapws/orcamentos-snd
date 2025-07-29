@@ -13,6 +13,7 @@ import Dashboard from "./pages/admin/Dashboard";
 import EmailConfig from "./pages/admin/EmailConfig";
 import Precificacao from "./pages/admin/Precificacao";
 import Aplicativos from "./pages/admin/Aplicativos";
+import Aprovacoes from "./pages/admin/Aprovacoes";
 
 import UserConfig from "./pages/admin/UserConfig";
 import NotFound from "./pages/NotFound";
@@ -35,6 +36,7 @@ const App = () => (
             
             {/* Rotas administrativas protegidas */}
             <Route path="/admin/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/admin/aprovacoes" element={<ProtectedRoute><Aprovacoes /></ProtectedRoute>} />
             <Route path="/admin/email-config" element={<ProtectedRoute><EmailConfig /></ProtectedRoute>} />
             <Route path="/admin/precificacao" element={<ProtectedRoute><Precificacao /></ProtectedRoute>} />
             <Route path="/admin/aplicativos" element={<ProtectedRoute><Aplicativos /></ProtectedRoute>} />
