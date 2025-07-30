@@ -22,10 +22,11 @@ const NotificationBell = () => {
     loadMoreNotifications
   } = useApprovalService();
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  // Filtrar apenas notificações não lidas
+  const unreadNotifications = notifications.filter(n => !n.read);
+  const unreadCount = unreadNotifications.length;
 
   const markAllAsRead = async () => {
-    const unreadNotifications = notifications.filter(n => !n.read);
     for (const notification of unreadNotifications) {
       await markNotificationAsRead(notification.id);
     }
@@ -83,8 +84,8 @@ const NotificationBell = () => {
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80">
-        <DropdownMenuLabel className="flex items-center justify-between">
+      <DropdownMenuContent align="end" className="w-80 bg-white dark:bg-sonda-gray1 border-gray-200 dark:border-sonda-gray2">
+        <DropdownMenuLabel className="flex items-center justify-between text-gray-900 dark:text-sonda-white">
           <span>Notificações</span>
           {unreadCount > 0 && (
             <Button 
@@ -99,20 +100,20 @@ const NotificationBell = () => {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         
-        {notifications.length === 0 ? (
-          <div className="p-4 text-center text-gray-500 text-sm">
+        {unreadNotifications.length === 0 ? (
+          <div className="p-4 text-center text-gray-500 dark:text-sonda-gray3 text-sm">
             {notificationsLoading ? (
               <div className="flex items-center justify-center gap-2">
                 <Loader2 className="w-4 h-4 animate-spin" />
                 Carregando...
               </div>
             ) : (
-              'Nenhuma notificação'
+              'Nenhuma notificação nova'
             )}
           </div>
         ) : (
           <div className="max-h-96 overflow-y-auto">
-            {notifications.map((notification) => (
+            {unreadNotifications.map((notification) => (
               <DropdownMenuItem 
                 key={notification.id} 
                 className="flex items-start space-x-3 p-3 cursor-default"
@@ -120,33 +121,27 @@ const NotificationBell = () => {
               >
                 <div className="flex items-center mt-1">
                   <span className="text-sm mr-2">{getTypeIcon(notification.type)}</span>
-                  <div className={`w-2 h-2 rounded-full ${
-                    notification.read ? 'bg-gray-300' : getTypeColor(notification.type)
-                  }`} />
+                  <div className={`w-2 h-2 rounded-full ${getTypeColor(notification.type)}`} />
                 </div>
                 
                 <div className="flex-1 space-y-1">
                   <div className="flex items-start justify-between">
-                    <p className={`text-sm ${
-                      notification.read ? 'text-gray-600' : 'text-gray-900'
-                    }`}>
+                    <p className="text-sm text-gray-900 dark:text-sonda-white">
                       {notification.message}
                     </p>
                     <div className="flex items-center space-x-1 ml-2">
-                      {!notification.read && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => markNotificationAsRead(notification.id)}
-                          className="h-6 w-6 p-0"
-                          title="Marcar como lida"
-                        >
-                          <Check className="h-3 w-3" />
-                        </Button>
-                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => markNotificationAsRead(notification.id)}
+                        className="h-6 w-6 p-0"
+                        title="Marcar como lida"
+                      >
+                        <Check className="h-3 w-3" />
+                      </Button>
                     </div>
                   </div>
-                  <p className="text-xs text-gray-400">{formatTimeAgo(notification.created_at)}</p>
+                  <p className="text-xs text-gray-400 dark:text-sonda-gray3">{formatTimeAgo(notification.created_at)}</p>
                 </div>
               </DropdownMenuItem>
             ))}

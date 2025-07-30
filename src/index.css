@@ -46,41 +46,44 @@
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Sonda Brand Colors - Dark Mode */
+    --background: 0 0% 0%;              /* Negro #000000 */
+    --foreground: 0 0% 100%;            /* Branco puro */
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 8%;                    /* Cinza muito escuro para cards */
+    --card-foreground: 0 0% 95%;        /* Branco suave */
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 5%;                 /* Quase preto para popovers */
+    --popover-foreground: 0 0% 95%;     /* Branco suave */
 
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 221.2 83.2% 53.3%;       /* Azul Sonda mantido */
+    --primary-foreground: 0 0% 100%;    /* Branco puro */
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 0 0% 24%;              /* Gris 1 #3D3D3D */
+    --secondary-foreground: 0 0% 95%;   /* Branco suave */
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 0 0% 15%;                  /* Cinza escuro */
+    --muted-foreground: 0 0% 69%;       /* Gris 3 #B1B1B1 */
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 0 0% 20%;                 /* Cinza médio escuro */
+    --accent-foreground: 0 0% 95%;      /* Branco suave */
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84.2% 60.2%;       /* Vermelho mantido */
+    --destructive-foreground: 0 0% 100%; /* Branco puro */
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 0 0% 40%;                 /* Gris 2 #666666 */
+    --input: 0 0% 12%;                  /* Cinza muito escuro para inputs */
+    --ring: 221.2 83.2% 53.3%;         /* Azul Sonda */
+    
+    /* Sidebar com cores da marca */
+    --sidebar-background: 0 0% 3%;      /* Quase preto */
+    --sidebar-foreground: 0 0% 89%;     /* Gris 4 #E4E4E4 */
+    --sidebar-primary: 221.2 83.2% 53.3%; /* Azul Sonda */
+    --sidebar-primary-foreground: 0 0% 100%; /* Branco puro */
+    --sidebar-accent: 0 0% 18%;         /* Cinza escuro para hover */
+    --sidebar-accent-foreground: 0 0% 95%; /* Branco suave */
+    --sidebar-border: 0 0% 24%;         /* Gris 1 #3D3D3D */
+    --sidebar-ring: 221.2 83.2% 53.3%;  /* Azul Sonda */
   }
 }
 

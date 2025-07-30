@@ -5,20 +5,18 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useApprovalService } from '@/hooks/useApprovalService';
 import { useDataCleanup } from '@/hooks/useDataCleanup';
-import { CheckCircle, XCircle, Clock, MessageSquare, History, Loader2 } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, History, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const PainelAprovacao: React.FC = () => {
   const {
     pendingQuotes,
-    notifications,
     approvalHistory,
     loading,
     historyLoading,
     historyPagination,
     approveQuote,
     rejectQuote,
-    markNotificationAsRead,
     loadMoreHistory
   } = useApprovalService();
 
@@ -126,29 +124,6 @@ const PainelAprovacao: React.FC = () => {
         </TabsList>
 
         <TabsContent value="pending" className="space-y-4">
-          {notifications.filter(n => !n.read).length > 0 && (
-            <Card className="p-4 border-blue-200 bg-blue-50">
-              <h3 className="font-semibold mb-2 flex items-center gap-2">
-                <MessageSquare className="w-4 h-4" />
-                Notificações Recentes ({notifications.filter(n => !n.read).length})
-              </h3>
-              <div className="space-y-2">
-                {notifications.filter(n => !n.read).slice(0, 3).map((notification) => (
-                  <div key={notification.id} className="flex items-center justify-between text-sm">
-                    <span>{notification.message}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => markNotificationAsRead(notification.id)}
-                    >
-                      Marcar como lida
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          )}
-
           <div className="grid gap-4">
             {pendingQuotes.length === 0 ? (
               <Card className="p-8 text-center">

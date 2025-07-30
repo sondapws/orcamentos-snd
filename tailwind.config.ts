@@ -98,6 +98,15 @@ export default {
 					800: '#1f2937',
 					900: '#111827'
 				},
+				// Sonda Brand Colors
+				sonda: {
+					black: '#000000',     // Negro
+					gray1: '#3D3D3D',     // Gris 1
+					gray2: '#666666',     // Gris 2  
+					gray3: '#B1B1B1',     // Gris 3
+					gray4: '#E4E4E4',     // Gris 4
+					white: '#FFFFFF'      // Branco puro
+				},
 				blue: {
 					50: '#eff6ff',
 					100: '#dbeafe',

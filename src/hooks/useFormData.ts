@@ -37,23 +37,12 @@ const initialFormData: FormData = {
 export const useFormData = () => {
   const [formData, setFormData] = useState<FormData>(initialFormData);
 
-  // Load data from localStorage on mount
+  // Always start with clean form on mount (similar to Comply Fiscal behavior)
   useEffect(() => {
-    const savedData = localStorage.getItem(STORAGE_KEY);
-    if (savedData) {
-      try {
-        const parsed = JSON.parse(savedData);
-        setFormData({ ...initialFormData, ...parsed });
-      } catch (error) {
-        console.error('Error parsing saved form data:', error);
-      }
-    }
+    // Clear any saved data and start fresh
+    localStorage.removeItem(STORAGE_KEY);
+    setFormData(initialFormData);
   }, []);
-
-  // Save to localStorage whenever formData changes
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
-  }, [formData]);
 
   const updateFormData = (updates: Partial<FormData>) => {
     setFormData(prev => ({ ...prev, ...updates }));

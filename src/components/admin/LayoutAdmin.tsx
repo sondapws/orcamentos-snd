@@ -19,18 +19,18 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 dark:bg-sonda-black flex transition-colors">
       {/* Sidebar */}
       <Sidebar isCollapsed={isCollapsed} onToggle={toggle} />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Top Header */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4">
+        <header className="bg-white dark:bg-sonda-gray1 border-b border-gray-200 dark:border-sonda-gray2 px-6 py-4 transition-colors">
           <div className={`flex justify-between items-center ${isCollapsed ? 'h-6' : 'h-12'} transition-all duration-300`}>
             <div className="flex flex-col justify-center">
-              <h1 className={`font-bold text-blue-600 leading-tight ${isCollapsed ? 'text-lg' : 'text-xl'}`}>Painel Administrativo</h1>
-              {!isCollapsed && <p className="text-sm text-gray-600 leading-tight">Gerencie sua aplicação</p>}
+              <h1 className={`font-bold text-blue-600 dark:text-blue-400 leading-tight ${isCollapsed ? 'text-lg' : 'text-xl'}`}>Painel Administrativo</h1>
+              {!isCollapsed && <p className="text-sm text-gray-600 dark:text-sonda-gray3 leading-tight">Gerencie sua aplicação</p>}
             </div>
 
             {/* User Info */}
@@ -39,15 +39,15 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               <NotificationBell />
 
               <div 
-                className="flex items-center space-x-3 bg-gray-50 px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+                className="flex items-center space-x-3 bg-gray-50 dark:bg-sonda-gray2 px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-sonda-gray1 transition-colors"
                 onClick={() => navigate('/admin/user-config')}
               >
-                <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full">
-                  <User className="h-4 w-4 text-blue-600" />
+                <div className="flex items-center justify-center w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full">
+                  <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div className="text-sm">
-                  <p className="font-medium text-gray-900">Usuário</p>
-                  <p className="text-gray-600">{user?.email}</p>
+                  <p className="font-medium text-gray-900 dark:text-sonda-white">Usuário</p>
+                  <p className="text-gray-600 dark:text-sonda-gray3">{user?.email}</p>
                 </div>
               </div>
             </div>
