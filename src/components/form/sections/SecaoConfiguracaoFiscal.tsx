@@ -43,8 +43,8 @@ const ConfiguracaoFiscalSection: React.FC<ConfiguracaoFiscalSectionProps> = ({
   return (
     <div className="border-t pt-6">
       <h3 className="text-lg font-semibold mb-4">Configurações</h3>
-      
-      <div className="space-y-6">
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Volumetria de Notas */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
@@ -55,9 +55,6 @@ const ConfiguracaoFiscalSection: React.FC<ConfiguracaoFiscalSectionProps> = ({
               value={volumetriaNotas ? volumetriaOptions.find(v => v.value === volumetriaNotas)?.label || volumetriaNotas : ''}
             />
           </div>
-          <p className="text-sm text-gray-600 mb-2">
-            Considerar a quantidade total de notas mensais de entrada e saída de todos os modelos de nota utilizados
-          </p>
           <Select value={volumetriaNotas} onValueChange={(value) => onUpdate('volumetriaNotas', value)}>
             <SelectTrigger className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${errors.volumetriaNotas ? 'border-red-500' : ''}`}>
               <SelectValue placeholder="Selecione" />
@@ -73,59 +70,57 @@ const ConfiguracaoFiscalSection: React.FC<ConfiguracaoFiscalSectionProps> = ({
           {errors.volumetriaNotas && <p className="text-red-500 text-sm">{errors.volumetriaNotas}</p>}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Modalidade */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Label>Modalidade *</Label>
-              <FieldSpeechButton
-                fieldId="modalidade"
-                label="Modalidade"
-                value={modalidade ? modalidadeOptions.find(m => m.value === modalidade)?.label || modalidade : ''}
-              />
-            </div>
-            <Select value={modalidade} onValueChange={(value) => onUpdate('modalidade', value)}>
-              <SelectTrigger className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${errors.modalidade ? 'border-red-500' : ''}`}>
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent>
-                {modalidadeOptions.map(option => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.modalidade && <p className="text-red-500 text-sm">{errors.modalidade}</p>}
+        {/* Modalidade */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Label>Modalidade *</Label>
+            <FieldSpeechButton
+              fieldId="modalidade"
+              label="Modalidade"
+              value={modalidade ? modalidadeOptions.find(m => m.value === modalidade)?.label || modalidade : ''}
+            />
           </div>
+          <Select value={modalidade} onValueChange={(value) => onUpdate('modalidade', value)}>
+            <SelectTrigger className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${errors.modalidade ? 'border-red-500' : ''}`}>
+              <SelectValue placeholder="Selecione" />
+            </SelectTrigger>
+            <SelectContent>
+              {modalidadeOptions.map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.modalidade && <p className="text-red-500 text-sm">{errors.modalidade}</p>}
+        </div>
 
-          {/* Prazo de Contratação */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Label>Prazo de contratação do serviço (meses) *</Label>
-              <FieldSpeechButton
-                fieldId="prazoContratacao"
-                label="Prazo de contratação"
-                value={prazoContratacao ? prazoOptions.find(p => p.value === prazoContratacao)?.label || `${prazoContratacao} meses` : ''}
-              />
-            </div>
-            <Select 
-              value={prazoContratacao.toString()} 
-              onValueChange={(value) => onUpdate('prazoContratacao', parseInt(value))}
-            >
-              <SelectTrigger className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${errors.prazoContratacao ? 'border-red-500' : ''}`}>
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent>
-                {prazoOptions.map(option => (
-                  <SelectItem key={option.value} value={option.value.toString()}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.prazoContratacao && <p className="text-red-500 text-sm">{errors.prazoContratacao}</p>}
+        {/* Prazo de Contratação */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Label>Prazo de Contratação *</Label>
+            <FieldSpeechButton
+              fieldId="prazoContratacao"
+              label="Prazo de Contratação"
+              value={prazoContratacao ? prazoOptions.find(p => p.value === prazoContratacao)?.label || `${prazoContratacao} meses` : ''}
+            />
           </div>
+          <Select
+            value={prazoContratacao.toString()}
+            onValueChange={(value) => onUpdate('prazoContratacao', parseInt(value))}
+          >
+            <SelectTrigger className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${errors.prazoContratacao ? 'border-red-500' : ''}`}>
+              <SelectValue placeholder="Selecione" />
+            </SelectTrigger>
+            <SelectContent>
+              {prazoOptions.map(option => (
+                <SelectItem key={option.value} value={option.value.toString()}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.prazoContratacao && <p className="text-red-500 text-sm">{errors.prazoContratacao}</p>}
         </div>
       </div>
     </div>

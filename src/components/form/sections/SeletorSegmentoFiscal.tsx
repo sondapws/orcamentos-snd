@@ -11,10 +11,8 @@ interface SegmentSelectorFiscalProps {
 
 const SegmentSelectorFiscal: React.FC<SegmentSelectorFiscalProps> = ({ value, onChange, error }) => {
   const segments = [
-    { value: 'industria', label: 'Indústria' },
-    { value: 'varejo', label: 'Varejo' },
-    { value: 'outros', label: 'Outros' },
-    { value: 'utilities', label: 'Utilities (Serviços Públicos - Energia, Água, Gás, Saneamento, entre outros)' },
+    { value: 'industria', label: 'Indústria, Varejo ou Outros' },
+    { value: 'utilities', label: 'Utilities (Serviços Públicos - Energia, Água, Gás, Saneamento)' },
     { value: 'servico', label: 'Serviço' }
   ];
 

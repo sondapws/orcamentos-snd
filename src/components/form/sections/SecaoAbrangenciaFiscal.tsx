@@ -21,7 +21,7 @@ const AbrangenciaFiscalSection: React.FC<AbrangenciaFiscalSectionProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Label>Quantidade de Empresas (Matriz) *</Label>
+            <Label>Quantidade de Empresas (Matriz)</Label>
             <FieldSpeechButton
               fieldId="quantidadeEmpresas"
               label="Quantidade de Empresas"
@@ -39,7 +39,7 @@ const AbrangenciaFiscalSection: React.FC<AbrangenciaFiscalSectionProps> = ({
 
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Label>Quantidade de UFs *</Label>
+            <Label>Quantidade de UFs</Label>
             <FieldSpeechButton
               fieldId="quantidadeUfs"
               label="Quantidade de UFs"
@@ -54,9 +54,6 @@ const AbrangenciaFiscalSection: React.FC<AbrangenciaFiscalSectionProps> = ({
             onChange={(e) => onUpdate('quantidadeUfs', parseInt(e.target.value) || 1)}
             className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
           />
-          <p className="text-sm text-gray-500">
-            Abrangência de UFs da operação, visando entendimento das obrigações estaduais necessárias e outras necessidades por UF
-          </p>
         </div>
       </div>
     </div>

@@ -94,3 +94,200 @@ export const prazoContratacaoOptions = [
   { value: 48, label: '48 meses' },
   { value: 60, label: '60 meses' }
 ];
+
+// ===== CAMPOS COMPARTILHADOS ENTRE FORMULÁRIOS =====
+
+// Campos do Step 1 (Identificação) - Comuns aos dois produtos
+export const commonStep1Fields = {
+  crm: {
+    label: 'CRM',
+    placeholder: 'Digite o CRM',
+    required: true,
+    type: 'text' as const
+  },
+  razaoSocial: {
+    label: 'Razão Social',
+    placeholder: 'Digite a razão social da empresa',
+    required: true,
+    type: 'text' as const
+  },
+  cnpj: {
+    label: 'CNPJ',
+    placeholder: '00.000.000/0000-00',
+    required: true,
+    type: 'text' as const,
+    mask: true
+  },
+  municipio: {
+    label: 'Município',
+    placeholder: 'Selecione o município',
+    required: true,
+    type: 'select' as const,
+    dependsOn: 'uf'
+  },
+  uf: {
+    label: 'UF',
+    placeholder: 'Selecione o estado',
+    required: true,
+    type: 'select' as const,
+    options: estadosBrasil
+  },
+  responsavel: {
+    label: 'Responsável',
+    placeholder: 'Nome do responsável',
+    required: true,
+    type: 'text' as const
+  },
+  email: {
+    label: 'E-mail Corporativo',
+    placeholder: 'Insira um endereço de email',
+    required: true,
+    type: 'email' as const
+  }
+};
+
+// Campos do Step 2 - Comuns aos dois produtos
+export const commonStep2Fields = {
+  segmento: {
+    label: 'Segmento da Empresa',
+    placeholder: 'Selecione o segmento',
+    required: true,
+    type: 'select' as const,
+    options: segmentosEmpresa
+  },
+  quantidadeEmpresas: {
+    label: 'Quantidade de Empresas',
+    placeholder: '1',
+    required: true,
+    type: 'number' as const,
+    min: 1,
+    max: 999
+  },
+  quantidadeUfs: {
+    label: 'Quantidade de UFs',
+    placeholder: '1',
+    required: true,
+    type: 'number' as const,
+    min: 1,
+    max: 27
+  },
+  volumetriaNotas: {
+    label: 'Volumetria de Notas (mensal)',
+    placeholder: 'Selecione a volumetria',
+    required: true,
+    type: 'select' as const,
+    options: volumetriaOptions
+  },
+  modalidade: {
+    label: 'Modalidade',
+    placeholder: 'Selecione a modalidade',
+    required: true,
+    type: 'select' as const,
+    options: modalidadeOptions
+  },
+  prazoContratacao: {
+    label: 'Prazo de Contratação',
+    placeholder: 'Selecione o prazo',
+    required: true,
+    type: 'select' as const,
+    options: prazoContratacaoOptions
+  }
+};
+
+// ===== CAMPOS ESPECÍFICOS DO COMPLY FISCAL =====
+
+export const segmentosFiscal = [
+  { value: 'industria', label: 'Indústria, Varejo ou Outros' },
+  { value: 'utilities', label: 'Utilities (Serviços Públicos - Energia, Água, Gás, Saneamento)' },
+  { value: 'servico', label: 'Serviço' }
+];
+
+export const escopoFiscalOptions = [
+  { value: 'apuracao_icms', label: 'Apuração de ICMS' },
+  { value: 'apuracao_ipi', label: 'Apuração de IPI' },
+  { value: 'apuracao_pis_cofins', label: 'Apuração de PIS/COFINS' },
+  { value: 'sped_fiscal', label: 'SPED Fiscal (EFD)' },
+  { value: 'sped_contribuicoes', label: 'SPED Contribuições (EFD Contribuições)' },
+  { value: 'reinf', label: 'e-Reinf (Retenções)' },
+  { value: 'dctf', label: 'DCTF (Declaração de Débitos e Créditos Tributários)' },
+  { value: 'gias', label: 'GIAs Estaduais' },
+  { value: 'substituicao_tributaria', label: 'Substituição Tributária' },
+  { value: 'diferencial_aliquota', label: 'Diferencial de Alíquota' }
+];
+
+export const volumetriaFiscalOptions = [
+  { value: 'ate_5000', label: 'Até 5.000 documentos/mês' },
+  { value: 'ate_15000', label: 'Até 15.000 documentos/mês' },
+  { value: 'ate_30000', label: 'Até 30.000 documentos/mês' },
+  { value: 'ate_50000', label: 'Até 50.000 documentos/mês' },
+  { value: 'maior_50000', label: 'Maior que 50.000 documentos/mês' }
+];
+
+// Campos específicos do Comply Fiscal
+export const fiscalStep2Fields = {
+  segmento: {
+    ...commonStep2Fields.segmento,
+    options: segmentosFiscal
+  },
+  escopo: {
+    label: 'Escopo do Comply Fiscal',
+    placeholder: 'Selecione os módulos necessários',
+    required: true,
+    type: 'checkbox' as const,
+    options: escopoFiscalOptions
+  },
+  volumetriaNotas: {
+    ...commonStep2Fields.volumetriaNotas,
+    label: 'Volumetria de Documentos Fiscais (mensal)',
+    options: volumetriaFiscalOptions
+  }
+};
+
+// ===== UTILITÁRIOS PARA VALIDAÇÃO =====
+
+export const getFieldConfig = (fieldName: string, product: 'edocs' | 'fiscal' = 'edocs') => {
+  // Campos do Step 1 são sempre comuns
+  if (fieldName in commonStep1Fields) {
+    return commonStep1Fields[fieldName as keyof typeof commonStep1Fields];
+  }
+  
+  // Campos do Step 2 podem ser específicos
+  if (product === 'fiscal' && fieldName in fiscalStep2Fields) {
+    return fiscalStep2Fields[fieldName as keyof typeof fiscalStep2Fields];
+  }
+  
+  if (fieldName in commonStep2Fields) {
+    return commonStep2Fields[fieldName as keyof typeof commonStep2Fields];
+  }
+  
+  return null;
+};
+
+export const validateField = (fieldName: string, value: any, product: 'edocs' | 'fiscal' = 'edocs'): string | null => {
+  const config = getFieldConfig(fieldName, product);
+  
+  if (!config) return null;
+  
+  if (config.required && (!value || (typeof value === 'string' && !value.trim()))) {
+    return `${config.label} é obrigatório`;
+  }
+  
+  if (config.type === 'email') {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (value && !emailRegex.test(value)) {
+      return 'E-mail inválido';
+    }
+  }
+  
+  if (config.type === 'number') {
+    const num = Number(value);
+    if (config.min && num < config.min) {
+      return `${config.label} deve ser no mínimo ${config.min}`;
+    }
+    if (config.max && num > config.max) {
+      return `${config.label} deve ser no máximo ${config.max}`;
+    }
+  }
+  
+  return null;
+};

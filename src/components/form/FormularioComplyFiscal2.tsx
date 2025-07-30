@@ -104,16 +104,7 @@ const FormularioComplyFiscal2: React.FC<FormStep2FiscalProps> = ({
   };
 
   return (
-    <div className="form-step relative">
-      {/* Background decorative elements */}
-      <div className="fixed right-0 top-1/2 -translate-y-1/2 w-96 h-96 opacity-10 pointer-events-none z-0">
-        <img 
-          src="/lovable-uploads/3cb78bc3-ef63-4825-9fde-9f402df85f7b.png" 
-          alt="Background decoration"
-          className="w-full h-full object-contain"
-        />
-      </div>
-
+    <div className="form-step relative">   
       <div className="relative z-10">
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
