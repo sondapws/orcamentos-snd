@@ -169,21 +169,22 @@ const FormularioComplyFiscal: React.FC<FormStep1FiscalProps> = ({ data, onUpdate
               )}
             </div>
 
-            {/* Location Fields - Estado e Município na mesma linha */}
+            {/* Location Fields - Localidade na mesma linha */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Label className="text-gray-700 font-medium">
-                  Município <span className="text-red-500">*</span>
+                  Localidade <span className="text-red-500">*</span>
                 </Label>
                 <FieldSpeechButton
                   fieldId="localizacao"
-                  label="Município"
+                  label="Localidade"
                   value={data.uf && data.municipio ? `${data.uf} - ${data.municipio}` : data.uf || data.municipio || ''}
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {/* Estado Field */}
                 <div>
+                  <Label className="text-sm text-gray-600 mb-1 block">Estado</Label>
                   <Select value={data.uf} onValueChange={handleEstadoChange}>
                     <SelectTrigger className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${errors.uf ? 'border-red-500' : ''
                       }`}>
@@ -204,6 +205,7 @@ const FormularioComplyFiscal: React.FC<FormStep1FiscalProps> = ({ data, onUpdate
 
                 {/* Município Field */}
                 <div className="md:col-span-3">
+                  <Label className="text-sm text-gray-600 mb-1 block">Município</Label>
                   <Select
                     value={data.municipio}
                     onValueChange={(value) => onUpdate({ municipio: value })}
