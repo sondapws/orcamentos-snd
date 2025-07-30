@@ -66,23 +66,26 @@ const FormularioComplyFiscal2: React.FC<FormStep2FiscalProps> = ({
       const isSondaUser = isSondaEmail(formData.email);
 
       if (!isSondaUser) {
-        // Outros domínios - submeter para aprovação
+        // Outros domínios - submeter para aprovação (sem mostrar mensagem)
         const quoteId = await approvalService.submitForApproval(completeFormData as any, 'comply_fiscal');
-        setSubmissionStatus('pending');
         console.log('Orçamento enviado para aprovação com ID:', quoteId);
         
-        // Simular delay para mostrar feedback
-        setTimeout(() => {
-          setIsSubmitting(false);
-        }, 2000);
+        // Finalizar sem mostrar mensagem de aprovação
+        setIsSubmitting(false);
+        onSubmit();
       } else {
-        // Email @sonda.com - enviar diretamente
-        setSubmissionStatus('approved');
+        // Email @sonda.com - enviar diretamente via webhook
         console.log('E-mail @sonda.com detectado - enviando orçamento diretamente');
+        const success = await approvalService.sendQuoteDirectly(completeFormData, 'comply_fiscal');
+        
+        if (success) {
+          setSubmissionStatus('approved');
+        }
+        
         setTimeout(() => {
           setIsSubmitting(false);
           onSubmit();
-        }, 2000);
+        }, 1000);
       }
     } catch (error) {
       console.error('Erro ao processar orçamento:', error);
@@ -144,19 +147,6 @@ const FormularioComplyFiscal2: React.FC<FormStep2FiscalProps> = ({
           />
 
           {/* Status Messages */}
-          {submissionStatus === 'pending' && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-              <div className="flex items-center gap-2 text-yellow-800">
-                <Clock className="w-5 h-5" />
-                <div>
-                  <h3 className="font-medium">Orçamento Enviado para Aprovação</h3>
-                  <p className="text-sm mt-1">
-                    Seu orçamento foi enviado para análise. Você receberá um email assim que for aprovado.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
 
           {submissionStatus === 'approved' && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">

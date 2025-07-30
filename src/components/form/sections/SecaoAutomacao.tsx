@@ -26,7 +26,7 @@ const AutomationSection: React.FC<AutomationSectionProps> = ({
           value="Selecione os modelos de notas e cenários de negócio que sua empresa utiliza para automatizar os processos de entrada e saída de mercadorias."
         />
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Modelos de Notas */}
         <div className="space-y-3">
@@ -37,12 +37,12 @@ const AutomationSection: React.FC<AutomationSectionProps> = ({
                 <Checkbox
                   id={`modelo-${option.value}`}
                   checked={modelosNotas.includes(option.value)}
-                  onCheckedChange={(checked) => 
+                  onCheckedChange={(checked) =>
                     onCheckboxChange('modelosNotas', option.value, checked as boolean)
                   }
                 />
-                <Label 
-                  htmlFor={`modelo-${option.value}`} 
+                <Label
+                  htmlFor={`modelo-${option.value}`}
                   className="text-sm font-normal cursor-pointer"
                 >
                   {option.label}
@@ -61,12 +61,12 @@ const AutomationSection: React.FC<AutomationSectionProps> = ({
                 <Checkbox
                   id={`cenario-${option.value}`}
                   checked={cenariosNegocio.includes(option.value)}
-                  onCheckedChange={(checked) => 
+                  onCheckedChange={(checked) =>
                     onCheckboxChange('cenariosNegocio', option.value, checked as boolean)
                   }
                 />
-                <Label 
-                  htmlFor={`cenario-${option.value}`} 
+                <Label
+                  htmlFor={`cenario-${option.value}`}
                   className="text-sm font-normal cursor-pointer"
                 >
                   {option.label}

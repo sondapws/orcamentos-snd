@@ -37,12 +37,11 @@ const QuoteForm: React.FC = () => {
       const isSondaUser = isSondaEmail(formData.email);
 
       if (isSondaUser) {
-        // E-mail @sonda.com - enviar diretamente
+        // E-mail @sonda.com - enviar diretamente via webhook
         console.log('E-mail @sonda.com detectado - enviando orçamento diretamente');
-        // Aqui você pode implementar o envio direto do e-mail
-        // await emailService.sendQuoteDirectly(formData);
+        await approvalService.sendQuoteDirectly(formData, 'comply_edocs');
       } else {
-        // Outros domínios - enviar para aprovação
+        // Outros domínios - enviar para aprovação (sem mostrar mensagem)
         console.log('E-mail externo detectado - enviando para aprovação no portal administrativo');
         const quoteId = await approvalService.submitForApproval(formData, 'comply_edocs');
         console.log('Orçamento enviado para aprovação com ID:', quoteId);
