@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2 } from 'lucide-react';
 import AdminLayout from '@/components/admin/LayoutAdmin';
 import EmailTemplateForm from '@/components/admin/email/FormularioTemplateEmail';
+import EmailTemplateManager from '@/components/admin/email/GerenciadorTemplatesEmail';
 import EmailLogsViewer from '@/components/admin/email/VisualizadorLogsEmail';
 import WebhookConfigForm from '@/components/admin/email/FormularioConfiguracaoWebhook';
 import { useEmailConfig } from '@/hooks/useEmailConfig';
@@ -33,12 +34,17 @@ const EmailConfig = () => {
           <p className="text-gray-600">Configure templates e webhook do Power Automate</p>
         </div>
 
-        <Tabs defaultValue="template" className="space-y-4">
+        <Tabs defaultValue="templates" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="template">Template de E-mail</TabsTrigger>
+            <TabsTrigger value="templates">Templates por Formulário</TabsTrigger>
+            <TabsTrigger value="template">Template Geral</TabsTrigger>
             <TabsTrigger value="config">Configuração do Webhook</TabsTrigger>
             <TabsTrigger value="logs">Logs de Envio</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="templates">
+            <EmailTemplateManager />
+          </TabsContent>
 
           <TabsContent value="template">
             <EmailTemplateForm 

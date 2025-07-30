@@ -15,6 +15,21 @@ export interface PendingQuote {
   updated_at?: string;
 }
 
+export interface EmailTemplate {
+  id: string;
+  nome: string;
+  assunto: string;
+  corpo: string;
+  descricao?: string | null;
+  tipo?: string | null;
+  ativo: boolean;
+  vinculado_formulario: boolean;
+  formulario?: 'comply_edocs' | 'comply_fiscal' | null;
+  modalidade?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface ApprovalNotification {
   id: string;
   type: 'new_quote_pending' | 'quote_approved' | 'quote_rejected';

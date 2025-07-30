@@ -124,7 +124,7 @@ class ApprovalService {
       );
 
       // Enviar e-mail com orçamento
-      await this.sendQuoteEmail(typedQuote.form_data);
+      await this.sendQuoteEmail(typedQuote.form_data, typedQuote.product_type);
 
       return true;
     } catch (error) {
@@ -382,57 +382,26 @@ class ApprovalService {
     }
   }
 
-  private async sendQuoteEmail(formData: any): Promise<void> {
+  private async sendQuoteEmail(formData: any, productType: 'comply_edocs' | 'comply_fiscal' = 'comply_edocs'): Promise<void> {
     try {
       const { emailService } = await import('./emailService');
       
+      // Buscar template específico para o formulário e modalidade
+      const template = await this.getEmailTemplate(productType, formData.modalidade);
+      
+      let emailSubject = `Seu orçamento Comply - ${formData.razaoSocial}`;
+      let emailBody = this.getDefaultEmailTemplate(formData);
+      
+      if (template) {
+        // Usar template personalizado
+        emailSubject = this.replaceTemplateVariables(template.assunto, formData);
+        emailBody = this.replaceTemplateVariables(template.corpo, formData);
+      }
+      
       const emailData = {
         to: formData.email,
-        subject: `Seu orçamento Comply - ${formData.razaoSocial}`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <div style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; padding: 30px; text-align: center;">
-              <h1 style="margin: 0; font-size: 24px;">Orçamento Aprovado</h1>
-              <p style="margin: 10px 0 0 0; opacity: 0.9;">Comply - Soluções Fiscais</p>
-            </div>
-            
-            <div style="padding: 30px; background: #f8fafc;">
-              <p style="font-size: 16px; color: #374151; margin-bottom: 20px;">
-                Olá <strong>${formData.responsavel}</strong>,
-              </p>
-              
-              <p style="font-size: 16px; color: #374151; line-height: 1.6; margin-bottom: 25px;">
-                Seu orçamento foi aprovado e processado com sucesso! Segue abaixo os dados da sua solicitação:
-              </p>
-              
-              <div style="background: white; border-radius: 8px; padding: 20px; margin-bottom: 25px; border-left: 4px solid #2563eb;">
-                <h3 style="color: #2563eb; margin-top: 0;">Dados da Solicitação</h3>
-                <ul style="list-style: none; padding: 0; margin: 0;">
-                  <li style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;"><strong>Empresa:</strong> ${formData.razaoSocial}</li>
-                  <li style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;"><strong>CNPJ:</strong> ${formData.cnpj}</li>
-                  <li style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;"><strong>Responsável:</strong> ${formData.responsavel}</li>
-                  <li style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;"><strong>E-mail:</strong> ${formData.email}</li>
-                  <li style="padding: 8px 0;"><strong>Segmento:</strong> ${formData.segmento}</li>
-                </ul>
-              </div>
-              
-              <div style="background: #dbeafe; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
-                <p style="margin: 0; color: #1e40af; font-weight: 500;">
-                  📧 Em breve nossa equipe comercial entrará em contato para apresentar sua proposta personalizada.
-                </p>
-              </div>
-              
-              <p style="font-size: 16px; color: #374151; line-height: 1.6;">
-                Atenciosamente,<br>
-                <strong>Equipe Sonda</strong>
-              </p>
-            </div>
-            
-            <div style="background: #374151; color: white; padding: 20px; text-align: center; font-size: 14px;">
-              <p style="margin: 0;">© 2024 Sonda - Soluções em Tecnologia</p>
-            </div>
-          </div>
-        `
+        subject: emailSubject,
+        html: emailBody
       };
 
       const result = await emailService.sendEmail(emailData);
@@ -446,11 +415,119 @@ class ApprovalService {
       console.error('Erro ao enviar e-mail de orçamento:', error);
     }
   }
+
+  private async getEmailTemplate(formulario: 'comply_edocs' | 'comply_fiscal', modalidade?: string) {
+    try {
+      let query = supabase
+        .from('email_templates')
+        .select('*')
+        .eq('vinculado_formulario', true)
+        .eq('ativo', true)
+        .eq('formulario', formulario);
+
+      if (modalidade) {
+        query = query.eq('modalidade', modalidade);
+      } else {
+        query = query.is('modalidade', null);
+      }
+
+      const { data, error } = await query
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Erro ao buscar template de email:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Erro ao buscar template de email:', error);
+      return null;
+    }
+  }
+
+  private replaceTemplateVariables(template: string, formData: any): string {
+    let result = template;
+    
+    // Substituir variáveis do template
+    const variables = {
+      razaoSocial: formData.razaoSocial || 'N/A',
+      responsavel: formData.responsavel || 'N/A',
+      cnpj: formData.cnpj || 'N/A',
+      email: formData.email || 'N/A',
+      segmento: formData.segmento || 'N/A',
+      modalidade: formData.modalidade || 'N/A',
+      municipio: formData.municipio || 'N/A',
+      uf: formData.uf || 'N/A',
+      valor: 'A definir', // Valor será calculado posteriormente
+      escopo: Array.isArray(formData.escopo) ? formData.escopo.join(', ') : (formData.escopo || 'N/A'),
+      quantidadeEmpresas: formData.quantidadeEmpresas || 'N/A',
+      quantidadeUfs: formData.quantidadeUfs || 'N/A',
+      volumetriaNotas: formData.volumetriaNotas || 'N/A',
+      prazoContratacao: formData.prazoContratacao || 'N/A'
+    };
+
+    Object.entries(variables).forEach(([key, value]) => {
+      const regex = new RegExp(`{{${key}}}`, 'g');
+      result = result.replace(regex, String(value));
+    });
+
+    return result;
+  }
+
+  private getDefaultEmailTemplate(formData: any): string {
+    return `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; padding: 30px; text-align: center;">
+          <h1 style="margin: 0; font-size: 24px;">Orçamento Aprovado</h1>
+          <p style="margin: 10px 0 0 0; opacity: 0.9;">Comply - Soluções Fiscais</p>
+        </div>
+        
+        <div style="padding: 30px; background: #f8fafc;">
+          <p style="font-size: 16px; color: #374151; margin-bottom: 20px;">
+            Olá <strong>${formData.responsavel}</strong>,
+          </p>
+          
+          <p style="font-size: 16px; color: #374151; line-height: 1.6; margin-bottom: 25px;">
+            Seu orçamento foi aprovado e processado com sucesso! Segue abaixo os dados da sua solicitação:
+          </p>
+          
+          <div style="background: white; border-radius: 8px; padding: 20px; margin-bottom: 25px; border-left: 4px solid #2563eb;">
+            <h3 style="color: #2563eb; margin-top: 0;">Dados da Solicitação</h3>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;"><strong>Empresa:</strong> ${formData.razaoSocial}</li>
+              <li style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;"><strong>CNPJ:</strong> ${formData.cnpj}</li>
+              <li style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;"><strong>Responsável:</strong> ${formData.responsavel}</li>
+              <li style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;"><strong>E-mail:</strong> ${formData.email}</li>
+              <li style="padding: 8px 0;"><strong>Segmento:</strong> ${formData.segmento}</li>
+            </ul>
+          </div>
+          
+          <div style="background: #dbeafe; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
+            <p style="margin: 0; color: #1e40af; font-weight: 500;">
+              📧 Em breve nossa equipe comercial entrará em contato para apresentar sua proposta personalizada.
+            </p>
+          </div>
+          
+          <p style="font-size: 16px; color: #374151; line-height: 1.6;">
+            Atenciosamente,<br>
+            <strong>Equipe Sonda</strong>
+          </p>
+        </div>
+        
+        <div style="background: #374151; color: white; padding: 20px; text-align: center; font-size: 14px;">
+          <p style="margin: 0;">© 2024 Sonda - Soluções em Tecnologia</p>
+        </div>
+      </div>
+    `;
+  }
   // Enviar orçamento diretamente (para @sonda.com)
   async sendQuoteDirectly(formData: any, productType: 'comply_edocs' | 'comply_fiscal' = 'comply_edocs'): Promise<boolean> {
     try {
       console.log('Enviando orçamento diretamente para @sonda.com:', formData.email);
-      await this.sendQuoteEmail(formData);
+      await this.sendQuoteEmail(formData, productType);
       return true;
     } catch (error) {
       console.error('Erro ao enviar orçamento diretamente:', error);
