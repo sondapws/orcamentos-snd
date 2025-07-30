@@ -174,11 +174,11 @@ const FormularioComplyEDocs: React.FC<FormStep1Props> = ({ data, onUpdate, onNex
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Label className="text-gray-700 font-medium">
-                  Localização (Estado/Município) <span className="text-red-500">*</span>
+                  Município <span className="text-red-500">*</span>
                 </Label>
                 <FieldSpeechButton
                   fieldId="localizacao"
-                  label="Localização"
+                  label="Município"
                   value={data.uf && data.municipio ? `${data.uf} - ${data.municipio}` : data.uf || data.municipio || ''}
                 />
               </div>
