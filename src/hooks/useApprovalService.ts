@@ -107,6 +107,7 @@ export const useApprovalService = () => {
       if (success) {
         await loadPendingQuotes(); // Recarregar lista
         await loadNotifications(); // Recarregar notificações
+        await loadApprovalHistory(); // Recarregar histórico
       }
       return success;
     } catch (error) {
@@ -121,6 +122,7 @@ export const useApprovalService = () => {
       if (success) {
         await loadPendingQuotes(); // Recarregar lista
         await loadNotifications(); // Recarregar notificações
+        await loadApprovalHistory(); // Recarregar histórico
       }
       return success;
     } catch (error) {

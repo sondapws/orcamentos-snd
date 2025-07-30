@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Calculator } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -7,21 +6,17 @@ const Index = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
-      <main className="container mx-auto px-4">
-        <div className="mb-12 flex justify-center">
-          <img
-            src="/images/sonda-logo.png"
-            alt="Sonda Logo"
-            className="h-[120px] w-auto"
-          />
-        </div>
+    <div
+      className="min-h-screen bg-blue-600 bg-no-repeat bg-contain bg-right flex items-center justify-center"
+      style={{ backgroundImage: "url('/images/fundo-sonda.png')" }}
+    >
 
+      <main className="container mx-auto p-10 rounded-md bg-white bg-opacity-80">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-600 mb-4">
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">
             Sistema de Orçamentos
           </h1>
-          <p className="text-xl text-gray-600 mb-8">
+          <p className="text-xl text-gray-700 mb-8">
             Gere orçamentos personalizados de forma rápida e eficiente
           </p>
 
@@ -62,8 +57,6 @@ const Index = () => {
               </div>
             </div>
           </div>
-
-
         </div>
       </main>
     </div>

@@ -24,7 +24,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       <Sidebar isCollapsed={isCollapsed} onToggle={toggle} />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
         {/* Top Header */}
         <header className="bg-white dark:bg-sonda-gray1 border-b border-gray-200 dark:border-sonda-gray2 px-6 py-4 transition-colors">
           <div className={`flex justify-between items-center ${isCollapsed ? 'h-6' : 'h-12'} transition-all duration-300`}>

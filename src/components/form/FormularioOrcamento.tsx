@@ -46,6 +46,12 @@ const QuoteForm: React.FC = () => {
         const quoteId = await approvalService.submitForApproval(formData, 'comply_edocs');
         console.log('Orçamento enviado para aprovação com ID:', quoteId);
       }
+      
+      // Limpar formulário e voltar ao step 1 após envio
+      setTimeout(() => {
+        clearFormData();
+      }, 2000);
+      
     } catch (error) {
       console.error('Erro ao processar formulário:', error);
     }
@@ -103,7 +109,7 @@ const QuoteForm: React.FC = () => {
                       <img
                         src="/images/logo-sonda.png"
                         alt="Sonda Logo"
-                        className="w-35 h-20"
+                        className="w-25 h-10"
                       />
                     </div>
                   </div>

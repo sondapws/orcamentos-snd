@@ -3,9 +3,12 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { useApprovalService } from '@/hooks/useApprovalService';
 import { useDataCleanup } from '@/hooks/useDataCleanup';
-import { CheckCircle, XCircle, Clock, History, Loader2 } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, History, Loader2, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const PainelAprovacao: React.FC = () => {
@@ -17,34 +20,101 @@ const PainelAprovacao: React.FC = () => {
     historyPagination,
     approveQuote,
     rejectQuote,
-    loadMoreHistory
+    loadMoreHistory,
+    loadApprovalHistory
   } = useApprovalService();
 
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('pending');
+  const [processingQuotes, setProcessingQuotes] = useState<Set<string>>(new Set());
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [selectedQuoteId, setSelectedQuoteId] = useState<string>('');
+  const [rejectionReason, setRejectionReason] = useState('');
+
+  // Função para lidar com mudança de aba
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    // Se mudou para a aba histórico, recarregar os dados
+    if (value === 'history') {
+      loadApprovalHistory();
+    }
+  };
 
   // Configurar limpeza automática de dados
   useDataCleanup();
 
   const handleApprove = async (quoteId: string) => {
-    const success = await approveQuote(quoteId, 'admin');
-    if (success) {
-      toast({
-        title: 'Orçamento Aprovado',
-        description: 'O orçamento foi aprovado e o e-mail será enviado ao cliente.',
+    // Prevenir duplo clique
+    if (processingQuotes.has(quoteId)) {
+      return;
+    }
+
+    setProcessingQuotes(prev => new Set(prev).add(quoteId));
+
+    try {
+      const success = await approveQuote(quoteId, 'admin');
+      if (success) {
+        toast({
+          title: 'Orçamento Aprovado',
+          description: 'O orçamento foi aprovado e o e-mail será enviado ao cliente.',
+        });
+      }
+    } finally {
+      setProcessingQuotes(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(quoteId);
+        return newSet;
       });
     }
   };
 
-  const handleReject = async (quoteId: string) => {
-    const success = await rejectQuote(quoteId, 'admin', 'Rejeitado pelo administrador');
-    if (success) {
+  const handleRejectClick = (quoteId: string) => {
+    setSelectedQuoteId(quoteId);
+    setRejectionReason('');
+    setRejectModalOpen(true);
+  };
+
+  const handleRejectConfirm = async () => {
+    if (!rejectionReason.trim()) {
       toast({
-        title: 'Orçamento Rejeitado',
-        description: 'O orçamento foi rejeitado.',
+        title: 'Motivo obrigatório',
+        description: 'Por favor, informe o motivo da rejeição.',
         variant: 'destructive'
       });
+      return;
     }
+
+    // Prevenir duplo clique
+    if (processingQuotes.has(selectedQuoteId)) {
+      return;
+    }
+
+    setProcessingQuotes(prev => new Set(prev).add(selectedQuoteId));
+
+    try {
+      const success = await rejectQuote(selectedQuoteId, 'admin', rejectionReason);
+      if (success) {
+        toast({
+          title: 'Orçamento Rejeitado',
+          description: 'O orçamento foi rejeitado.',
+          variant: 'destructive'
+        });
+        // Fechar modal e limpar estados
+        handleCloseModal();
+      }
+    } finally {
+      setProcessingQuotes(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(selectedQuoteId);
+        return newSet;
+      });
+    }
+  };
+
+  const handleCloseModal = () => {
+    setRejectModalOpen(false);
+    setSelectedQuoteId('');
+    setRejectionReason('');
   };
 
   const formatDate = (dateString: string) => {
@@ -111,7 +181,7 @@ const PainelAprovacao: React.FC = () => {
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="pending" className="flex items-center gap-2">
             <Clock className="w-4 h-4" />
@@ -163,15 +233,26 @@ const PainelAprovacao: React.FC = () => {
                       variant="default"
                       size="sm"
                       onClick={() => handleApprove(quote.id)}
-                      className="bg-green-600 hover:bg-green-700"
+                      disabled={processingQuotes.has(quote.id)}
+                      className="bg-green-600 hover:bg-green-700 disabled:opacity-50"
                     >
-                      <CheckCircle className="w-4 h-4 mr-1" />
-                      Aprovar
+                      {processingQuotes.has(quote.id) ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                          Processando...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle className="w-4 h-4 mr-1" />
+                          Aprovar
+                        </>
+                      )}
                     </Button>
                     <Button
                       variant="destructive"
                       size="sm"
-                      onClick={() => handleReject(quote.id)}
+                      onClick={() => handleRejectClick(quote.id)}
+                      disabled={processingQuotes.has(quote.id)}
                     >
                       <XCircle className="w-4 h-4 mr-1" />
                       Rejeitar
@@ -184,6 +265,19 @@ const PainelAprovacao: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="history" className="space-y-4">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold">Histórico de Aprovações</h3>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => loadApprovalHistory()}
+              disabled={historyLoading}
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className={`w-4 h-4 ${historyLoading ? 'animate-spin' : ''}`} />
+              Atualizar
+            </Button>
+          </div>
           <div className="grid gap-4">
             {approvalHistory.length === 0 ? (
               <Card className="p-8 text-center">
@@ -258,6 +352,54 @@ const PainelAprovacao: React.FC = () => {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Modal de Rejeição */}
+      <Dialog open={rejectModalOpen} onOpenChange={(open) => {
+        if (!open) {
+          handleCloseModal();
+        }
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Rejeitar Orçamento</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="rejection-reason">Motivo da rejeição *</Label>
+              <Textarea
+                id="rejection-reason"
+                placeholder="Informe o motivo da rejeição..."
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                className="mt-2"
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={handleCloseModal}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleRejectConfirm}
+              disabled={processingQuotes.has(selectedQuoteId)}
+            >
+              {processingQuotes.has(selectedQuoteId) ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                  Rejeitando...
+                </>
+              ) : (
+                'Confirmar Rejeição'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

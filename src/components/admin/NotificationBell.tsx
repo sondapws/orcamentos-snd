@@ -11,6 +11,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Bell, Check, X, ChevronDown, Loader2 } from 'lucide-react';
 import { useApprovalService } from '@/hooks/useApprovalService';
+import { useNavigate } from 'react-router-dom';
 
 const NotificationBell = () => {
   const { 
@@ -21,6 +22,8 @@ const NotificationBell = () => {
     loadNotifications,
     loadMoreNotifications
   } = useApprovalService();
+  
+  const navigate = useNavigate();
 
   // Filtrar apenas notificações não lidas
   const unreadNotifications = notifications.filter(n => !n.read);
@@ -67,6 +70,14 @@ const NotificationBell = () => {
     if (diffInDays < 7) return `${diffInDays}d atrás`;
     
     return date.toLocaleDateString('pt-BR');
+  };
+
+  const handleNotificationClick = async (notification: any) => {
+    // Marcar como lida
+    await markNotificationAsRead(notification.id);
+    
+    // Navegar para o painel de aprovações
+    navigate('/admin/aprovacoes');
   };
 
   return (
@@ -116,8 +127,8 @@ const NotificationBell = () => {
             {unreadNotifications.map((notification) => (
               <DropdownMenuItem 
                 key={notification.id} 
-                className="flex items-start space-x-3 p-3 cursor-default"
-                onSelect={(e) => e.preventDefault()}
+                className="flex items-start space-x-3 p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-sonda-gray2"
+                onClick={() => handleNotificationClick(notification)}
               >
                 <div className="flex items-center mt-1">
                   <span className="text-sm mr-2">{getTypeIcon(notification.type)}</span>
@@ -133,7 +144,10 @@ const NotificationBell = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => markNotificationAsRead(notification.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          markNotificationAsRead(notification.id);
+                        }}
                         className="h-6 w-6 p-0"
                         title="Marcar como lida"
                       >

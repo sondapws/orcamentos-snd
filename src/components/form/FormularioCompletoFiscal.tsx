@@ -61,7 +61,29 @@ const FormularioCompletoFiscal: React.FC = () => {
   const handleSubmit = () => {
     setFormData(prev => ({ ...prev, completed: true }));
     console.log('Formulário Comply Fiscal completo submetido:', formData);
-    // Aqui você pode adicionar lógica adicional após o envio
+
+    // Limpar formulário e voltar ao step 1 após envio
+    setTimeout(() => {
+      setFormData({
+        crm: '',
+        razaoSocial: '',
+        cnpj: '',
+        municipio: '',
+        uf: '',
+        responsavel: '',
+        email: '',
+        segmento: '',
+        escopo: [],
+        quantidadeEmpresas: 1,
+        quantidadeUfs: 1,
+        volumetriaNotas: '',
+        modalidade: '',
+        prazoContratacao: 12,
+        step: 1,
+        completed: false
+      });
+      setCurrentStep(1);
+    }, 3000);
   };
 
   const handleTextToSpeech = () => {
@@ -134,7 +156,7 @@ const FormularioCompletoFiscal: React.FC = () => {
                       <img
                         src="/images/logo-sonda.png"
                         alt="Sonda Logo"
-                        className="w-35 h-20"
+                        className="w-25 h-10"
                       />
                     </div>
                   </div>

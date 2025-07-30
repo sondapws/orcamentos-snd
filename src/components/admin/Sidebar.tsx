@@ -67,7 +67,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
 
   return (
     <div className={cn(
-      "bg-blue-600 flex flex-col transition-all duration-300 ease-in-out",
+      "bg-blue-600 flex flex-col transition-all duration-300 ease-in-out h-screen fixed left-0 top-0 z-10",
       isCollapsed ? "w-16" : "w-64"
     )}>
       {/* Header com Logo */}
@@ -77,7 +77,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
             <img
               src="/images/logo-sonda.png"
               alt="Sonda Logo"
-              className="h-12 w-auto scale-150"
+              className="h-12 w-auto"
             />
           )}
           {isCollapsed && (
@@ -103,7 +103,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
       </div>
 
       {/* Menu Items */}
-      <nav className="flex-1 p-2 space-y-1">
+      <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;

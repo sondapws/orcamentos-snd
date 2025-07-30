@@ -1,9 +1,10 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Calculator, Clock } from 'lucide-react';
+import { ArrowLeft, Calculator } from 'lucide-react';
 import { Step2DataFiscal, FormDataFiscal } from '@/types/formDataFiscal';
 import { isSondaEmail } from '@/utils/emailValidation';
 import { approvalService } from '@/services/approvalService';
+import { useToast } from '@/hooks/use-toast';
 import SegmentSelectorFiscal from './sections/SeletorSegmentoFiscal';
 import ScopeSelectorFiscal from './sections/SeletorEscopoFiscal';
 import AbrangenciaFiscalSection from './sections/SecaoAbrangenciaFiscal';
@@ -26,7 +27,7 @@ const FormularioComplyFiscal2: React.FC<FormStep2FiscalProps> = ({
 }) => {
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [submissionStatus, setSubmissionStatus] = React.useState<'idle' | 'pending' | 'approved'>('idle');
+  const { toast } = useToast();
 
   const validateStep2 = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -65,30 +66,38 @@ const FormularioComplyFiscal2: React.FC<FormStep2FiscalProps> = ({
       const completeFormData: FormDataFiscal = { ...formData, ...data };
       const isSondaUser = isSondaEmail(formData.email);
 
+      // Simular processamento
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
       if (!isSondaUser) {
-        // Outros domínios - submeter para aprovação (sem mostrar mensagem)
+        // Outros domínios - submeter para aprovação
         const quoteId = await approvalService.submitForApproval(completeFormData as any, 'comply_fiscal');
         console.log('Orçamento enviado para aprovação com ID:', quoteId);
-        
-        // Finalizar sem mostrar mensagem de aprovação
-        setIsSubmitting(false);
-        onSubmit();
       } else {
         // Email @sonda.com - enviar diretamente via webhook
         console.log('E-mail @sonda.com detectado - enviando orçamento diretamente');
-        const success = await approvalService.sendQuoteDirectly(completeFormData, 'comply_fiscal');
-        
-        if (success) {
-          setSubmissionStatus('approved');
-        }
-        
-        setTimeout(() => {
-          setIsSubmitting(false);
-          onSubmit();
-        }, 1000);
+        await approvalService.sendQuoteDirectly(completeFormData, 'comply_fiscal');
       }
+      
+      // Mostrar toast de sucesso
+      toast({
+        title: "Orçamento Enviado",
+        description: "Seu orçamento está sendo processado e será enviado por email em instantes.",
+        variant: "default",
+      });
+      
+      // Aguardar um pouco para mostrar o toast
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      onSubmit();
     } catch (error) {
       console.error('Erro ao processar orçamento:', error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao processar seu orçamento. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -146,21 +155,7 @@ const FormularioComplyFiscal2: React.FC<FormStep2FiscalProps> = ({
             errors={errors}
           />
 
-          {/* Status Messages */}
 
-          {submissionStatus === 'approved' && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-              <div className="flex items-center gap-2 text-green-800">
-                <Calculator className="w-5 h-5" />
-                <div>
-                  <h3 className="font-medium">Orçamento Aprovado</h3>
-                  <p className="text-sm mt-1">
-                    Seu orçamento está sendo processado e será enviado por email em instantes.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Buttons */}
           <div className="flex gap-4 pt-6">
@@ -168,7 +163,7 @@ const FormularioComplyFiscal2: React.FC<FormStep2FiscalProps> = ({
               type="button" 
               variant="outline" 
               onClick={onPrev}
-              disabled={isSubmitting || submissionStatus !== 'idle'}
+              disabled={isSubmitting}
               className="flex items-center gap-2 border-gray-300 text-gray-600 hover:bg-gray-50"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -177,7 +172,7 @@ const FormularioComplyFiscal2: React.FC<FormStep2FiscalProps> = ({
             
             <Button 
               type="submit" 
-              disabled={isSubmitting || submissionStatus !== 'idle'}
+              disabled={isSubmitting}
               className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
               size="lg"
             >

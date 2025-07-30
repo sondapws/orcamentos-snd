@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Calculator } from 'lucide-react';
 import { Step2Data } from '@/types/formData';
+import { useToast } from '@/hooks/use-toast';
 import SegmentSelector from './sections/SeletorSegmento';
 import ScopeSelector from './sections/SeletorEscopo';
 import AutomationSection from './sections/SecaoAutomacao';
@@ -20,6 +21,8 @@ const FormularioComplyEDocs2: React.FC<FormStep2Props> = ({ data, onUpdate, onPr
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [quantidadePrefeiturasInbound, setQuantidadePrefeiturasInbound] = React.useState(0);
   const [quantidadePrefeiturasOutbound, setQuantidadePrefeiturasOutbound] = React.useState(0);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const { toast } = useToast();
 
   const validateStep2 = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -48,10 +51,36 @@ const FormularioComplyEDocs2: React.FC<FormStep2Props> = ({ data, onUpdate, onPr
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateStep2()) {
+    if (!validateStep2()) return;
+
+    setIsSubmitting(true);
+    
+    try {
+      // Simular processamento
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Mostrar toast de sucesso
+      toast({
+        title: "Orçamento Enviado",
+        description: "Seu orçamento está sendo processado e será enviado por email em instantes.",
+        variant: "default",
+      });
+      
+      // Aguardar um pouco para mostrar o toast
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       onSubmit();
+    } catch (error) {
+      console.error('Erro ao processar orçamento:', error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao processar seu orçamento. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -136,6 +165,7 @@ const FormularioComplyEDocs2: React.FC<FormStep2Props> = ({ data, onUpdate, onPr
               type="button"
               variant="outline"
               onClick={onPrev}
+              disabled={isSubmitting}
               className="flex items-center gap-2 border-gray-300 text-gray-600 hover:bg-gray-50"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -144,11 +174,21 @@ const FormularioComplyEDocs2: React.FC<FormStep2Props> = ({ data, onUpdate, onPr
 
             <Button
               type="submit"
-              className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+              disabled={isSubmitting}
+              className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
               size="lg"
             >
-              <Calculator className="w-4 h-4" />
-              Gerar Orçamento
+              {isSubmitting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Processando...
+                </>
+              ) : (
+                <>
+                  <Calculator className="w-4 h-4" />
+                  Gerar Orçamento
+                </>
+              )}
             </Button>
           </div>
         </form>
