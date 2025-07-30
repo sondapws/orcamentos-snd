@@ -1,39 +1,65 @@
 import { supabase } from '@/integrations/supabase/client';
-
-interface PendingQuote {
-  id: string;
-  form_data: any;
-  product_type: 'comply_edocs' | 'comply_fiscal';
-  submitted_at: string;
-  status: 'pending' | 'approved' | 'rejected';
-  approved_by?: string;
-  approved_at?: string;
-  rejected_by?: string;
-  rejected_at?: string;
-  rejection_reason?: string;
-}
-
-interface ApprovalNotification {
-  id: string;
-  type: 'new_quote_pending' | 'quote_approved' | 'quote_rejected';
-  message: string;
-  quote_id: string;
-  read: boolean;
-  created_at: string;
-}
-
-interface ApprovalSettings {
-  id: string;
-  email_notifications: boolean;
-  approver_email: string;
-  auto_approval_domains: string[];
-}
+import type { 
+  PendingQuote, 
+  ApprovalNotification, 
+  ApprovalSettings,
+  NotificationsPaginationResult,
+  ApprovalHistoryResult
+} from '@/types/approval';
 
 class ApprovalService {
+  
+  // Helper para fazer cast seguro dos tipos do Supabase
+  private castToPendingQuote(data: any): PendingQuote {
+    return {
+      id: data.id,
+      form_data: data.form_data,
+      product_type: data.product_type as 'comply_edocs' | 'comply_fiscal',
+      submitted_at: data.submitted_at,
+      status: data.status as 'pending' | 'approved' | 'rejected',
+      approved_by: data.approved_by,
+      approved_at: data.approved_at,
+      rejected_by: data.rejected_by,
+      rejected_at: data.rejected_at,
+      rejection_reason: data.rejection_reason,
+      created_at: data.created_at,
+      updated_at: data.updated_at
+    };
+  }
+
+  private castToApprovalNotification(data: any): ApprovalNotification {
+    return {
+      id: data.id,
+      type: data.type as 'new_quote_pending' | 'quote_approved' | 'quote_rejected',
+      message: data.message,
+      quote_id: data.quote_id,
+      read: data.read,
+      created_at: data.created_at
+    };
+  }
 
   // Submeter orçamento para aprovação
   async submitForApproval(formData: any, productType: 'comply_edocs' | 'comply_fiscal' = 'comply_edocs'): Promise<string> {
     try {
+      // Verificar se já existe um orçamento pendente para o mesmo CNPJ e produto
+      const { data: existingQuote, error: checkError } = await supabase
+        .from('pending_quotes')
+        .select('id, status')
+        .eq('status', 'pending')
+        .eq('product_type', productType)
+        .contains('form_data', { cnpj: formData.cnpj })
+        .single();
+
+      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows returned
+        throw checkError;
+      }
+
+      // Se já existe um orçamento pendente, retornar o ID existente
+      if (existingQuote) {
+        console.log('Orçamento já existe para este CNPJ e produto:', existingQuote.id);
+        return existingQuote.id;
+      }
+
       // Inserir orçamento pendente no banco
       const { data: quote, error: quoteError } = await supabase
         .from('pending_quotes')
@@ -47,20 +73,23 @@ class ApprovalService {
 
       if (quoteError) throw quoteError;
 
+      // Cast para o tipo correto
+      const typedQuote = this.castToPendingQuote(quote);
+
       // Criar notificação
       await this.createNotification(
         'new_quote_pending',
         `Novo orçamento pendente de aprovação para ${formData.razaoSocial}`,
-        quote.id
+        typedQuote.id
       );
 
       // Verificar se deve enviar e-mail
       const settings = await this.getSettings();
       if (settings?.email_notifications) {
-        await this.sendApprovalEmail(quote);
+        await this.sendApprovalEmail(typedQuote);
       }
 
-      return quote.id;
+      return typedQuote.id;
     } catch (error) {
       console.error('Erro ao submeter orçamento para aprovação:', error);
       throw error;
@@ -84,15 +113,18 @@ class ApprovalService {
 
       if (updateError) throw updateError;
 
+      // Cast para o tipo correto
+      const typedQuote = this.castToPendingQuote(quote);
+
       // Criar notificação
       await this.createNotification(
         'quote_approved',
-        `Orçamento aprovado para ${quote.form_data.razaoSocial}`,
+        `Orçamento aprovado para ${(typedQuote.form_data as any)?.razaoSocial || 'Cliente'}`,
         quoteId
       );
 
       // Enviar e-mail com orçamento
-      await this.sendQuoteEmail(quote.form_data);
+      await this.sendQuoteEmail(typedQuote.form_data);
 
       return true;
     } catch (error) {
@@ -119,10 +151,13 @@ class ApprovalService {
 
       if (updateError) throw updateError;
 
+      // Cast para o tipo correto
+      const typedQuote = this.castToPendingQuote(quote);
+
       // Criar notificação
       await this.createNotification(
         'quote_rejected',
-        `Orçamento rejeitado para ${quote.form_data.razaoSocial}`,
+        `Orçamento rejeitado para ${(typedQuote.form_data as any)?.razaoSocial || 'Cliente'}`,
         quoteId
       );
 
@@ -143,26 +178,98 @@ class ApprovalService {
         .order('submitted_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      return (data || []).map(item => this.castToPendingQuote(item));
     } catch (error) {
       console.error('Erro ao buscar orçamentos pendentes:', error);
       return [];
     }
   }
 
-  // Obter todas as notificações
-  async getNotifications(): Promise<ApprovalNotification[]> {
+  // Obter histórico de aprovações dos últimos 31 dias
+  async getApprovalHistory(page: number = 1, limit: number = 10): Promise<ApprovalHistoryResult> {
     try {
+      const thirtyOneDaysAgo = new Date();
+      thirtyOneDaysAgo.setDate(thirtyOneDaysAgo.getDate() - 31);
+
+      // Contar total de aprovações
+      const { count, error: countError } = await supabase
+        .from('pending_quotes')
+        .select('*', { count: 'exact', head: true })
+        .in('status', ['approved', 'rejected'])
+        .gte('updated_at', thirtyOneDaysAgo.toISOString());
+
+      if (countError) throw countError;
+
+      // Buscar aprovações paginadas
+      const offset = (page - 1) * limit;
+      const { data, error } = await supabase
+        .from('pending_quotes')
+        .select('*')
+        .in('status', ['approved', 'rejected'])
+        .gte('updated_at', thirtyOneDaysAgo.toISOString())
+        .order('updated_at', { ascending: false })
+        .range(offset, offset + limit - 1);
+
+      if (error) throw error;
+
+      const total = count || 0;
+      const hasMore = offset + limit < total;
+
+      return {
+        quotes: (data || []).map(item => this.castToPendingQuote(item)),
+        total,
+        hasMore
+      };
+    } catch (error) {
+      console.error('Erro ao buscar histórico de aprovações:', error);
+      return {
+        quotes: [],
+        total: 0,
+        hasMore: false
+      };
+    }
+  }
+
+  // Obter notificações dos últimos 31 dias com paginação
+  async getNotifications(page: number = 1, limit: number = 20): Promise<NotificationsPaginationResult> {
+    try {
+      const thirtyOneDaysAgo = new Date();
+      thirtyOneDaysAgo.setDate(thirtyOneDaysAgo.getDate() - 31);
+
+      // Contar total de notificações
+      const { count, error: countError } = await supabase
+        .from('approval_notifications')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', thirtyOneDaysAgo.toISOString());
+
+      if (countError) throw countError;
+
+      // Buscar notificações paginadas
+      const offset = (page - 1) * limit;
       const { data, error } = await supabase
         .from('approval_notifications')
         .select('*')
-        .order('created_at', { ascending: false });
+        .gte('created_at', thirtyOneDaysAgo.toISOString())
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1);
 
       if (error) throw error;
-      return data || [];
+
+      const total = count || 0;
+      const hasMore = offset + limit < total;
+
+      return {
+        notifications: (data || []).map(item => this.castToApprovalNotification(item)),
+        total,
+        hasMore
+      };
     } catch (error) {
       console.error('Erro ao buscar notificações:', error);
-      return [];
+      return {
+        notifications: [],
+        total: 0,
+        hasMore: false
+      };
     }
   }
 
@@ -249,16 +356,18 @@ class ApprovalService {
       const settings = await this.getSettings();
       if (!settings) return;
 
+      const formData = quote.form_data as any;
+
       // Simular envio de email para aprovador
       console.log(`Email enviado para ${settings.approver_email}:`, {
-        subject: `Novo orçamento pendente de aprovação - ${quote.form_data.razaoSocial}`,
+        subject: `Novo orçamento pendente de aprovação - ${formData?.razaoSocial || 'Cliente'}`,
         body: `
           Um novo orçamento foi submetido e aguarda aprovação:
           
-          Empresa: ${quote.form_data.razaoSocial}
-          CNPJ: ${quote.form_data.cnpj}
-          Responsável: ${quote.form_data.responsavel}
-          Email: ${quote.form_data.email}
+          Empresa: ${formData?.razaoSocial || 'N/A'}
+          CNPJ: ${formData?.cnpj || 'N/A'}
+          Responsável: ${formData?.responsavel || 'N/A'}
+          Email: ${formData?.email || 'N/A'}
           Produto: ${quote.product_type === 'comply_edocs' ? 'Comply e-DOCS' : 'Comply Fiscal'}
           Data: ${new Date(quote.submitted_at).toLocaleString('pt-BR')}
           

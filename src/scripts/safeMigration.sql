@@ -200,5 +200,30 @@ SELECT
     CASE WHEN EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'approval_settings') 
          THEN 'Existe' ELSE 'Não existe' END as status;
 
+-- Criar função para limpeza automática de notificações antigas (mais de 31 dias)
+CREATE OR REPLACE FUNCTION public.cleanup_old_notifications()
+RETURNS void
+LANGUAGE plpgsql
+AS $
+BEGIN
+    DELETE FROM public.approval_notifications 
+    WHERE created_at < (now() - interval '31 days');
+    
+    DELETE FROM public.pending_quotes 
+    WHERE status IN ('approved', 'rejected') 
+    AND updated_at < (now() - interval '31 days');
+    
+    RAISE NOTICE 'Limpeza de dados antigos concluída';
+END;
+$;
+
+-- Criar índice composto para otimizar consultas de duplicatas
+CREATE INDEX IF NOT EXISTS idx_pending_quotes_cnpj_product_status 
+ON public.pending_quotes USING btree (
+    ((form_data->>'cnpj')), 
+    product_type, 
+    status
+) WHERE status = 'pending';
+
 -- Mostrar configuração atual
 SELECT * FROM public.approval_settings LIMIT 1;

@@ -1,32 +1,24 @@
 import { useState, useEffect } from 'react';
 import { approvalService } from '@/services/approvalService';
-
-interface PendingQuote {
-  id: string;
-  form_data: any;
-  product_type: 'comply_edocs' | 'comply_fiscal';
-  submitted_at: string;
-  status: 'pending' | 'approved' | 'rejected';
-  approved_by?: string;
-  approved_at?: string;
-  rejected_by?: string;
-  rejected_at?: string;
-  rejection_reason?: string;
-}
-
-interface ApprovalNotification {
-  id: string;
-  type: 'new_quote_pending' | 'quote_approved' | 'quote_rejected';
-  message: string;
-  quote_id: string;
-  read: boolean;
-  created_at: string;
-}
+import type { PendingQuote, ApprovalNotification } from '@/types/approval';
 
 export const useApprovalService = () => {
   const [pendingQuotes, setPendingQuotes] = useState<PendingQuote[]>([]);
   const [notifications, setNotifications] = useState<ApprovalNotification[]>([]);
+  const [approvalHistory, setApprovalHistory] = useState<PendingQuote[]>([]);
   const [loading, setLoading] = useState(true);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [notificationsPagination, setNotificationsPagination] = useState({
+    page: 1,
+    hasMore: false,
+    total: 0
+  });
+  const [historyPagination, setHistoryPagination] = useState({
+    page: 1,
+    hasMore: false,
+    total: 0
+  });
 
   const loadPendingQuotes = async () => {
     setLoading(true);
@@ -40,12 +32,61 @@ export const useApprovalService = () => {
     }
   };
 
-  const loadNotifications = async () => {
+  const loadNotifications = async (page: number = 1, append: boolean = false) => {
+    setNotificationsLoading(true);
     try {
-      const notifs = await approvalService.getNotifications();
-      setNotifications(notifs);
+      const result = await approvalService.getNotifications(page, 20);
+      
+      if (append) {
+        setNotifications(prev => [...prev, ...result.notifications]);
+      } else {
+        setNotifications(result.notifications);
+      }
+      
+      setNotificationsPagination({
+        page,
+        hasMore: result.hasMore,
+        total: result.total
+      });
     } catch (error) {
       console.error('Erro ao carregar notificações:', error);
+    } finally {
+      setNotificationsLoading(false);
+    }
+  };
+
+  const loadApprovalHistory = async (page: number = 1, append: boolean = false) => {
+    setHistoryLoading(true);
+    try {
+      const result = await approvalService.getApprovalHistory(page, 10);
+      
+      if (append) {
+        setApprovalHistory(prev => [...prev, ...result.quotes]);
+      } else {
+        setApprovalHistory(result.quotes);
+      }
+      
+      setHistoryPagination({
+        page,
+        hasMore: result.hasMore,
+        total: result.total
+      });
+    } catch (error) {
+      console.error('Erro ao carregar histórico de aprovações:', error);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  const loadMoreNotifications = () => {
+    if (notificationsPagination.hasMore && !notificationsLoading) {
+      loadNotifications(notificationsPagination.page + 1, true);
+    }
+  };
+
+  const loadMoreHistory = () => {
+    if (historyPagination.hasMore && !historyLoading) {
+      loadApprovalHistory(historyPagination.page + 1, true);
     }
   };
 
@@ -102,6 +143,7 @@ export const useApprovalService = () => {
       try {
         await loadPendingQuotes();
         await loadNotifications();
+        await loadApprovalHistory();
       } catch (error) {
         console.error('Erro ao inicializar dados:', error);
         setLoading(false);
@@ -114,12 +156,20 @@ export const useApprovalService = () => {
   return {
     pendingQuotes,
     notifications,
+    approvalHistory,
     loading,
+    notificationsLoading,
+    historyLoading,
+    notificationsPagination,
+    historyPagination,
     submitForApproval,
     approveQuote,
     rejectQuote,
     markNotificationAsRead,
     loadPendingQuotes,
-    loadNotifications
+    loadNotifications,
+    loadApprovalHistory,
+    loadMoreNotifications,
+    loadMoreHistory
   };
 };
