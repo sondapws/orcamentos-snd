@@ -10,7 +10,8 @@ import {
   EyeOff, 
   Mail,
   FileText,
-  Settings
+  Settings,
+  Send
 } from 'lucide-react';
 import {
   Dialog,
@@ -31,8 +32,9 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { useEmailTemplates } from '@/hooks/useEmailTemplates';
-import FormularioNovoTemplateSimples from './FormularioNovoTemplateSimples';
+import FormularioNovoTemplate from './FormularioNovoTemplate';
 import EditorTemplateCompleto from './EditorTemplateCompleto';
+import TestEmailDialog from '../DialogTesteEmail';
 import type { EmailTemplate } from '@/types/approval';
 
 const EmailTemplateManager: React.FC = () => {
@@ -119,7 +121,7 @@ const EmailTemplateManager: React.FC = () => {
                 Crie um novo template de e-mail personalizado para um formulário e modalidade específicos.
               </p>
             </DialogHeader>
-            <FormularioNovoTemplateSimples 
+            <FormularioNovoTemplate 
               onSuccess={() => setIsCreateDialogOpen(false)}
             />
           </DialogContent>
@@ -194,10 +196,23 @@ const EmailTemplateManager: React.FC = () => {
                   </div>
                   
                   <div className="flex items-center gap-2 ml-4">
+                    <TestEmailDialog 
+                      emailTemplate={{
+                        assunto: template.assunto,
+                        corpo: template.corpo
+                      }}
+                      triggerButton={
+                        <Button variant="outline" size="sm" title="Enviar e-mail de teste">
+                          <Send className="h-4 w-4" />
+                        </Button>
+                      }
+                    />
+                    
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleToggleStatus(template.id, template.ativo)}
+                      title={template.ativo ? 'Desativar template' : 'Ativar template'}
                     >
                       {template.ativo ? (
                         <EyeOff className="h-4 w-4" />
@@ -210,13 +225,14 @@ const EmailTemplateManager: React.FC = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => handleEdit(template)}
+                      title="Editar template"
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
                     
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" title="Excluir template">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </AlertDialogTrigger>

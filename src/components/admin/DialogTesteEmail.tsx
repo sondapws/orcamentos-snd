@@ -20,9 +20,10 @@ interface TestEmailDialogProps {
     assunto: string;
     corpo: string;
   };
+  triggerButton?: React.ReactNode;
 }
 
-const TestEmailDialog: React.FC<TestEmailDialogProps> = ({ emailTemplate }) => {
+const TestEmailDialog: React.FC<TestEmailDialogProps> = ({ emailTemplate, triggerButton }) => {
   const [open, setOpen] = useState(false);
   const [testEmail, setTestEmail] = useState('');
   const [sending, setSending] = useState(false);
@@ -72,10 +73,12 @@ const TestEmailDialog: React.FC<TestEmailDialogProps> = ({ emailTemplate }) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full">
-          <Send className="h-4 w-4 mr-2" />
-          Enviar E-mail de Teste
-        </Button>
+        {triggerButton || (
+          <Button variant="outline" className="w-full">
+            <Send className="h-4 w-4 mr-2" />
+            Enviar E-mail de Teste
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
