@@ -21,7 +21,8 @@ const PainelAprovacao: React.FC = () => {
     approveQuote,
     rejectQuote,
     loadMoreHistory,
-    loadApprovalHistory
+    loadApprovalHistory,
+    loadPendingQuotes
   } = useApprovalService();
 
   const { toast } = useToast();
@@ -30,6 +31,7 @@ const PainelAprovacao: React.FC = () => {
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [selectedQuoteId, setSelectedQuoteId] = useState<string>('');
   const [rejectionReason, setRejectionReason] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
 
   // Função para lidar com mudança de aba
   const handleTabChange = (value: string) => {
@@ -178,6 +180,26 @@ const PainelAprovacao: React.FC = () => {
           <Badge variant="secondary">
             {historyPagination.total} processado{historyPagination.total !== 1 ? 's' : ''} (31 dias)
           </Badge>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={async () => {
+              setRefreshing(true);
+              await loadPendingQuotes();
+              setRefreshing(false);
+              toast({
+                title: "Dados atualizados",
+                description: "Lista de orçamentos pendentes foi recarregada.",
+              });
+            }}
+            disabled={refreshing}
+          >
+            {refreshing ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <RefreshCw className="w-4 h-4" />
+            )}
+          </Button>
         </div>
       </div>
 

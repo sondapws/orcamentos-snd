@@ -41,26 +41,14 @@ class ApprovalService {
   // Submeter orçamento para aprovação
   async submitForApproval(formData: any, productType: 'comply_edocs' | 'comply_fiscal' = 'comply_edocs'): Promise<string> {
     try {
-      // Verificar se já existe um orçamento pendente para o mesmo CNPJ e produto
-      const { data: existingQuote, error: checkError } = await supabase
-        .from('pending_quotes')
-        .select('id, status')
-        .eq('status', 'pending')
-        .eq('product_type', productType)
-        .contains('form_data', { cnpj: formData.cnpj })
-        .single();
+      console.log('Submetendo orçamento para aprovação:', {
+        cnpj: formData.cnpj,
+        razaoSocial: formData.razaoSocial,
+        email: formData.email,
+        productType
+      });
 
-      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows returned
-        throw checkError;
-      }
-
-      // Se já existe um orçamento pendente, retornar o ID existente
-      if (existingQuote) {
-        console.log('Orçamento já existe para este CNPJ e produto:', existingQuote.id);
-        return existingQuote.id;
-      }
-
-      // Inserir orçamento pendente no banco
+      // Inserir orçamento pendente no banco (permitir múltiplos orçamentos por CNPJ)
       const { data: quote, error: quoteError } = await supabase
         .from('pending_quotes')
         .insert({
@@ -71,7 +59,12 @@ class ApprovalService {
         .select()
         .single();
 
-      if (quoteError) throw quoteError;
+      if (quoteError) {
+        console.error('Erro ao inserir orçamento:', quoteError);
+        throw quoteError;
+      }
+
+      console.log('Orçamento inserido com sucesso:', quote.id);
 
       // Cast para o tipo correto
       const typedQuote = this.castToPendingQuote(quote);
@@ -171,6 +164,7 @@ class ApprovalService {
   // Obter orçamentos pendentes
   async getPendingQuotes(): Promise<PendingQuote[]> {
     try {
+      console.log('Buscando orçamentos pendentes...');
       const { data, error } = await supabase
         .from('pending_quotes')
         .select('*')
@@ -178,6 +172,18 @@ class ApprovalService {
         .order('submitted_at', { ascending: false });
 
       if (error) throw error;
+      
+      console.log('Orçamentos pendentes encontrados:', data?.length || 0);
+      if (data && data.length > 0) {
+        console.log('Detalhes dos orçamentos:', data.map(q => ({
+          id: q.id,
+          cnpj: q.form_data?.cnpj,
+          razaoSocial: q.form_data?.razaoSocial,
+          productType: q.product_type,
+          submittedAt: q.submitted_at
+        })));
+      }
+      
       return (data || []).map(item => this.castToPendingQuote(item));
     } catch (error) {
       console.error('Erro ao buscar orçamentos pendentes:', error);
