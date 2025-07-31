@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -32,6 +32,7 @@ const PainelAprovacao: React.FC = () => {
   const [selectedQuoteId, setSelectedQuoteId] = useState<string>('');
   const [rejectionReason, setRejectionReason] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [isRejecting, setIsRejecting] = useState(false);
 
   // Função para lidar com mudança de aba
   const handleTabChange = (value: string) => {
@@ -44,6 +45,8 @@ const PainelAprovacao: React.FC = () => {
 
   // Configurar limpeza automática de dados
   useDataCleanup();
+
+
 
   const handleApprove = async (quoteId: string) => {
     // Prevenir duplo clique
@@ -87,10 +90,11 @@ const PainelAprovacao: React.FC = () => {
     }
 
     // Prevenir duplo clique
-    if (processingQuotes.has(selectedQuoteId)) {
+    if (isRejecting) {
       return;
     }
 
+    setIsRejecting(true);
     setProcessingQuotes(prev => new Set(prev).add(selectedQuoteId));
 
     try {
@@ -101,15 +105,26 @@ const PainelAprovacao: React.FC = () => {
           description: 'O orçamento foi rejeitado.',
           variant: 'destructive'
         });
-        // Fechar modal e limpar estados
-        handleCloseModal();
+        
+        // Fechar modal imediatamente após sucesso
+        setRejectModalOpen(false);
+        setSelectedQuoteId('');
+        setRejectionReason('');
       }
+    } catch (error) {
+      console.error('Erro ao rejeitar orçamento:', error);
+      toast({
+        title: 'Erro',
+        description: 'Ocorreu um erro ao rejeitar o orçamento.',
+        variant: 'destructive'
+      });
     } finally {
       setProcessingQuotes(prev => {
         const newSet = new Set(prev);
         newSet.delete(selectedQuoteId);
         return newSet;
       });
+      setIsRejecting(false);
     }
   };
 
@@ -376,11 +391,15 @@ const PainelAprovacao: React.FC = () => {
       </Tabs>
 
       {/* Modal de Rejeição */}
-      <Dialog open={rejectModalOpen} onOpenChange={(open) => {
-        if (!open) {
-          handleCloseModal();
-        }
-      }}>
+      <Dialog 
+        open={rejectModalOpen} 
+        onOpenChange={(open) => {
+          // Só permitir fechar se não estiver rejeitando
+          if (!open && !isRejecting) {
+            handleCloseModal();
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Rejeitar Orçamento</DialogTitle>
@@ -402,15 +421,16 @@ const PainelAprovacao: React.FC = () => {
             <Button
               variant="outline"
               onClick={handleCloseModal}
+              disabled={isRejecting}
             >
               Cancelar
             </Button>
             <Button
               variant="destructive"
               onClick={handleRejectConfirm}
-              disabled={processingQuotes.has(selectedQuoteId)}
+              disabled={isRejecting}
             >
-              {processingQuotes.has(selectedQuoteId) ? (
+              {isRejecting ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-1 animate-spin" />
                   Rejeitando...
