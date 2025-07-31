@@ -42,7 +42,8 @@ const EmailTemplateManager: React.FC = () => {
     templates, 
     loading, 
     deleteTemplate, 
-    toggleTemplateStatus 
+    toggleTemplateStatus,
+    refreshTemplates
   } = useEmailTemplates();
   
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
@@ -122,7 +123,10 @@ const EmailTemplateManager: React.FC = () => {
               </p>
             </DialogHeader>
             <FormularioNovoTemplate 
-              onSuccess={() => setIsCreateDialogOpen(false)}
+              onSuccess={() => {
+                setIsCreateDialogOpen(false);
+                refreshTemplates();
+              }}
             />
           </DialogContent>
         </Dialog>
@@ -278,6 +282,7 @@ const EmailTemplateManager: React.FC = () => {
               onSuccess={() => {
                 setIsEditDialogOpen(false);
                 setSelectedTemplate(null);
+                refreshTemplates();
               }}
             />
           )}

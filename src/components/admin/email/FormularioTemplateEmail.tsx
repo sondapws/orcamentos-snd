@@ -79,33 +79,32 @@ const EmailTemplateForm: React.FC<EmailTemplateFormProps> = ({ emailTemplate, on
         <CardTitle>Template de E-mail</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Tabs defaultValue="editor" className="space-y-4">
+        <Tabs defaultValue="preview" className="space-y-4">
           <div className="flex items-center justify-between">
             <TabsList>
-              <TabsTrigger value="editor" className="flex items-center gap-2">
-                <EyeOff className="h-4 w-4" />
-                Editor HTML
-              </TabsTrigger>
               <TabsTrigger value="preview" className="flex items-center gap-2">
                 <Eye className="h-4 w-4" />
                 Preview
               </TabsTrigger>
+              <TabsTrigger value="editor" className="flex items-center gap-2">
+                <EyeOff className="h-4 w-4" />
+                Editor HTML
+              </TabsTrigger>
             </TabsList>
           </div>
+
+          <TabsContent value="preview">
+            <EmailPreview template={templateData} />
+          </TabsContent>
 
           <TabsContent value="editor">
             <EmailEditor 
               template={templateData}
               onTemplateChange={setTemplateData}
             />
-          </TabsContent>
-
-          <TabsContent value="preview">
-            <EmailPreview template={templateData} />
+            <TemplateVariables />
           </TabsContent>
         </Tabs>
-
-        <TemplateVariables />
 
         <div className="flex flex-col sm:flex-row gap-3">
           <Button onClick={handleSave} className="flex-1">

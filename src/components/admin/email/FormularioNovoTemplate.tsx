@@ -26,7 +26,7 @@ interface FormularioNovoTemplateProps {
 const FormularioNovoTemplate: React.FC<FormularioNovoTemplateProps> = ({ onSuccess }) => {
   const { createTemplate } = useEmailTemplates();
   const [loading, setLoading] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     nome: '',
     descricao: '',
@@ -121,50 +121,68 @@ const FormularioNovoTemplate: React.FC<FormularioNovoTemplateProps> = ({ onSucce
   const modalidadeOptions = {
     comply_edocs: [
       { value: 'saas', label: 'SaaS' },
-      { value: 'on_premise', label: 'On-Premise' },
+      { value: 'on-premise', label: 'On-Premise' },
       { value: 'hibrido', label: 'Híbrido' }
     ],
     comply_fiscal: [
       { value: 'saas', label: 'SaaS' },
-      { value: 'on_premise', label: 'On-Premise' },
+      { value: 'on-premise', label: 'On-Premise' },
       { value: 'consultoria', label: 'Consultoria' }
     ]
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.nome || !formData.formulario || !formData.assunto || !formData.corpo) {
+
+    if (!formData.nome.trim() || !formData.formulario || !formData.assunto.trim() || !formData.corpo.trim()) {
+      console.log('Validação falhou:', {
+        nome: formData.nome,
+        formulario: formData.formulario,
+        assunto: formData.assunto,
+        corpo: formData.corpo.length
+      });
       return;
     }
 
     setLoading(true);
-    
-    const result = await createTemplate({
-      nome: formData.nome,
-      descricao: formData.descricao || null,
-      formulario: formData.formulario,
-      modalidade: formData.modalidade === 'todas' ? null : formData.modalidade || null,
-      assunto: formData.assunto,
-      corpo: formData.corpo,
-      tipo: 'orcamento',
-      ativo: true,
-      vinculado_formulario: true
-    });
 
-    setLoading(false);
+    try {
+      const result = await createTemplate({
+        nome: formData.nome,
+        descricao: formData.descricao || null,
+        formulario: formData.formulario,
+        modalidade: formData.modalidade === 'todas' ? null : formData.modalidade || null,
+        assunto: formData.assunto,
+        corpo: formData.corpo,
+        tipo: 'orcamento',
+        ativo: true,
+        vinculado_formulario: true
+      });
 
-    if (result.success) {
-      onSuccess();
+      if (result.success) {
+        console.log('Template criado com sucesso');
+        onSuccess();
+      } else {
+        console.error('Erro ao criar template:', result.error);
+      }
+    } catch (error) {
+      console.error('Erro inesperado ao criar template:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleTemplateChange = (newTemplate: { assunto: string; corpo: string }) => {
-    setFormData(prev => ({
-      ...prev,
-      assunto: newTemplate.assunto,
-      corpo: newTemplate.corpo
-    }));
+    console.log('Template sendo alterado (novo):', newTemplate);
+    setFormData(prev => {
+      const updated = {
+        ...prev,
+        assunto: newTemplate.assunto,
+        corpo: newTemplate.corpo
+      };
+      console.log('FormData atualizado (novo):', updated);
+      return updated;
+    });
   };
 
   return (
@@ -185,12 +203,12 @@ const FormularioNovoTemplate: React.FC<FormularioNovoTemplateProps> = ({ onSucce
                 required
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="formulario">Formulário *</Label>
-              <Select 
-                value={formData.formulario} 
-                onValueChange={(value: 'comply_edocs' | 'comply_fiscal') => 
+              <Select
+                value={formData.formulario}
+                onValueChange={(value: 'comply_edocs' | 'comply_fiscal') =>
                   setFormData(prev => ({ ...prev, formulario: value, modalidade: 'todas' }))
                 }
               >
@@ -208,8 +226,8 @@ const FormularioNovoTemplate: React.FC<FormularioNovoTemplateProps> = ({ onSucce
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="modalidade">Modalidade</Label>
-              <Select 
-                value={formData.modalidade} 
+              <Select
+                value={formData.modalidade}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, modalidade: value }))}
                 disabled={!formData.formulario}
               >
@@ -246,33 +264,32 @@ const FormularioNovoTemplate: React.FC<FormularioNovoTemplateProps> = ({ onSucce
           <CardTitle>Conteúdo do E-mail</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Tabs defaultValue="editor" className="space-y-4">
+          <Tabs defaultValue="preview" className="space-y-4">
             <div className="flex items-center justify-between">
               <TabsList>
-                <TabsTrigger value="editor" className="flex items-center gap-2">
-                  <EyeOff className="h-4 w-4" />
-                  Editor HTML
-                </TabsTrigger>
                 <TabsTrigger value="preview" className="flex items-center gap-2">
                   <Eye className="h-4 w-4" />
                   Preview
                 </TabsTrigger>
+                <TabsTrigger value="editor" className="flex items-center gap-2">
+                  <EyeOff className="h-4 w-4" />
+                  Editor HTML
+                </TabsTrigger>
               </TabsList>
             </div>
-
-            <TabsContent value="editor">
-              <EmailEditor 
-                template={formData}
-                onTemplateChange={handleTemplateChange}
-              />
-            </TabsContent>
 
             <TabsContent value="preview">
               <EmailPreview template={formData} />
             </TabsContent>
-          </Tabs>
 
-          <TemplateVariables />
+            <TabsContent value="editor">
+              <EmailEditor
+                template={formData}
+                onTemplateChange={handleTemplateChange}
+              />
+              <TemplateVariables />
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 

@@ -29,9 +29,9 @@ const AbrangenciaSection: React.FC<AbrangenciaSectionProps> = ({
   return (
     <div className="border-t pt-6">
       <div className="flex items-center gap-2 mb-4">
-        <h3 className="text-base font-semibold">Abrangência</h3>        
+        <h3 className="text-base font-semibold">Abrangência</h3>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-gray-600 font-medium">
@@ -82,8 +82,8 @@ const AbrangenciaSection: React.FC<AbrangenciaSectionProps> = ({
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-gray-600">
-              Verificamos que a quantidade informada ultrapassa o limite permitido neste formulário. 
-              Para orçamentos com mais de 10 matrizes ou 10 UFs, nossa equipe comercial poderá oferecer 
+              Verificamos que a quantidade informada ultrapassa o limite permitido neste formulário.
+              Para orçamentos com mais de 10 matrizes ou 10 UFs, nossa equipe comercial poderá oferecer
               uma proposta personalizada.
             </p>
             <div className="bg-blue-50 p-4 rounded-lg">
