@@ -36,23 +36,23 @@ const ScopeSelector: React.FC<ScopeSelectorProps> = ({
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2">
-        <h3 className="text-lg font-semibold">Escopo *</h3>
-        <FieldSpeechButton
-          fieldId="escopo"
-          label="Escopo"
-          value="Escopo do produto. Inbound: Entrada de documentos eletrônicos no sistema da empresa, normalmente enviados por fornecedores. Outbound: Saída de documentos eletrônicos do sistema da empresa, normalmente enviados para clientes."
-        />
+        <Label className="text-base font-semibold">Escopo <span className="text-red-500">*</span></Label>        
       </div>
       
       {/* Escopo Inbound */}
       <div className="space-y-3">
         <div>
           <div className="flex items-center gap-2">
-            <Label className="text-base font-semibold">Inbound</Label>
+            <Label className="text-gray-600 font-medium">Inbound</Label>
             <FieldSpeechButton
               fieldId="inbound"
               label="Inbound"
-              value="Entrada de documentos eletrônicos no sistema da empresa, normalmente enviados por fornecedores."
+              value={escopoInbound.length > 0 
+                ? escopoInbound.map(value => 
+                    escopoInboundOptions.find(opt => opt.value === value)?.label || value
+                  ).join(', ')
+                : 'Nenhuma opção selecionada'
+              }
             />
           </div>
           <p className="text-sm text-gray-600 mt-1">
@@ -135,11 +135,16 @@ const ScopeSelector: React.FC<ScopeSelectorProps> = ({
       <div className="space-y-3">
         <div>
           <div className="flex items-center gap-2">
-            <Label className="text-base font-semibold">Outbound</Label>
+            <Label className="text-gray-600 font-medium">Outbound</Label>
             <FieldSpeechButton
               fieldId="outbound"
               label="Outbound"
-              value="Emissão ou envio de documentos eletrônicos pela empresa, geralmente para clientes ou órgãos reguladores."
+              value={escopoOutbound.length > 0 
+                ? escopoOutbound.map(value => 
+                    escopoOutboundOptions.find(opt => opt.value === value)?.label || value
+                  ).join(', ')
+                : 'Nenhuma opção selecionada'
+              }
             />
           </div>
           <p className="text-sm text-gray-600 mt-1">

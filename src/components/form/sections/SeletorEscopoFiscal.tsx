@@ -41,7 +41,7 @@ const ScopeSelectorFiscal: React.FC<ScopeSelectorFiscalProps> = ({
     <div className="border-t pt-6">
       <div className="space-y-3">
         <div className="flex items-center gap-2">
-          <Label className="text-base font-semibold">Escopo *</Label>
+          <Label className="text-gray-600 font-medium">Escopo <span className="text-red-500">*</span></Label>
           <FieldSpeechButton
             fieldId="escopo"
             label="Escopo"

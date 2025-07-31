@@ -19,18 +19,20 @@ const AutomationSection: React.FC<AutomationSectionProps> = ({
   return (
     <div className="border-t pt-6">
       <div className="flex items-center gap-2 mb-4">
-        <h3 className="text-lg font-semibold">Automação MIRO e MIGO</h3>
-        <FieldSpeechButton
-          fieldId="automacao"
-          label="Automação MIRO e MIGO"
-          value="Selecione os modelos de notas e cenários de negócio que sua empresa utiliza para automatizar os processos de entrada e saída de mercadorias."
-        />
+        <h3 className="text-base font-semibold">Automação MIRO e MIGO</h3>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Modelos de Notas */}
         <div className="space-y-3">
-          <Label className="text-base font-semibold">Modelos de Notas</Label>
+          <div className="flex items-center gap-2">
+            <Label className="text-gray-600 font-medium">Modelos de Notas</Label>
+            <FieldSpeechButton
+              fieldId="modelosNotas"
+              label="Modelos de Notas"
+              value={modelosNotas.join(', ')}
+            />
+          </div>
           <div className="space-y-2">
             {modelosNotasOptions.map(option => (
               <div key={`modelo-${option.value}`} className="flex items-center space-x-2">
@@ -54,7 +56,14 @@ const AutomationSection: React.FC<AutomationSectionProps> = ({
 
         {/* Cenários de Negócio */}
         <div className="space-y-3">
-          <Label className="text-base font-semibold">Cenários de Negócio</Label>
+          <div className="flex items-center gap-2">
+            <Label className="text-gray-600 font-medium">Cenários de Negócio</Label>
+            <FieldSpeechButton
+              fieldId="cenariosNegocio"
+              label="Cenários de Negócio"
+              value={cenariosNegocio.join(', ')}
+            />
+          </div>
           <div className="space-y-2">
             {cenariosNegocioOptions.map(option => (
               <div key={`cenario-${option.value}`} className="flex items-center space-x-2">

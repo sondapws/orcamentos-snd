@@ -26,6 +26,17 @@ const FormularioComplyFiscal2: React.FC<FormStep2FiscalProps> = ({
   onSubmit 
 }) => {
   const [errors, setErrors] = React.useState<Record<string, string>>({});
+
+  // Função para limpar erro específico quando campo é alterado
+  const clearFieldError = (fieldName: string) => {
+    if (errors[fieldName]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[fieldName];
+        return newErrors;
+      });
+    }
+  };
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { toast } = useToast();
 
@@ -109,10 +120,16 @@ const FormularioComplyFiscal2: React.FC<FormStep2FiscalProps> = ({
       : currentArray.filter(item => item !== value);
     
     onUpdate({ [field]: newArray });
+    
+    // Limpar erro de escopo quando qualquer checkbox for alterado
+    if (field === 'escopo') {
+      clearFieldError('escopo');
+    }
   };
 
   const handleFieldUpdate = (field: string, value: any) => {
     onUpdate({ [field]: value });
+    clearFieldError(field);
   };
 
   return (
@@ -131,7 +148,10 @@ const FormularioComplyFiscal2: React.FC<FormStep2FiscalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-8">
           <SegmentSelectorFiscal 
             value={data.segmento}
-            onChange={(value) => onUpdate({ segmento: value as any })}
+            onChange={(value) => {
+              onUpdate({ segmento: value as any });
+              clearFieldError('segmento');
+            }}
             error={errors.segmento}
           />
 

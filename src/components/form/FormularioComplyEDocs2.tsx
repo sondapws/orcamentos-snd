@@ -19,6 +19,17 @@ interface FormStep2Props {
 
 const FormularioComplyEDocs2: React.FC<FormStep2Props> = ({ data, onUpdate, onPrev, onSubmit }) => {
   const [errors, setErrors] = React.useState<Record<string, string>>({});
+
+  // Função para limpar erro específico quando campo é alterado
+  const clearFieldError = (fieldName: string) => {
+    if (errors[fieldName]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[fieldName];
+        return newErrors;
+      });
+    }
+  };
   const [quantidadePrefeiturasInbound, setQuantidadePrefeiturasInbound] = React.useState(0);
   const [quantidadePrefeiturasOutbound, setQuantidadePrefeiturasOutbound] = React.useState(0);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -91,6 +102,11 @@ const FormularioComplyEDocs2: React.FC<FormStep2Props> = ({ data, onUpdate, onPr
       : currentArray.filter(item => item !== value);
 
     onUpdate({ [field]: newArray });
+    
+    // Limpar erro de escopo quando qualquer checkbox for alterado
+    if (field === 'escopoInbound' || field === 'escopoOutbound') {
+      clearFieldError('escopo');
+    }
   };
 
   const handleQuantidadeChange = (field: string, value: number) => {
@@ -105,6 +121,7 @@ const FormularioComplyEDocs2: React.FC<FormStep2Props> = ({ data, onUpdate, onPr
 
   const handleFieldUpdate = (field: string, value: any) => {
     onUpdate({ [field]: value });
+    clearFieldError(field);
   };
 
   return (
@@ -123,7 +140,10 @@ const FormularioComplyEDocs2: React.FC<FormStep2Props> = ({ data, onUpdate, onPr
         <form onSubmit={handleSubmit} className="space-y-8">
           <SegmentSelector
             value={data.segmento}
-            onChange={(value) => onUpdate({ segmento: value as any })}
+            onChange={(value) => {
+              onUpdate({ segmento: value as any });
+              clearFieldError('segmento');
+            }}
             error={errors.segmento}
           />
 

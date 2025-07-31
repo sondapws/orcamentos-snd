@@ -96,7 +96,7 @@ const NotificationBell = () => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80 bg-white dark:bg-sonda-gray1 border-gray-200 dark:border-sonda-gray2">
-        <DropdownMenuLabel className="flex items-center justify-between text-gray-900 dark:text-sonda-white">
+        <DropdownMenuLabel className="flex items-center justify-between text-gray-700 dark:text-gray-300">
           <span>Notificações</span>
           {unreadCount > 0 && (
             <Button 
@@ -137,7 +137,7 @@ const NotificationBell = () => {
                 
                 <div className="flex-1 space-y-1">
                   <div className="flex items-start justify-between">
-                    <p className="text-sm text-gray-900 dark:text-sonda-white">
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
                       {notification.message}
                     </p>
                     <div className="flex items-center space-x-1 ml-2">

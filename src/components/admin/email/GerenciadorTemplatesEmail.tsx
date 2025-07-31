@@ -103,7 +103,7 @@ const EmailTemplateManager: React.FC = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Templates de E-mail</h2>
+          <h2 className="text-2xl font-bold text-gray-700 dark:text-gray-300">Templates de E-mail</h2>
           <p className="text-gray-600">Gerencie templates por formulário e modalidade</p>
         </div>
         
@@ -132,7 +132,7 @@ const EmailTemplateManager: React.FC = () => {
         <Card>
           <CardContent className="text-center py-12">
             <Mail className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
               Nenhum template encontrado
             </h3>
             <p className="text-gray-600 mb-4">
@@ -152,7 +152,7 @@ const EmailTemplateManager: React.FC = () => {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">
+                      <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
                         {template.nome}
                       </h3>
                       <Badge 

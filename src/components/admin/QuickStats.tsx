@@ -61,7 +61,7 @@ const QuickStats = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-gray-600 font-medium">{stat.label}</p>
-                <p className="text-lg font-bold text-gray-900">{stat.value}</p>
+                <p className="text-lg font-bold text-gray-700 dark:text-gray-300">{stat.value}</p>
               </div>
               <div className="flex items-center space-x-1">
                 {getTrendIcon(stat.trend)}

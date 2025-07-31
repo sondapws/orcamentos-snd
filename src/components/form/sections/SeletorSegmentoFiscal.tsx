@@ -19,7 +19,7 @@ const SegmentSelectorFiscal: React.FC<SegmentSelectorFiscalProps> = ({ value, on
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
-        <Label className="text-base font-semibold">Segmento da Empresa *</Label>
+        <Label className="text-gray-600 font-medium">Segmento da Empresa <span className="text-red-500">*</span></Label>
         <FieldSpeechButton
           fieldId="segmento"
           label="Segmento da Empresa"

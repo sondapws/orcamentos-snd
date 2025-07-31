@@ -29,12 +29,7 @@ const AbrangenciaSection: React.FC<AbrangenciaSectionProps> = ({
   return (
     <div className="border-t pt-6">
       <div className="flex items-center gap-2 mb-4">
-        <h3 className="text-lg font-semibold">Abrangência</h3>
-        <FieldSpeechButton
-          fieldId="abrangencia"
-          label="Abrangência"
-          value="Abrangência do sistema. Informe a quantidade de empresas matriz e a quantidade de estados (UFs) onde sua empresa atua para dimensionar adequadamente a solução."
-        />
+        <h3 className="text-base font-semibold">Abrangência</h3>        
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

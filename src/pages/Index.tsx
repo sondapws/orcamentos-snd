@@ -13,16 +13,16 @@ const Index = () => {
 
       <main className="container mx-auto p-10 rounded-md bg-white bg-opacity-80">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">
+          <h1 className="text-4xl font-bold text-gray-700 mb-4">
             Sistema de Orçamentos
           </h1>
-          <p className="text-xl text-gray-700 mb-8">
+          <p className="text-xl text-gray-600 mb-8">
             Gere orçamentos personalizados de forma rápida e eficiente
           </p>
 
           {/* Seção de Produtos */}
           <div className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-6">Escolha o Produto</h2>
+            <h2 className="text-2xl font-semibold text-gray-700 mb-6">Escolha o Produto</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
               {/* Comply e-DOCS */}
               <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">

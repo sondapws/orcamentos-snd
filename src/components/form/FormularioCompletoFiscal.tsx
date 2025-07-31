@@ -12,10 +12,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 const FormularioCompletoFiscal: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isReading, setIsReading] = useState(false);
+  const [showClearDialog, setShowClearDialog] = useState(false);
   const [formData, setFormData] = useState<FormDataFiscal>({
     // Step 1 data
     crm: '',
@@ -122,27 +124,29 @@ const FormularioCompletoFiscal: React.FC = () => {
   };
 
   const handleClearForm = () => {
-    if (confirm('Tem certeza que deseja limpar todo o formulário?')) {
-      setFormData({
-        crm: '',
-        razaoSocial: '',
-        cnpj: '',
-        municipio: '',
-        uf: '',
-        responsavel: '',
-        email: '',
-        segmento: '',
-        escopo: [],
-        quantidadeEmpresas: 1,
-        quantidadeUfs: 1,
-        volumetriaNotas: '',
-        modalidade: '',
-        prazoContratacao: 12,
-        step: 1,
-        completed: false
-      });
-      setCurrentStep(1);
-    }
+    setShowClearDialog(true);
+  };
+
+  const handleConfirmClear = () => {
+    setFormData({
+      crm: '',
+      razaoSocial: '',
+      cnpj: '',
+      municipio: '',
+      uf: '',
+      responsavel: '',
+      email: '',
+      segmento: '',
+      escopo: [],
+      quantidadeEmpresas: 1,
+      quantidadeUfs: 1,
+      volumetriaNotas: '',
+      modalidade: '',
+      prazoContratacao: 12,
+      step: 1,
+      completed: false
+    });
+    setCurrentStep(1);
   };
 
   const openProductLink = () => {
@@ -249,6 +253,18 @@ const FormularioCompletoFiscal: React.FC = () => {
           </Card>
         </div>
       </div>
+
+      {/* Modal de confirmação para limpar formulário */}
+      <ConfirmDialog
+        open={showClearDialog}
+        onOpenChange={setShowClearDialog}
+        onConfirm={handleConfirmClear}
+        title="Limpar Formulário"
+        description="Tem certeza que deseja limpar todo o formulário? Todos os dados preenchidos serão perdidos e não poderão ser recuperados."
+        confirmText="Sim, limpar"
+        cancelText="Cancelar"
+        variant="destructive"
+      />
     </div>
   );
 };

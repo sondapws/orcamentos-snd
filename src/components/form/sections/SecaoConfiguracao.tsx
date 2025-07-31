@@ -23,18 +23,13 @@ const ConfiguracaoSection: React.FC<ConfiguracaoSectionProps> = ({
   return (
     <div className="border-t pt-6">
       <div className="flex items-center gap-2 mb-4">
-        <h3 className="text-lg font-semibold">Configurações</h3>
-        <FieldSpeechButton
-          fieldId="configuracoes"
-          label="Configurações"
-          value="Configurações do sistema. Defina a volumetria mensal de notas fiscais, a modalidade de instalação e o prazo de contratação do serviço para personalizar sua proposta."
-        />
+        <h3 className="text-base font-semibold">Configurações</h3>  
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Label>Volumetria de Notas *</Label>
+            <Label className="text-gray-600 font-medium">Volumetria de Notas <span className="text-red-500">*</span></Label>
             <FieldSpeechButton
               fieldId="volumetriaNotas"
               label="Volumetria de Notas"
@@ -58,7 +53,7 @@ const ConfiguracaoSection: React.FC<ConfiguracaoSectionProps> = ({
 
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Label>Modalidade *</Label>
+            <Label className="text-gray-600 font-medium">Modalidade <span className="text-red-500">*</span></Label>
             <FieldSpeechButton
               fieldId="modalidade"
               label="Modalidade"
@@ -82,7 +77,7 @@ const ConfiguracaoSection: React.FC<ConfiguracaoSectionProps> = ({
 
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Label>Prazo de Contratação *</Label>
+            <Label className="text-gray-600 font-medium">Prazo de Contratação</Label>
             <FieldSpeechButton
               fieldId="prazoContratacao"
               label="Prazo de Contratação"

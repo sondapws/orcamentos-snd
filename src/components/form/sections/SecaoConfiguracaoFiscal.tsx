@@ -42,13 +42,13 @@ const ConfiguracaoFiscalSection: React.FC<ConfiguracaoFiscalSectionProps> = ({
 
   return (
     <div className="border-t pt-6">
-      <h3 className="text-lg font-semibold mb-4">Configurações</h3>
+      <h3 className="text-base font-semibold mb-4">Configurações</h3>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Volumetria de Notas */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Label>Volumetria de Notas *</Label>
+            <Label className="text-gray-600 font-medium">Volumetria de Notas <span className="text-red-500">*</span></Label>
             <FieldSpeechButton
               fieldId="volumetriaNotas"
               label="Volumetria de Notas"
@@ -73,7 +73,7 @@ const ConfiguracaoFiscalSection: React.FC<ConfiguracaoFiscalSectionProps> = ({
         {/* Modalidade */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Label>Modalidade *</Label>
+            <Label className="text-gray-600 font-medium">Modalidade <span className="text-red-500">*</span></Label>
             <FieldSpeechButton
               fieldId="modalidade"
               label="Modalidade"
@@ -98,7 +98,7 @@ const ConfiguracaoFiscalSection: React.FC<ConfiguracaoFiscalSectionProps> = ({
         {/* Prazo de Contratação */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Label>Prazo de Contratação *</Label>
+            <Label className="text-gray-600 font-medium">Prazo de Contratação</Label>
             <FieldSpeechButton
               fieldId="prazoContratacao"
               label="Prazo de Contratação"

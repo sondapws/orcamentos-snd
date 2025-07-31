@@ -13,12 +13,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { isSondaEmail } from '@/utils/emailValidation';
 import { approvalService } from '@/services/approvalService';
 
 const QuoteForm: React.FC = () => {
   const { formData, updateFormData, nextStep, prevStep, completeForm, clearFormData } = useFormData();
   const [isReading, setIsReading] = useState(false);
+  const [showClearDialog, setShowClearDialog] = useState(false);
 
   const handleStep1Update = (data: any) => {
     updateFormData(data);
@@ -72,9 +74,11 @@ const QuoteForm: React.FC = () => {
   };
 
   const handleClearForm = () => {
-    if (confirm('Tem certeza que deseja limpar todo o formulário?')) {
-      clearFormData();
-    }
+    setShowClearDialog(true);
+  };
+
+  const handleConfirmClear = () => {
+    clearFormData();
   };
 
   const openProductLink = () => {
@@ -183,6 +187,18 @@ const QuoteForm: React.FC = () => {
           </Card>
         </div>
       </div>
+
+      {/* Modal de confirmação para limpar formulário */}
+      <ConfirmDialog
+        open={showClearDialog}
+        onOpenChange={setShowClearDialog}
+        onConfirm={handleConfirmClear}
+        title="Limpar Formulário"
+        description="Tem certeza que deseja limpar todo o formulário? Todos os dados preenchidos serão perdidos e não poderão ser recuperados."
+        confirmText="Sim, limpar"
+        cancelText="Cancelar"
+        variant="destructive"
+      />
     </div>
   );
 };

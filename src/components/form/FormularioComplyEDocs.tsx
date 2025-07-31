@@ -19,6 +19,17 @@ interface FormStep1Props {
 const FormularioComplyEDocs: React.FC<FormStep1Props> = ({ data, onUpdate, onNext }) => {
   const [errors, setErrors] = React.useState<Record<string, string>>({});
 
+  // Função para limpar erro específico quando campo é alterado
+  const clearFieldError = (fieldName: string) => {
+    if (errors[fieldName]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[fieldName];
+        return newErrors;
+      });
+    }
+  };
+
   // Get municipalities for selected state and sort alphabetically
   const municipiosDisponiveis = data.uf
     ? (municipiosPorEstado[data.uf] || []).sort((a, b) => a.localeCompare(b, 'pt-BR'))
@@ -27,6 +38,8 @@ const FormularioComplyEDocs: React.FC<FormStep1Props> = ({ data, onUpdate, onNex
   const handleEstadoChange = (value: string) => {
     // Clear municipality when state changes
     onUpdate({ uf: value, municipio: '' });
+    clearFieldError('uf');
+    clearFieldError('municipio');
   };
 
   const validateStep1 = (): boolean => {
@@ -80,10 +93,7 @@ const FormularioComplyEDocs: React.FC<FormStep1Props> = ({ data, onUpdate, onNex
   const handleCNPJChange = (value: string) => {
     const formatted = formatCNPJ(value);
     onUpdate({ cnpj: formatted });
-
-    if (errors.cnpj && validateCNPJ(formatted)) {
-      setErrors(prev => ({ ...prev, cnpj: '' }));
-    }
+    clearFieldError('cnpj');
   };
 
   return (
@@ -103,7 +113,7 @@ const FormularioComplyEDocs: React.FC<FormStep1Props> = ({ data, onUpdate, onNex
             {/* CRM Field */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Label htmlFor="crm" className="text-gray-700 font-medium">CRM:</Label>
+                <Label htmlFor="crm" className="text-gray-600 font-medium">CRM:</Label>
                 <FieldSpeechButton
                   fieldId="crm"
                   label="CRM"
@@ -122,7 +132,7 @@ const FormularioComplyEDocs: React.FC<FormStep1Props> = ({ data, onUpdate, onNex
             {/* Razão Social Field */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Label htmlFor="razaoSocial" className="text-gray-700 font-medium">
+                <Label htmlFor="razaoSocial" className="text-gray-600 font-medium">
                   Razão Social <span className="text-red-500">*</span>
                 </Label>
                 <FieldSpeechButton
@@ -134,7 +144,10 @@ const FormularioComplyEDocs: React.FC<FormStep1Props> = ({ data, onUpdate, onNex
               <Input
                 id="razaoSocial"
                 value={data.razaoSocial}
-                onChange={(e) => onUpdate({ razaoSocial: e.target.value })}
+                onChange={(e) => {
+                  onUpdate({ razaoSocial: e.target.value });
+                  clearFieldError('razaoSocial');
+                }}
                 placeholder="Insira sua resposta"
                 className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${errors.razaoSocial ? 'border-red-500' : ''
                   }`}
@@ -147,7 +160,7 @@ const FormularioComplyEDocs: React.FC<FormStep1Props> = ({ data, onUpdate, onNex
             {/* CNPJ Field */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Label htmlFor="cnpj" className="text-gray-700 font-medium">
+                <Label htmlFor="cnpj" className="text-gray-600 font-medium">
                   CNPJ <span className="text-red-500">*</span>
                 </Label>
                 <FieldSpeechButton
@@ -172,24 +185,26 @@ const FormularioComplyEDocs: React.FC<FormStep1Props> = ({ data, onUpdate, onNex
 
             {/* Location Fields - Localidade na mesma linha */}
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Label className="text-gray-700 font-medium">
-                  Localidade <span className="text-red-500">*</span>
+              <div>
+                <Label className="text-gray-600 font-medium">
+                  Localização <span className="text-red-500">*</span>
                 </Label>
-                <FieldSpeechButton
-                  fieldId="localizacao"
-                  label="Localidade"
-                  value={data.uf && data.municipio ? `${data.uf} - ${data.municipio}` : data.uf || data.municipio || ''}
-                />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-2">
                 {/* Estado Field */}
                 <div>
-                  <Label className="text-sm text-gray-600 mb-1 block">Estado</Label>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Label className="text-sm text-gray-600">Estado</Label>
+                    <FieldSpeechButton
+                      fieldId="estado"
+                      label="Estado"
+                      value={data.uf || ''}
+                    />
+                  </div>
                   <Select value={data.uf} onValueChange={handleEstadoChange}>
                     <SelectTrigger className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${errors.uf ? 'border-red-500' : ''
                       }`}>
-                      <SelectValue placeholder="Estado" />
+                      <SelectValue placeholder="Selecione o estado" />
                     </SelectTrigger>
                     <SelectContent>
                       {estadosBrasil.map(estado => (
@@ -206,10 +221,20 @@ const FormularioComplyEDocs: React.FC<FormStep1Props> = ({ data, onUpdate, onNex
 
                 {/* Município Field */}
                 <div className="md:col-span-3">
-                  <Label className="text-sm text-gray-600 mb-1 block">Município</Label>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Label className="text-sm text-gray-600">Município</Label>
+                    <FieldSpeechButton
+                      fieldId="municipio"
+                      label="Município"
+                      value={data.municipio || ''}
+                    />
+                  </div>
                   <Select
                     value={data.municipio}
-                    onValueChange={(value) => onUpdate({ municipio: value })}
+                    onValueChange={(value) => {
+                      onUpdate({ municipio: value });
+                      clearFieldError('municipio');
+                    }}
                     disabled={!data.uf}
                   >
                     <SelectTrigger className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${errors.municipio ? 'border-red-500' : ''
@@ -234,7 +259,7 @@ const FormularioComplyEDocs: React.FC<FormStep1Props> = ({ data, onUpdate, onNex
             {/* Responsável Field */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Label htmlFor="responsavel" className="text-gray-700 font-medium">
+                <Label htmlFor="responsavel" className="text-gray-600 font-medium">
                   Responsável pelas Informações (Nome Completo) <span className="text-red-500">*</span>
                 </Label>
                 <FieldSpeechButton
@@ -246,7 +271,10 @@ const FormularioComplyEDocs: React.FC<FormStep1Props> = ({ data, onUpdate, onNex
               <Input
                 id="responsavel"
                 value={data.responsavel}
-                onChange={(e) => onUpdate({ responsavel: e.target.value })}
+                onChange={(e) => {
+                  onUpdate({ responsavel: e.target.value });
+                  clearFieldError('responsavel');
+                }}
                 placeholder="Insira sua resposta"
                 className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${errors.responsavel ? 'border-red-500' : ''
                   }`}
@@ -259,7 +287,7 @@ const FormularioComplyEDocs: React.FC<FormStep1Props> = ({ data, onUpdate, onNex
             {/* Email Field */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Label htmlFor="email" className="text-gray-700 font-medium">
+                <Label htmlFor="email" className="text-gray-600 font-medium">
                   E-mail Corporativo <span className="text-red-500">*</span>
                 </Label>
                 <FieldSpeechButton
@@ -275,15 +303,7 @@ const FormularioComplyEDocs: React.FC<FormStep1Props> = ({ data, onUpdate, onNex
                 onChange={(e) => {
                   const email = e.target.value;
                   onUpdate({ email });
-                  
-                  // Limpar erro de e-mail em tempo real se for válido
-                  if (validateEmail(email)) {
-                    setErrors(prev => {
-                      const newErrors = { ...prev };
-                      delete newErrors.email;
-                      return newErrors;
-                    });
-                  }
+                  clearFieldError('email');
                 }}
                 placeholder="Insira um endereço de email"
                 className={`border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${errors.email ? 'border-red-500' : ''
