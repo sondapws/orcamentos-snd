@@ -27,11 +27,11 @@ const AbrangenciaFiscalSection: React.FC<AbrangenciaFiscalSectionProps> = ({
   };
   return (
     <div className="border-t pt-6">
-      <h3 className="text-lg font-semibold mb-4">Abrangência</h3>
+      <h3 className="text-base font-semibold mb-4">Abrangência</h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-gray-600 font-medium">
             <Label>Quantidade de Empresas (Matriz)</Label>
             <FieldSpeechButton
               fieldId="quantidadeEmpresas"
@@ -50,7 +50,7 @@ const AbrangenciaFiscalSection: React.FC<AbrangenciaFiscalSectionProps> = ({
         </div>
 
         <div className="space-y-2">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-gray-600 font-medium">
             <Label>Quantidade de UFs</Label>
             <FieldSpeechButton
               fieldId="quantidadeUfs"

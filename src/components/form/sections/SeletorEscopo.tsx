@@ -29,6 +29,62 @@ const ScopeSelector: React.FC<ScopeSelectorProps> = ({
   onQuantidadeChange,
   error
 }) => {
+  // Função para gerar o valor completo do Inbound incluindo quantidades
+  const getInboundValue = () => {
+    if (escopoInbound.length === 0) {
+      return 'Nenhuma opção selecionada';
+    }
+
+    const selectedOptions = escopoInbound.map(value => {
+      const option = escopoInboundOptions.find(opt => opt.value === value);
+      let optionText = option?.label || value;
+      
+      // Adicionar quantidade de prefeituras para NFS-e
+      if (value === 'nfse' && quantidadePrefeiturasInbound > 0) {
+        optionText += ` (${quantidadePrefeiturasInbound} prefeituras)`;
+      }
+      
+      // Adicionar quantidades para Faturas de Concessionárias
+      if (value === 'faturas') {
+        const details = [];
+        if (quantidadeConcessionarias > 0) {
+          details.push(`${quantidadeConcessionarias} concessionárias`);
+        }
+        if (quantidadeFaturas > 0) {
+          details.push(`${quantidadeFaturas} faturas`);
+        }
+        if (details.length > 0) {
+          optionText += ` (${details.join(', ')})`;
+        }
+      }
+      
+      return optionText;
+    });
+
+    return selectedOptions.join(', ');
+  };
+
+  // Função para gerar o valor completo do Outbound incluindo quantidades
+  const getOutboundValue = () => {
+    if (escopoOutbound.length === 0) {
+      return 'Nenhuma opção selecionada';
+    }
+
+    const selectedOptions = escopoOutbound.map(value => {
+      const option = escopoOutboundOptions.find(opt => opt.value === value);
+      let optionText = option?.label || value;
+      
+      // Adicionar quantidade de prefeituras para NFS-e
+      if (value === 'nfse' && quantidadePrefeiturasOutbound > 0) {
+        optionText += ` (${quantidadePrefeiturasOutbound} prefeituras)`;
+      }
+      
+      return optionText;
+    });
+
+    return selectedOptions.join(', ');
+  };
+
   const hasNfseInbound = escopoInbound.includes('nfse');
   const hasNfseOutbound = escopoOutbound.includes('nfse');
   const hasFaturas = escopoInbound.includes('faturas');
@@ -47,12 +103,7 @@ const ScopeSelector: React.FC<ScopeSelectorProps> = ({
             <FieldSpeechButton
               fieldId="inbound"
               label="Inbound"
-              value={escopoInbound.length > 0 
-                ? escopoInbound.map(value => 
-                    escopoInboundOptions.find(opt => opt.value === value)?.label || value
-                  ).join(', ')
-                : 'Nenhuma opção selecionada'
-              }
+              value={getInboundValue()}
             />
           </div>
           <p className="text-sm text-gray-600 mt-1">
@@ -139,12 +190,7 @@ const ScopeSelector: React.FC<ScopeSelectorProps> = ({
             <FieldSpeechButton
               fieldId="outbound"
               label="Outbound"
-              value={escopoOutbound.length > 0 
-                ? escopoOutbound.map(value => 
-                    escopoOutboundOptions.find(opt => opt.value === value)?.label || value
-                  ).join(', ')
-                : 'Nenhuma opção selecionada'
-              }
+              value={getOutboundValue()}
             />
           </div>
           <p className="text-sm text-gray-600 mt-1">

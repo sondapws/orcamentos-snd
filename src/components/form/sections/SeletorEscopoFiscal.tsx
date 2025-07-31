@@ -38,10 +38,10 @@ const ScopeSelectorFiscal: React.FC<ScopeSelectorFiscalProps> = ({
   };
 
   return (
-    <div className="border-t pt-6">
+    
       <div className="space-y-3">
         <div className="flex items-center gap-2">
-          <Label className="text-gray-600 font-medium">Escopo <span className="text-red-500">*</span></Label>
+          <Label className="text-base font-medium">Escopo <span className="text-red-500">*</span></Label>
           <FieldSpeechButton
             fieldId="escopo"
             label="Escopo"
@@ -63,7 +63,7 @@ const ScopeSelectorFiscal: React.FC<ScopeSelectorFiscalProps> = ({
               />
               <Label 
                 htmlFor={option.id} 
-                className="text-sm cursor-pointer flex-1"
+                className="text-sm font-normal cursor-pointer"
               >
                 {option.label}
               </Label>
@@ -75,7 +75,7 @@ const ScopeSelectorFiscal: React.FC<ScopeSelectorFiscalProps> = ({
           <p className="text-red-500 text-sm">{error}</p>
         )}
       </div>
-    </div>
+    
   );
 };
 

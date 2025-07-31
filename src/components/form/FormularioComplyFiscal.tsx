@@ -196,7 +196,7 @@ const FormularioComplyFiscal: React.FC<FormStep1FiscalProps> = ({ data, onUpdate
                     <Label className="text-sm text-gray-600">Estado</Label>
                     <FieldSpeechButton
                       fieldId="estado"
-                      label="Selecione"
+                      label="Estado"
                       value={data.uf || ''}
                     />
                   </div>
