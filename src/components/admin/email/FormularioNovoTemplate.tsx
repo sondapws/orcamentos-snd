@@ -14,10 +14,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Eye, EyeOff } from 'lucide-react';
 import { useEmailTemplates } from '@/hooks/useEmailTemplates';
+import { useTemplateMappingValidation } from '@/hooks/useTemplateMappingValidation';
 import EmailEditor from './EditorEmail';
 import EmailPreview from './PreviewEmail';
 import TemplateVariables from './VariaveisTemplate';
 import TestEmailDialog from '../DialogTesteEmail';
+import TemplateMappingValidation from './TemplateMappingValidation';
 
 interface FormularioNovoTemplateProps {
   onSuccess: () => void;
@@ -26,6 +28,18 @@ interface FormularioNovoTemplateProps {
 const FormularioNovoTemplate: React.FC<FormularioNovoTemplateProps> = ({ onSuccess }) => {
   const { createTemplate } = useEmailTemplates();
   const [loading, setLoading] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
+  
+  // Hook para validação de mapeamento
+  const {
+    validationState,
+    isValidating,
+    validateMapping,
+    hasError: hasValidationError
+  } = useTemplateMappingValidation({
+    showToasts: false, // Não mostrar toasts, usar validação inline
+    autoValidate: false // Validar manualmente antes de submeter
+  });
 
   const [formData, setFormData] = useState({
     nome: '',
@@ -127,21 +141,42 @@ const FormularioNovoTemplate: React.FC<FormularioNovoTemplateProps> = ({ onSucce
     comply_fiscal: [
       { value: 'saas', label: 'SaaS' },
       { value: 'on-premise', label: 'On-Premise' },
-      { value: 'consultoria', label: 'Consultoria' }
     ]
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setValidationError(null);
 
+    // Validação básica dos campos obrigatórios
     if (!formData.nome.trim() || !formData.formulario || !formData.assunto.trim() || !formData.corpo.trim()) {
-      console.log('Validação falhou:', {
+      console.log('Validação básica falhou:', {
         nome: formData.nome,
         formulario: formData.formulario,
         assunto: formData.assunto,
         corpo: formData.corpo.length
       });
+      setValidationError('Todos os campos obrigatórios devem ser preenchidos');
       return;
+    }
+
+    // Validação de mapeamento único (apenas se modalidade específica foi selecionada)
+    if (formData.modalidade !== 'todas' && formData.modalidade) {
+      const validModalidades = ['on-premise', 'saas'];
+      if (validModalidades.includes(formData.modalidade)) {
+        console.log('Validando unicidade do mapeamento...');
+        
+        const mappingValidation = await validateMapping({
+          formulario: formData.formulario,
+          modalidade: formData.modalidade as 'on-premise' | 'saas'
+        });
+
+        if (!mappingValidation.isValid) {
+          console.log('Validação de mapeamento falhou:', mappingValidation.error);
+          setValidationError(mappingValidation.error || 'Erro de validação de mapeamento');
+          return;
+        }
+      }
     }
 
     setLoading(true);
@@ -164,9 +199,11 @@ const FormularioNovoTemplate: React.FC<FormularioNovoTemplateProps> = ({ onSucce
         onSuccess();
       } else {
         console.error('Erro ao criar template:', result.error);
+        setValidationError('Erro ao criar template. Tente novamente.');
       }
     } catch (error) {
       console.error('Erro inesperado ao criar template:', error);
+      setValidationError('Erro inesperado ao criar template');
     } finally {
       setLoading(false);
     }
@@ -243,6 +280,26 @@ const FormularioNovoTemplate: React.FC<FormularioNovoTemplateProps> = ({ onSucce
                   ))}
                 </SelectContent>
               </Select>
+              
+              {/* Validação de mapeamento em tempo real */}
+              {formData.formulario && formData.modalidade && formData.modalidade !== 'todas' && (
+                <TemplateMappingValidation
+                  formulario={formData.formulario}
+                  modalidade={formData.modalidade}
+                  realTimeValidation={true}
+                  showToasts={false}
+                  onValidationChange={(isValid, error) => {
+                    if (!isValid && error) {
+                      setValidationError(error);
+                    } else if (isValid && validationError) {
+                      // Limpar erro apenas se for erro de validação de mapeamento
+                      if (validationError.includes('template para') || validationError.includes('mapeamento')) {
+                        setValidationError(null);
+                      }
+                    }
+                  }}
+                />
+              )}
             </div>
           </div>
 
@@ -256,6 +313,13 @@ const FormularioNovoTemplate: React.FC<FormularioNovoTemplateProps> = ({ onSucce
               rows={2}
             />
           </div>
+
+          {/* Exibir erro de validação */}
+          {validationError && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-sm text-red-600">{validationError}</p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -295,8 +359,12 @@ const FormularioNovoTemplate: React.FC<FormularioNovoTemplateProps> = ({ onSucce
 
       <div className="flex flex-col sm:flex-row gap-3 justify-end">
         <TestEmailDialog emailTemplate={formData} />
-        <Button type="submit" disabled={loading} className="flex-1 sm:flex-initial">
-          {loading ? 'Criando...' : 'Criar Template'}
+        <Button 
+          type="submit" 
+          disabled={loading || isValidating || (hasValidationError && formData.modalidade !== 'todas')} 
+          className="flex-1 sm:flex-initial"
+        >
+          {loading ? 'Criando...' : isValidating ? 'Validando...' : 'Criar Template'}
         </Button>
       </div>
     </form>

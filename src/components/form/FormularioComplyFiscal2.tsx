@@ -5,6 +5,7 @@ import { Step2DataFiscal, FormDataFiscal } from '@/types/formDataFiscal';
 import { isSondaEmail } from '@/utils/emailValidation';
 import { approvalService } from '@/services/approvalService';
 import { useToast } from '@/hooks/use-toast';
+import { useEmailTemplateMapping, FormContextProviderComponent } from '@/hooks/useEmailTemplateMapping';
 import SegmentSelectorFiscal from './sections/SeletorSegmentoFiscal';
 import ScopeSelectorFiscal from './sections/SeletorEscopoFiscal';
 import AbrangenciaFiscalSection from './sections/SecaoAbrangenciaFiscal';
@@ -26,6 +27,9 @@ const FormularioComplyFiscal2: React.FC<FormStep2FiscalProps> = ({
   onSubmit 
 }) => {
   const [errors, setErrors] = React.useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const { toast } = useToast();
+  const { findWithFallback, loading: templateLoading } = useEmailTemplateMapping();
 
   // Função para limpar erro específico quando campo é alterado
   const clearFieldError = (fieldName: string) => {
@@ -37,8 +41,6 @@ const FormularioComplyFiscal2: React.FC<FormStep2FiscalProps> = ({
       });
     }
   };
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { toast } = useToast();
 
   const validateStep2 = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -77,6 +79,32 @@ const FormularioComplyFiscal2: React.FC<FormStep2FiscalProps> = ({
       const completeFormData: FormDataFiscal = { ...formData, ...data };
       const isSondaUser = isSondaEmail(formData.email);
 
+      // Verificar se existe template apropriado antes de processar
+      console.log('Verificando template para formulário Comply Fiscal, modalidade:', data.modalidade);
+      
+      const templateResult = await findWithFallback('comply_fiscal', data.modalidade as 'on-premise' | 'saas');
+      
+      if (!templateResult.template) {
+        console.error('Nenhum template encontrado para Comply Fiscal + modalidade:', data.modalidade);
+        toast({
+          title: "Erro de Template",
+          description: "Não foi possível encontrar um template de e-mail apropriado para esta configuração. Entre em contato com o suporte.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (templateResult.isDefault && !templateResult.mappingFound) {
+        console.log('Usando template padrão para Comply Fiscal');
+        toast({
+          title: "Template Padrão",
+          description: "Será usado o template padrão para este formulário.",
+          variant: "default",
+        });
+      } else {
+        console.log('Template específico encontrado:', templateResult.template.nome);
+      }
+
       // Simular processamento
       await new Promise(resolve => setTimeout(resolve, 2000));
 
@@ -103,11 +131,21 @@ const FormularioComplyFiscal2: React.FC<FormStep2FiscalProps> = ({
       onSubmit();
     } catch (error) {
       console.error('Erro ao processar orçamento:', error);
-      toast({
-        title: "Erro",
-        description: "Ocorreu um erro ao processar seu orçamento. Tente novamente.",
-        variant: "destructive",
-      });
+      
+      // Tratamento específico para erros de template
+      if (error instanceof Error && error.message.includes('template')) {
+        toast({
+          title: "Erro de Template",
+          description: "Não foi possível encontrar um template de e-mail apropriado. Entre em contato com o suporte.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: "Ocorreu um erro ao processar seu orçamento. Tente novamente.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -133,85 +171,88 @@ const FormularioComplyFiscal2: React.FC<FormStep2FiscalProps> = ({
   };
 
   return (
-    <div className="form-step relative">   
-      <div className="relative z-10">
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-red-500 text-sm">*</span>
-            <span className="text-gray-600 text-sm">Obrigatória</span>
-          </div>
-          
-          <h2 className="text-2xl font-bold text-blue-600 mb-2">Questionário Técnico</h2>
-          <p className="text-gray-600">Informe os detalhes técnicos para calcularmos seu orçamento personalizado</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <SegmentSelectorFiscal 
-            value={data.segmento}
-            onChange={(value) => {
-              onUpdate({ segmento: value as any });
-              clearFieldError('segmento');
-            }}
-            error={errors.segmento}
-          />
-
-          <ScopeSelectorFiscal
-            escopo={data.escopo}
-            onCheckboxChange={handleCheckboxChange}
-            error={errors.escopo}
-          />
-
-          <AbrangenciaFiscalSection
-            quantidadeEmpresas={data.quantidadeEmpresas}
-            quantidadeUfs={data.quantidadeUfs}
-            onUpdate={handleFieldUpdate}
-          />
-
-          <ConfiguracaoFiscalSection
-            volumetriaNotas={data.volumetriaNotas}
-            modalidade={data.modalidade}
-            prazoContratacao={data.prazoContratacao}
-            onUpdate={handleFieldUpdate}
-            errors={errors}
-          />
-
-
-
-          {/* Buttons */}
-          <div className="flex gap-4 pt-6">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={onPrev}
-              disabled={isSubmitting}
-              className="flex items-center gap-2 border-gray-300 text-gray-600 hover:bg-gray-50"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Voltar
-            </Button>
+    <FormContextProviderComponent 
+      formulario="comply_fiscal" 
+      modalidade={data.modalidade as 'on-premise' | 'saas'}
+    >
+      <div className="form-step relative">   
+        <div className="relative z-10">
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-red-500 text-sm">*</span>
+              <span className="text-gray-600 text-sm">Obrigatória</span>
+            </div>
             
-            <Button 
-              type="submit" 
-              disabled={isSubmitting}
-              className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
-              size="lg"
-            >
-              {isSubmitting ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  Processando...
-                </>
-              ) : (
-                <>
-                  <Calculator className="w-4 h-4" />
-                  Gerar Orçamento
-                </>
-              )}
-            </Button>
+            <h2 className="text-2xl font-bold text-blue-600 mb-2">Questionário Técnico</h2>
+            <p className="text-gray-600">Informe os detalhes técnicos para calcularmos seu orçamento personalizado</p>
           </div>
-        </form>
+
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <SegmentSelectorFiscal 
+              value={data.segmento}
+              onChange={(value) => {
+                onUpdate({ segmento: value as any });
+                clearFieldError('segmento');
+              }}
+              error={errors.segmento}
+            />
+
+            <ScopeSelectorFiscal
+              escopo={data.escopo}
+              onCheckboxChange={handleCheckboxChange}
+              error={errors.escopo}
+            />
+
+            <AbrangenciaFiscalSection
+              quantidadeEmpresas={data.quantidadeEmpresas}
+              quantidadeUfs={data.quantidadeUfs}
+              onUpdate={handleFieldUpdate}
+            />
+
+            <ConfiguracaoFiscalSection
+              volumetriaNotas={data.volumetriaNotas}
+              modalidade={data.modalidade}
+              prazoContratacao={data.prazoContratacao}
+              onUpdate={handleFieldUpdate}
+              errors={errors}
+            />
+
+            {/* Buttons */}
+            <div className="flex gap-4 pt-6">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={onPrev}
+                disabled={isSubmitting}
+                className="flex items-center gap-2 border-gray-300 text-gray-600 hover:bg-gray-50"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Voltar
+              </Button>
+              
+              <Button 
+                type="submit" 
+                disabled={isSubmitting || templateLoading}
+                className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
+                size="lg"
+              >
+                {isSubmitting || templateLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    {templateLoading ? 'Verificando template...' : 'Processando...'}
+                  </>
+                ) : (
+                  <>
+                    <Calculator className="w-4 h-4" />
+                    Gerar Orçamento
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
+    </FormContextProviderComponent>
   );
 };
 

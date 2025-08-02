@@ -178,6 +178,7 @@ const QuoteForm: React.FC = () => {
               {formData.step === 2 && (
                 <FormStep2
                   data={formData}
+                  formData={formData}
                   onUpdate={handleStep2Update}
                   onPrev={prevStep}
                   onSubmit={handleFormSubmit}

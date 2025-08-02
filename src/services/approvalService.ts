@@ -391,17 +391,30 @@ class ApprovalService {
   private async sendQuoteEmail(formData: any, productType: 'comply_edocs' | 'comply_fiscal' = 'comply_edocs'): Promise<void> {
     try {
       const { emailService } = await import('./emailService');
+      const { emailTemplateMappingService } = await import('./emailTemplateMappingService');
       
-      // Buscar template específico para o formulário e modalidade
-      const template = await this.getEmailTemplate(productType, formData.modalidade);
+      // Buscar template usando o serviço de mapeamento
+      console.log(`Buscando template para ${productType} + modalidade: ${formData.modalidade}`);
+      
+      const templateResult = await emailTemplateMappingService.findWithFallback(
+        productType, 
+        formData.modalidade as 'on-premise' | 'saas'
+      );
       
       let emailSubject = `Seu orçamento Comply - ${formData.razaoSocial}`;
       let emailBody = this.getDefaultEmailTemplate(formData);
       
-      if (template) {
-        // Usar template personalizado
-        emailSubject = this.replaceTemplateVariables(template.assunto, formData);
-        emailBody = this.replaceTemplateVariables(template.corpo, formData);
+      if (templateResult.template) {
+        // Usar template encontrado (específico ou padrão)
+        console.log(`Usando template: ${templateResult.template.nome} (${templateResult.isDefault ? 'padrão' : 'específico'})`);
+        emailSubject = this.replaceTemplateVariables(templateResult.template.assunto, formData);
+        emailBody = this.replaceTemplateVariables(templateResult.template.corpo, formData);
+        
+        if (templateResult.isDefault && !templateResult.mappingFound) {
+          console.log('Template padrão usado - não foi encontrado mapeamento específico');
+        }
+      } else {
+        console.warn('Nenhum template encontrado, usando template padrão do sistema');
       }
       
       const emailData = {
@@ -419,40 +432,11 @@ class ApprovalService {
       }
     } catch (error) {
       console.error('Erro ao enviar e-mail de orçamento:', error);
+      throw error; // Re-throw para que o erro seja tratado no nível superior
     }
   }
 
-  private async getEmailTemplate(formulario: 'comply_edocs' | 'comply_fiscal', modalidade?: string) {
-    try {
-      let query = supabase
-        .from('email_templates')
-        .select('*')
-        .eq('vinculado_formulario', true)
-        .eq('ativo', true)
-        .eq('formulario', formulario);
 
-      if (modalidade) {
-        query = query.eq('modalidade', modalidade);
-      } else {
-        query = query.is('modalidade', null);
-      }
-
-      const { data, error } = await query
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Erro ao buscar template de email:', error);
-        return null;
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Erro ao buscar template de email:', error);
-      return null;
-    }
-  }
 
   private replaceTemplateVariables(template: string, formData: any): string {
     let result = template;

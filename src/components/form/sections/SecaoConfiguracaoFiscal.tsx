@@ -30,7 +30,6 @@ const ConfiguracaoFiscalSection: React.FC<ConfiguracaoFiscalSectionProps> = ({
   const modalidadeOptions = [
     { value: 'on-premise', label: 'On-premise (Instalação local)' },
     { value: 'saas', label: 'SaaS (Software as a Service)' },
-    { value: 'consultoria', label: 'Consultoria' }
   ];
 
   const prazoOptions = [

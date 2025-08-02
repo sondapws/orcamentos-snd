@@ -14,7 +14,7 @@ export interface Step2DataFiscal {
   quantidadeEmpresas: number;
   quantidadeUfs: number;
   volumetriaNotas: string;
-  modalidade: 'on-premise' | 'saas' | 'consultoria' | '';
+  modalidade: 'on-premise' | 'saas';
   prazoContratacao: number;
 }
 
