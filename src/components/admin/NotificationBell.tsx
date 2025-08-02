@@ -25,11 +25,12 @@ const NotificationBell = () => {
   
   const navigate = useNavigate();
 
-  // Filtrar apenas notificações não lidas
-  const unreadNotifications = notifications.filter(n => !n.read);
+  // Filtrar apenas notificações não lidas de novos orçamentos pendentes
+  const unreadNotifications = notifications.filter(n => !n.read && n.type === 'new_quote_pending');
   const unreadCount = unreadNotifications.length;
 
   const markAllAsRead = async () => {
+    // Marcar apenas notificações de novos orçamentos pendentes como lidas
     for (const notification of unreadNotifications) {
       await markNotificationAsRead(notification.id);
     }

@@ -1,16 +1,16 @@
 import { supabase } from '@/integrations/supabase/client';
 import { submissionLock } from '@/utils/submissionLock';
 import { submissionIdempotency } from '@/utils/submissionIdempotency';
-import type { 
-  PendingQuote, 
-  ApprovalNotification, 
+import type {
+  PendingQuote,
+  ApprovalNotification,
   ApprovalSettings,
   NotificationsPaginationResult,
   ApprovalHistoryResult
 } from '@/types/approval';
 
 class ApprovalService {
-  
+
   // Helper para fazer cast seguro dos tipos do Supabase
   private castToPendingQuote(data: any): PendingQuote {
     return {
@@ -60,7 +60,7 @@ class ApprovalService {
     // 3. Criar chave única para o lock baseada no submissionId (não no CNPJ)
     // Isso permite múltiplos orçamentos do mesmo CNPJ, mas previne duplo clique
     const lockKey = `submit_${submissionId}`;
-    
+
     // 4. Tentar adquirir lock
     if (!submissionLock.acquire(lockKey, 30000)) {
       // Se falhar no lock, desmarcar idempotência
@@ -228,18 +228,18 @@ class ApprovalService {
         .order('submitted_at', { ascending: false });
 
       if (error) throw error;
-      
+
       console.log('Orçamentos pendentes encontrados:', data?.length || 0);
       if (data && data.length > 0) {
         console.log('Detalhes dos orçamentos:', data.map(q => ({
           id: q.id,
-          cnpj: q.form_data?.cnpj,
-          razaoSocial: q.form_data?.razaoSocial,
+          cnpj: (q.form_data as any)?.cnpj,
+          razaoSocial: (q.form_data as any)?.razaoSocial,
           productType: q.product_type,
           submittedAt: q.submitted_at
         })));
       }
-      
+
       return (data || []).map(item => this.castToPendingQuote(item));
     } catch (error) {
       console.error('Erro ao buscar orçamentos pendentes:', error);
@@ -447,7 +447,7 @@ class ApprovalService {
   private async sendQuoteEmail(formData: any, productType: 'comply_edocs' | 'comply_fiscal' = 'comply_edocs'): Promise<void> {
     // Criar chave única para o lock de envio de e-mail
     const emailLockKey = `email_${formData.email}_${productType}_${Date.now()}`;
-    
+
     // Tentar adquirir lock para envio de e-mail
     if (!submissionLock.acquire(emailLockKey, 15000)) {
       console.warn('Já existe um envio de e-mail em andamento');
@@ -457,24 +457,24 @@ class ApprovalService {
     try {
       const { emailService } = await import('./emailService');
       const { emailTemplateMappingService } = await import('./emailTemplateMappingService');
-      
+
       // Buscar template usando o serviço de mapeamento
       console.log(`Buscando template para ${productType} + modalidade: ${formData.modalidade}`);
-      
+
       const templateResult = await emailTemplateMappingService.findWithFallback(
-        productType, 
+        productType,
         formData.modalidade as 'on-premise' | 'saas'
       );
-      
+
       let emailSubject: string;
       let emailBody: string;
-      
+
       if (templateResult.template) {
         // Usar template encontrado (específico ou padrão)
         console.log(`Usando template: ${templateResult.template.nome} (${templateResult.isDefault ? 'padrão' : 'específico'})`);
         emailSubject = this.replaceTemplateVariables(templateResult.template.assunto, formData);
         emailBody = this.replaceTemplateVariables(templateResult.template.corpo, formData);
-        
+
         if (templateResult.isDefault && !templateResult.mappingFound) {
           console.log('Template padrão usado - não foi encontrado mapeamento específico');
         }
@@ -484,7 +484,7 @@ class ApprovalService {
         emailSubject = `Orçamento Comply - ${formData.razaoSocial}`;
         emailBody = this.getDefaultEmailTemplate(formData);
       }
-      
+
       const emailData = {
         to: formData.email,
         subject: emailSubject,
@@ -498,7 +498,7 @@ class ApprovalService {
       });
 
       const result = await emailService.sendEmail(emailData);
-      
+
       if (result.success) {
         console.log('E-mail de orçamento enviado com sucesso via webhook');
       } else {
@@ -518,7 +518,7 @@ class ApprovalService {
 
   private replaceTemplateVariables(template: string, formData: any): string {
     let result = template;
-    
+
     // Substituir variáveis do template
     const variables = {
       razaoSocial: formData.razaoSocial || 'N/A',
@@ -611,7 +611,7 @@ class ApprovalService {
     // 3. Criar chave única para o lock baseada no submissionId (não no email)
     // Isso permite múltiplos orçamentos do mesmo e-mail, mas previne duplo clique
     const lockKey = `direct_${submissionId}`;
-    
+
     // 4. Tentar adquirir lock
     if (!submissionLock.acquire(lockKey, 30000)) {
       console.warn('Já existe um envio em andamento para este orçamento');
@@ -627,7 +627,7 @@ class ApprovalService {
         submissionId,
         lockKey
       });
-      
+
       await this.sendQuoteEmail(formData, productType);
       return true;
     } catch (error) {

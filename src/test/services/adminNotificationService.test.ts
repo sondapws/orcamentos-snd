@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { AdminNotificationService } from '@/services/adminNotificationService';
+import { AdminNotificationService, type NotificationChannel } from '@/services/adminNotificationService';
 import { EmailTemplateError } from '@/errors/EmailTemplateError';
 
 describe('AdminNotificationService', () => {
@@ -12,17 +12,17 @@ describe('AdminNotificationService', () => {
       rateLimitMinutes: 1,
       severityThreshold: 'error'
     });
-    
+
     // Mock console methods
-    vi.spyOn(console, 'log').mockImplementation(() => {});
-    vi.spyOn(console, 'warn').mockImplementation(() => {});
-    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'log').mockImplementation(() => { });
+    vi.spyOn(console, 'warn').mockImplementation(() => { });
+    vi.spyOn(console, 'error').mockImplementation(() => { });
   });
 
   describe('notifyError', () => {
     it('should notify for errors requiring admin notification', async () => {
       const error = new EmailTemplateError('System failure', 'SYSTEM_ERROR');
-      
+
       const results = await adminNotificationService.notifyError(
         error,
         { operation: 'template_search' }
@@ -31,7 +31,7 @@ describe('AdminNotificationService', () => {
       expect(results).toHaveLength(1);
       expect(results[0].success).toBe(true);
       expect(results[0].channel).toBe('console');
-      
+
       const history = adminNotificationService.getNotificationHistory();
       expect(history).toHaveLength(1);
       expect(history[0].type).toBe('system_failure');
@@ -40,22 +40,22 @@ describe('AdminNotificationService', () => {
 
     it('should not notify for errors below severity threshold', async () => {
       adminNotificationService.updateConfig({ severityThreshold: 'critical' });
-      
+
       const error = new EmailTemplateError('Template not found', 'TEMPLATE_NOT_FOUND');
-      
+
       const results = await adminNotificationService.notifyError(error);
 
       expect(results).toHaveLength(0);
-      
+
       const history = adminNotificationService.getNotificationHistory();
       expect(history).toHaveLength(0);
     });
 
     it('should not notify when service is disabled', async () => {
       adminNotificationService.updateConfig({ enabled: false });
-      
+
       const error = new EmailTemplateError('System failure', 'SYSTEM_ERROR');
-      
+
       const results = await adminNotificationService.notifyError(error);
 
       expect(results).toHaveLength(0);
@@ -68,7 +68,7 @@ describe('AdminNotificationService', () => {
         { query: 'SELECT *' },
         { formulario: 'comply_fiscal' }
       );
-      
+
       await adminNotificationService.notifyError(
         error,
         { additionalInfo: 'test' }
@@ -76,7 +76,7 @@ describe('AdminNotificationService', () => {
 
       const history = adminNotificationService.getNotificationHistory();
       const notification = history[0];
-      
+
       expect(notification.context).toEqual({
         formulario: 'comply_fiscal',
         additionalInfo: 'test'
@@ -98,10 +98,10 @@ describe('AdminNotificationService', () => {
 
       expect(results).toHaveLength(1);
       expect(results[0].success).toBe(true);
-      
+
       const history = adminNotificationService.getNotificationHistory();
       const notification = history[0];
-      
+
       expect(notification.type).toBe('configuration_issue');
       expect(notification.title).toBe('Invalid configuration');
       expect(notification.severity).toBe('warning');
@@ -120,7 +120,7 @@ describe('AdminNotificationService', () => {
 
       const history = adminNotificationService.getNotificationHistory();
       const notification = history[0];
-      
+
       expect(notification.type).toBe('performance_degradation');
       expect(notification.title).toBe('Performance degradada: template_search');
       expect(notification.message).toContain('5000ms');
@@ -145,7 +145,7 @@ describe('AdminNotificationService', () => {
 
       const history = adminNotificationService.getNotificationHistory();
       const notification = history[0];
-      
+
       expect(notification.type).toBe('configuration_issue');
       expect(notification.title).toBe('Problema de configuração: defaultTemplate.comply_fiscal');
       expect(notification.message).toContain('Template não encontrado');
@@ -165,7 +165,7 @@ describe('AdminNotificationService', () => {
 
       const history = adminNotificationService.getNotificationHistory();
       const notification = history[0];
-      
+
       expect(notification.message).toBe('URL inválida');
       expect(notification.context!.suggestion).toBeUndefined();
     });
@@ -174,15 +174,15 @@ describe('AdminNotificationService', () => {
   describe('rate limiting', () => {
     it('should prevent duplicate notifications within rate limit window', async () => {
       const error = new EmailTemplateError('System error', 'SYSTEM_ERROR');
-      
+
       // Primeira notificação
       const results1 = await adminNotificationService.notifyError(error);
       expect(results1).toHaveLength(1);
-      
+
       // Segunda notificação imediata (deve ser bloqueada)
       const results2 = await adminNotificationService.notifyError(error);
       expect(results2).toHaveLength(0);
-      
+
       const history = adminNotificationService.getNotificationHistory();
       expect(history).toHaveLength(1);
     });
@@ -190,19 +190,19 @@ describe('AdminNotificationService', () => {
     it('should allow notifications after rate limit window', async () => {
       // Configurar rate limit muito baixo para teste
       adminNotificationService.updateConfig({ rateLimitMinutes: 0.001 }); // ~60ms
-      
+
       const error = new EmailTemplateError('System error', 'SYSTEM_ERROR');
-      
+
       // Primeira notificação
       await adminNotificationService.notifyError(error);
-      
+
       // Aguardar rate limit window
       await new Promise(resolve => setTimeout(resolve, 100));
-      
+
       // Segunda notificação (deve passar)
       const results = await adminNotificationService.notifyError(error);
       expect(results).toHaveLength(1);
-      
+
       const history = adminNotificationService.getNotificationHistory();
       expect(history).toHaveLength(2);
     });
@@ -211,7 +211,7 @@ describe('AdminNotificationService', () => {
   describe('notification channels', () => {
     it('should send to console channel', async () => {
       const consoleSpy = vi.spyOn(console, 'error');
-      
+
       const error = new EmailTemplateError('Critical error', 'SYSTEM_ERROR');
       await adminNotificationService.notifyError(error);
 
@@ -221,10 +221,10 @@ describe('AdminNotificationService', () => {
     });
 
     it('should handle multiple channels', async () => {
-      adminNotificationService.updateConfig({ 
-        channels: ['console', 'in_app'] 
+      adminNotificationService.updateConfig({
+        channels: ['console', 'in_app']
       });
-      
+
       const error = new EmailTemplateError('System error', 'SYSTEM_ERROR');
       const results = await adminNotificationService.notifyError(error);
 
@@ -235,11 +235,11 @@ describe('AdminNotificationService', () => {
 
     it('should handle channel errors gracefully', async () => {
       // Simular erro em canal específico
-      adminNotificationService.updateConfig({ 
+      adminNotificationService.updateConfig({
         channels: ['webhook'],
         webhookUrl: undefined // Vai causar erro
       });
-      
+
       const error = new EmailTemplateError('System error', 'SYSTEM_ERROR');
       const results = await adminNotificationService.notifyError(error);
 
@@ -278,19 +278,19 @@ describe('AdminNotificationService', () => {
   describe('message formatting', () => {
     it('should include context in error message when enabled', async () => {
       adminNotificationService.updateConfig({ includeContext: true });
-      
+
       const error = new EmailTemplateError(
         'Test error',
         'SYSTEM_ERROR',
         undefined,
         { formulario: 'comply_fiscal', modalidade: 'on-premise' }
       );
-      
+
       await adminNotificationService.notifyError(error);
 
       const history = adminNotificationService.getNotificationHistory();
       const notification = history[0];
-      
+
       expect(notification.message).toContain('Contexto:');
       expect(notification.message).toContain('formulario: comply_fiscal');
       expect(notification.message).toContain('modalidade: on-premise');
@@ -298,34 +298,34 @@ describe('AdminNotificationService', () => {
 
     it('should include stack trace when enabled', async () => {
       adminNotificationService.updateConfig({ includeStackTrace: true });
-      
+
       const error = new EmailTemplateError('Test error', 'SYSTEM_ERROR');
       await adminNotificationService.notifyError(error);
 
       const history = adminNotificationService.getNotificationHistory();
       const notification = history[0];
-      
+
       expect(notification.message).toContain('Stack trace:');
     });
 
     it('should exclude context and stack trace when disabled', async () => {
-      adminNotificationService.updateConfig({ 
+      adminNotificationService.updateConfig({
         includeContext: false,
-        includeStackTrace: false 
+        includeStackTrace: false
       });
-      
+
       const error = new EmailTemplateError(
         'Test error',
         'SYSTEM_ERROR',
         undefined,
         { formulario: 'comply_fiscal' }
       );
-      
+
       await adminNotificationService.notifyError(error);
 
       const history = adminNotificationService.getNotificationHistory();
       const notification = history[0];
-      
+
       expect(notification.message).not.toContain('Contexto:');
       expect(notification.message).not.toContain('Stack trace:');
       expect(notification.message).toBe('Test error');
@@ -352,7 +352,7 @@ describe('AdminNotificationService', () => {
 
     it('should return notifications in descending order by timestamp', () => {
       const history = adminNotificationService.getNotificationHistory();
-      
+
       for (let i = 1; i < history.length; i++) {
         const currentTime = new Date(history[i].timestamp).getTime();
         const previousTime = new Date(history[i - 1].timestamp).getTime();
@@ -372,7 +372,7 @@ describe('AdminNotificationService', () => {
 
     it('should calculate correct statistics', () => {
       const stats = adminNotificationService.getStatistics();
-      
+
       expect(stats.totalNotifications).toBe(4);
       expect(stats.notificationsByType['critical_error']).toBe(2);
       expect(stats.notificationsByType['configuration_issue']).toBe(1);
@@ -388,7 +388,7 @@ describe('AdminNotificationService', () => {
     it('should update configuration correctly', () => {
       const newConfig = {
         enabled: false,
-        channels: ['email', 'webhook'] as const,
+        channels: ['email', 'webhook'] as NotificationChannel[],
         emailRecipients: ['admin@example.com'],
         rateLimitMinutes: 10
       };
@@ -404,7 +404,7 @@ describe('AdminNotificationService', () => {
 
     it('should maintain existing config when partially updating', () => {
       const originalConfig = adminNotificationService.getConfig();
-      
+
       adminNotificationService.updateConfig({ rateLimitMinutes: 15 });
       const updatedConfig = adminNotificationService.getConfig();
 
