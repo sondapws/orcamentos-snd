@@ -116,8 +116,11 @@ export const BasicFallbackSetup = async () => {
 
     // Habilitar logs
     emailTemplateMappingService.updateFallbackConfig({
-        enableLogging: true,
-        logFallbackUsage: true
+        logging: {
+            enabled: true,
+            logFallbackUsage: true,
+            logMappingNotFound: true
+        }
     });
 
     console.log('Fallback configurado!');
@@ -199,7 +202,7 @@ export const RealTimeValidationField: React.FC = () => {
             validateMapping({
                 formulario: 'comply_fiscal',
                 modalidade: 'on-premise',
-                templateId
+                excludeId: templateId
             });
         }
     }, [templateId, validateMapping]);
@@ -316,10 +319,15 @@ export const InitialSetup = async () => {
 
         // 3. Configurar fallback básico
         emailTemplateMappingService.updateFallbackConfig({
-            enableLogging: true,
-            logFallbackUsage: true,
-            useAnyActiveTemplateAsFallback: true,
-            failWhenNoTemplateFound: false
+            logging: {
+                enabled: true,
+                logFallbackUsage: true,
+                logMappingNotFound: true
+            },
+            behavior: {
+                useAnyActiveTemplateAsFallback: true,
+                failWhenNoTemplateFound: false
+            }
         });
 
         // 4. Testar sistema
@@ -432,9 +440,15 @@ export const quickStart = {
     // Configurar fallback básico
     setupFallback: () => {
         emailTemplateMappingService.updateFallbackConfig({
-            enableLogging: true,
-            logFallbackUsage: true,
-            useAnyActiveTemplateAsFallback: true
+            logging: {
+                enabled: true,
+                logFallbackUsage: true,
+                logMappingNotFound: true
+            },
+            behavior: {
+                useAnyActiveTemplateAsFallback: true,
+                failWhenNoTemplateFound: false
+            }
         });
     },
 

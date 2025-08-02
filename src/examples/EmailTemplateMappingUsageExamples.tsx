@@ -29,26 +29,26 @@ export const BasicFormIntegrationExample: React.FC = () => {
     try {
       // Identificar formulário (normalmente baseado na rota ou contexto)
       const formulario = 'comply_fiscal'; // ou 'comply_edocs'
-      
+
       // Buscar template apropriado com fallback
       const result = await findWithFallback(formulario, selectedModalidade);
-      
+
       if (result.template) {
         setTemplate(result.template);
-        
+
         // Informar sobre uso de fallback
         if (result.isDefault) {
           setFallbackInfo(`Fallback usado: ${result.fallbackType} - ${result.fallbackReason}`);
         } else {
           setFallbackInfo('Template específico encontrado');
         }
-        
+
         // Aqui você usaria o template para gerar o e-mail
         console.log('Template a ser usado:', result.template.nome);
-        
+
         // Exemplo de uso do template
         await sendEmailWithTemplate(result.template, formData);
-        
+
       } else {
         throw new Error('Nenhum template disponível para esta combinação');
       }
@@ -61,12 +61,12 @@ export const BasicFormIntegrationExample: React.FC = () => {
   return (
     <div className="p-4 border rounded">
       <h3 className="text-lg font-bold mb-4">Exemplo: Integração Básica com Formulário</h3>
-      
+
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium mb-2">Modalidade:</label>
-          <select 
-            value={selectedModalidade} 
+          <select
+            value={selectedModalidade}
             onChange={(e) => setSelectedModalidade(e.target.value as 'on-premise' | 'saas')}
             className="border rounded px-3 py-2"
           >
@@ -74,22 +74,22 @@ export const BasicFormIntegrationExample: React.FC = () => {
             <option value="saas">SaaS</option>
           </select>
         </div>
-        
-        <button 
+
+        <button
           onClick={() => handleFormSubmit({ modalidade: selectedModalidade })}
           disabled={loading}
           className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
         >
           {loading ? 'Processando...' : 'Simular Envio'}
         </button>
-        
+
         {template && (
           <div className="bg-green-50 p-3 rounded">
             <p><strong>Template selecionado:</strong> {template.nome}</p>
             <p><strong>Assunto:</strong> {template.assunto}</p>
           </div>
         )}
-        
+
         {fallbackInfo && (
           <div className="bg-blue-50 p-3 rounded">
             <p><strong>Info:</strong> {fallbackInfo}</p>
@@ -131,7 +131,7 @@ export const RealTimeValidationExample: React.FC = () => {
       validateMapping({
         formulario,
         modalidade,
-        templateId
+        excludeId: templateId
       });
     } else {
       clearValidation();
@@ -141,12 +141,12 @@ export const RealTimeValidationExample: React.FC = () => {
   return (
     <div className="p-4 border rounded">
       <h3 className="text-lg font-bold mb-4">Exemplo: Validação em Tempo Real</h3>
-      
+
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium mb-2">Formulário:</label>
-          <select 
-            value={formulario} 
+          <select
+            value={formulario}
             onChange={(e) => setFormulario(e.target.value as 'comply_edocs' | 'comply_fiscal')}
             className="border rounded px-3 py-2 w-full"
           >
@@ -154,11 +154,11 @@ export const RealTimeValidationExample: React.FC = () => {
             <option value="comply_edocs">Comply e-DOCS</option>
           </select>
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium mb-2">Modalidade:</label>
-          <select 
-            value={modalidade} 
+          <select
+            value={modalidade}
             onChange={(e) => setModalidade(e.target.value as 'on-premise' | 'saas')}
             className="border rounded px-3 py-2 w-full"
           >
@@ -166,7 +166,7 @@ export const RealTimeValidationExample: React.FC = () => {
             <option value="saas">SaaS</option>
           </select>
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium mb-2">ID do Template:</label>
           <input
@@ -177,7 +177,7 @@ export const RealTimeValidationExample: React.FC = () => {
             className={`border rounded px-3 py-2 w-full ${hasError ? 'border-red-500' : 'border-gray-300'}`}
           />
         </div>
-        
+
         {/* Indicador de validação */}
         <div className="flex items-center space-x-2">
           {isValidating && (
@@ -186,7 +186,7 @@ export const RealTimeValidationExample: React.FC = () => {
               Validando...
             </div>
           )}
-          
+
           {!isValidating && validationState.isValid && templateId && (
             <div className="flex items-center text-green-600">
               <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -195,7 +195,7 @@ export const RealTimeValidationExample: React.FC = () => {
               Mapeamento válido
             </div>
           )}
-          
+
           {hasError && (
             <div className="flex items-center text-red-600">
               <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -250,7 +250,7 @@ export const FallbackConfigurationExample: React.FC = () => {
   return (
     <div className="p-4 border rounded">
       <h3 className="text-lg font-bold mb-4">Exemplo: Configuração de Fallback</h3>
-      
+
       <div className="space-y-6">
         {/* Status */}
         {status && (
@@ -258,7 +258,7 @@ export const FallbackConfigurationExample: React.FC = () => {
             {status}
           </div>
         )}
-        
+
         {/* Configurações de comportamento */}
         <div>
           <h4 className="font-medium mb-3">Comportamentos</h4>
@@ -266,25 +266,35 @@ export const FallbackConfigurationExample: React.FC = () => {
             <label className="flex items-center">
               <input
                 type="checkbox"
-                checked={config.useAnyActiveTemplateAsFallback}
-                onChange={(e) => updateConfig({ useAnyActiveTemplateAsFallback: e.target.checked })}
+                checked={config.behavior?.useAnyActiveTemplateAsFallback}
+                onChange={(e) => updateConfig({
+                  behavior: {
+                    ...config.behavior,
+                    useAnyActiveTemplateAsFallback: e.target.checked
+                  }
+                })}
                 className="mr-2"
               />
               Usar qualquer template ativo como fallback
             </label>
-            
+
             <label className="flex items-center">
               <input
                 type="checkbox"
-                checked={config.failWhenNoTemplateFound}
-                onChange={(e) => updateConfig({ failWhenNoTemplateFound: e.target.checked })}
+                checked={config.behavior?.failWhenNoTemplateFound}
+                onChange={(e) => updateConfig({
+                  behavior: {
+                    ...config.behavior,
+                    failWhenNoTemplateFound: e.target.checked
+                  }
+                })}
                 className="mr-2"
               />
               Falhar quando nenhum template for encontrado
             </label>
           </div>
         </div>
-        
+
         {/* Configurações de log */}
         <div>
           <h4 className="font-medium mb-3">Logs</h4>
@@ -292,35 +302,50 @@ export const FallbackConfigurationExample: React.FC = () => {
             <label className="flex items-center">
               <input
                 type="checkbox"
-                checked={config.enableLogging}
-                onChange={(e) => updateConfig({ enableLogging: e.target.checked })}
+                checked={config.logging?.enabled}
+                onChange={(e) => updateConfig({
+                  logging: {
+                    ...config.logging,
+                    enabled: e.target.checked
+                  }
+                })}
                 className="mr-2"
               />
               Habilitar logs
             </label>
-            
+
             <label className="flex items-center">
               <input
                 type="checkbox"
-                checked={config.logFallbackUsage}
-                onChange={(e) => updateConfig({ logFallbackUsage: e.target.checked })}
+                checked={config.logging?.logFallbackUsage}
+                onChange={(e) => updateConfig({
+                  logging: {
+                    ...config.logging,
+                    logFallbackUsage: e.target.checked
+                  }
+                })}
                 className="mr-2"
               />
               Log de uso de fallback
             </label>
-            
+
             <label className="flex items-center">
               <input
                 type="checkbox"
-                checked={config.logMappingNotFound}
-                onChange={(e) => updateConfig({ logMappingNotFound: e.target.checked })}
+                checked={config.logging?.logMappingNotFound}
+                onChange={(e) => updateConfig({
+                  logging: {
+                    ...config.logging,
+                    logMappingNotFound: e.target.checked
+                  }
+                })}
                 className="mr-2"
               />
               Log quando mapeamento não for encontrado
             </label>
           </div>
         </div>
-        
+
         {/* Templates padrão */}
         <div>
           <h4 className="font-medium mb-3">Templates Padrão</h4>
@@ -343,7 +368,7 @@ export const FallbackConfigurationExample: React.FC = () => {
                 </span>
               </div>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium mb-1">Comply e-DOCS:</label>
               <div className="flex space-x-2">
@@ -364,7 +389,7 @@ export const FallbackConfigurationExample: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         {/* Template global */}
         <div>
           <h4 className="font-medium mb-3">Template Global de Fallback</h4>
@@ -431,13 +456,13 @@ export const MappingManagementExample: React.FC = () => {
   return (
     <div className="p-4 border rounded">
       <h3 className="text-lg font-bold mb-4">Exemplo: Gerenciamento de Mapeamentos</h3>
-      
+
       <div className="space-y-4">
         {/* Filtros */}
         <div className="flex items-center space-x-4">
           <label className="text-sm font-medium">Filtrar por formulário:</label>
-          <select 
-            value={filter} 
+          <select
+            value={filter}
             onChange={(e) => setFilter(e.target.value)}
             className="border rounded px-3 py-2"
           >
@@ -445,8 +470,8 @@ export const MappingManagementExample: React.FC = () => {
             <option value="comply_fiscal">Comply Fiscal</option>
             <option value="comply_edocs">Comply e-DOCS</option>
           </select>
-          
-          <button 
+
+          <button
             onClick={loadMappings}
             disabled={loading}
             className="bg-blue-500 text-white px-3 py-2 rounded disabled:opacity-50"
@@ -454,7 +479,7 @@ export const MappingManagementExample: React.FC = () => {
             {loading ? 'Carregando...' : 'Atualizar'}
           </button>
         </div>
-        
+
         {/* Lista de mapeamentos */}
         <div className="border rounded">
           <table className="w-full">
@@ -493,11 +518,10 @@ export const MappingManagementExample: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-4 py-2">
-                      <span className={`inline-block px-2 py-1 rounded text-sm ${
-                        mapping.template?.ativo 
-                          ? 'bg-green-100 text-green-800' 
+                      <span className={`inline-block px-2 py-1 rounded text-sm ${mapping.template?.ativo
+                          ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
-                      }`}>
+                        }`}>
                         {mapping.template?.ativo ? 'Ativo' : 'Inativo'}
                       </span>
                     </td>
@@ -507,7 +531,7 @@ export const MappingManagementExample: React.FC = () => {
             </tbody>
           </table>
         </div>
-        
+
         {/* Estatísticas */}
         <div className="bg-gray-50 p-3 rounded">
           <div className="grid grid-cols-3 gap-4 text-center">
@@ -549,10 +573,10 @@ async function sendEmailWithTemplate(template: EmailTemplate, formData: any): Pr
     subject: template.assunto,
     formData
   });
-  
+
   // Simular delay de envio
   await new Promise(resolve => setTimeout(resolve, 1000));
-  
+
   console.log('E-mail enviado com sucesso!');
 }
 
@@ -572,7 +596,7 @@ export const EmailTemplateMappingExamples: React.FC = () => {
           Demonstrações práticas de como usar o sistema de mapeamento de templates de e-mail
         </p>
       </div>
-      
+
       <BasicFormIntegrationExample />
       <RealTimeValidationExample />
       <FallbackConfigurationExample />
