@@ -187,7 +187,13 @@ const PainelAprovacao: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Painel de Aprovação</h1>
+        <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Painel de Aprovações</h1>
+              <p className="text-gray-600">Avalie a aprovação dos orçamentos</p>
+            </div>
+        </div>
+
         <div className="flex items-center gap-2">
           <Badge variant="outline">
             {pendingQuotes.length} pendente{pendingQuotes.length !== 1 ? 's' : ''}
@@ -320,7 +326,7 @@ const PainelAprovacao: React.FC = () => {
               <Card className="p-8 text-center">
                 <History className="w-12 h-12 mx-auto mb-4 text-gray-400" />
                 <h3 className="text-lg font-semibold mb-2">Nenhum histórico encontrado</h3>
-                <p className="text-gray-600">Não há aprovações nos últimos 31 dias.</p>
+                <p className="text-gray-600">Não há Aprovações nos últimos 31 dias.</p>
               </Card>
             ) : (
               <>

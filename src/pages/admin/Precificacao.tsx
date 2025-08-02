@@ -26,9 +26,11 @@ const Precificacao = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-blue-600">Sistema de Precificação 2025</h1>
-          <p className="text-gray-600">Configure os parâmetros de precificação do sistema</p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Painel de parametrizações</h1>
+            <p className="text-gray-600">Configure os parâmetros de precificação dos orçamentos</p>
+          </div>
         </div>
 
         {modo === 'listagem' && (
