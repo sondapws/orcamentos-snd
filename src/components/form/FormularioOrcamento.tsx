@@ -31,32 +31,20 @@ const QuoteForm: React.FC = () => {
   };
 
   const handleFormSubmit = async () => {
+    // O orçamento já foi processado pelo FormularioComplyEDocs2
+    // Aqui apenas finalizamos o fluxo do formulário
     completeForm();
-    console.log('Formulário completo:', formData);
-
-    try {
-      // Verificar se é e-mail @sonda.com
-      const isSondaUser = isSondaEmail(formData.email);
-
-      if (isSondaUser) {
-        // E-mail @sonda.com - enviar diretamente via webhook
-        console.log('E-mail @sonda.com detectado - enviando orçamento diretamente');
-        await approvalService.sendQuoteDirectly(formData, 'comply_edocs');
-      } else {
-        // Outros domínios - enviar para aprovação (sem mostrar mensagem)
-        console.log('E-mail externo detectado - enviando para aprovação no portal administrativo');
-        const quoteId = await approvalService.submitForApproval(formData, 'comply_edocs');
-        console.log('Orçamento enviado para aprovação com ID:', quoteId);
-      }
-      
-      // Limpar formulário e voltar ao step 1 após envio
-      setTimeout(() => {
-        clearFormData();
-      }, 2000);
-      
-    } catch (error) {
-      console.error('Erro ao processar formulário:', error);
-    }
+    console.log('Formulário completo e orçamento enviado:', {
+      razaoSocial: formData.razaoSocial,
+      email: formData.email,
+      step: formData.step
+    });
+    
+    // Aguardar um pouco para o usuário ver o toast de sucesso
+    setTimeout(() => {
+      console.log('Limpando formulário e voltando ao início...');
+      clearFormData();
+    }, 2000);
   };
 
   const handleTextToSpeech = () => {

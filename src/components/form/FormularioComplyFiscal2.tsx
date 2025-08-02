@@ -6,6 +6,7 @@ import { isSondaEmail } from '@/utils/emailValidation';
 import { approvalService } from '@/services/approvalService';
 import { useToast } from '@/hooks/use-toast';
 import { useEmailTemplateMapping, FormContextProviderComponent } from '@/hooks/useEmailTemplateMapping';
+import { submissionIdempotency } from '@/utils/submissionIdempotency';
 import SegmentSelectorFiscal from './sections/SeletorSegmentoFiscal';
 import ScopeSelectorFiscal from './sections/SeletorEscopoFiscal';
 import AbrangenciaFiscalSection from './sections/SecaoAbrangenciaFiscal';
@@ -28,6 +29,7 @@ const FormularioComplyFiscal2: React.FC<FormStep2FiscalProps> = ({
 }) => {
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [lastSubmissionTime, setLastSubmissionTime] = React.useState<number>(0);
   const { toast } = useToast();
   const { findWithFallback, loading: templateLoading } = useEmailTemplateMapping();
 
@@ -71,9 +73,29 @@ const FormularioComplyFiscal2: React.FC<FormStep2FiscalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevenir múltiplas submissões
+    if (isSubmitting || templateLoading) {
+      console.log('Submissão já em andamento, ignorando...');
+      return;
+    }
+
+    // Prevenir duplo clique (debounce de 3 segundos)
+    const now = Date.now();
+    if (now - lastSubmissionTime < 3000) {
+      console.log('Duplo clique detectado, ignorando submissão');
+      toast({
+        title: "Aguarde",
+        description: "Aguarde alguns segundos antes de tentar novamente.",
+        variant: "default",
+      });
+      return;
+    }
+
     if (!validateStep2()) return;
 
     setIsSubmitting(true);
+    setLastSubmissionTime(now);
     
     try {
       const completeFormData: FormDataFiscal = { ...formData, ...data };
@@ -108,14 +130,24 @@ const FormularioComplyFiscal2: React.FC<FormStep2FiscalProps> = ({
       // Simular processamento
       await new Promise(resolve => setTimeout(resolve, 2000));
 
+      // Gerar ID único para idempotência
+      const submissionId = submissionIdempotency.generateSubmissionId(completeFormData, 'comply_fiscal');
+      
+      // Adicionar dados únicos para identificação
+      const uniqueFormData = {
+        ...completeFormData,
+        submissionTimestamp: new Date().toISOString(),
+        submissionId
+      };
+
       if (!isSondaUser) {
         // Outros domínios - submeter para aprovação
-        const quoteId = await approvalService.submitForApproval(completeFormData as any, 'comply_fiscal');
+        const quoteId = await approvalService.submitForApproval(uniqueFormData as any, 'comply_fiscal');
         console.log('Orçamento enviado para aprovação com ID:', quoteId);
       } else {
         // Email @sonda.com - enviar diretamente via webhook
         console.log('E-mail @sonda.com detectado - enviando orçamento diretamente');
-        await approvalService.sendQuoteDirectly(completeFormData, 'comply_fiscal');
+        await approvalService.sendQuoteDirectly(uniqueFormData, 'comply_fiscal');
       }
       
       // Mostrar toast de sucesso

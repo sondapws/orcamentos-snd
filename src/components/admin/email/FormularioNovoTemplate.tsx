@@ -46,7 +46,7 @@ const FormularioNovoTemplate: React.FC<FormularioNovoTemplateProps> = ({ onSucce
     descricao: '',
     formulario: '' as 'comply_edocs' | 'comply_fiscal' | '',
     modalidade: 'todas',
-    assunto: 'Seu Orçamento - {{razaoSocial}}',
+    assunto: 'Orçamento Comply - {{razaoSocial}}',
     corpo: `<html>
 <head>
   <style>

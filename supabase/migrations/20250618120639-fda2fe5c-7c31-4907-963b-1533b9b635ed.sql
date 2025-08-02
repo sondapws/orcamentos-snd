@@ -75,7 +75,7 @@ VALUES ('smtp.office365.com', 587, '', '', true);
 INSERT INTO public.email_templates (nome, assunto, corpo)
 VALUES (
   'template_orcamento',
-  'Seu Orçamento - {{razaoSocial}}',
+  'Orçamento Comply - {{razaoSocial}}',
   'Prezado(a) {{responsavel}},
 
 Segue em anexo o orçamento solicitado para {{razaoSocial}}.

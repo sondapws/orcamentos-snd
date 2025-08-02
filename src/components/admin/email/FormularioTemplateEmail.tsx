@@ -21,7 +21,7 @@ interface EmailTemplateFormProps {
 
 const EmailTemplateForm: React.FC<EmailTemplateFormProps> = ({ emailTemplate, onSave }) => {
   const [templateData, setTemplateData] = useState<EmailTemplate>({
-    assunto: 'Seu Orçamento - {{razaoSocial}}',
+    assunto: 'Orçamento Comply - {{razaoSocial}}',
     corpo: `<html>
 <head>
   <style>

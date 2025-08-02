@@ -61,52 +61,38 @@ const FormularioCompletoFiscal: React.FC = () => {
   };
 
   const handleSubmit = async () => {
+    // O orçamento já foi processado pelo FormularioComplyFiscal2
+    // Aqui apenas finalizamos o fluxo do formulário
     setFormData(prev => ({ ...prev, completed: true }));
-    console.log('Formulário Comply Fiscal completo submetido:', formData);
+    console.log('Formulário Comply Fiscal completo e orçamento enviado:', {
+      razaoSocial: formData.razaoSocial,
+      email: formData.email,
+      step: currentStep
+    });
 
-    try {
-      // Verificar se é e-mail @sonda.com
-      const isSondaUser = formData.email.toLowerCase().includes('@sonda.com');
-
-      if (isSondaUser) {
-        // E-mail @sonda.com - enviar diretamente via webhook
-        console.log('E-mail @sonda.com detectado - enviando orçamento diretamente');
-        const { approvalService } = await import('@/services/approvalService');
-        await approvalService.sendQuoteDirectly(formData, 'comply_fiscal');
-      } else {
-        // Outros domínios - enviar para aprovação
-        console.log('E-mail externo detectado - enviando para aprovação no portal administrativo');
-        const { approvalService } = await import('@/services/approvalService');
-        const quoteId = await approvalService.submitForApproval(formData, 'comply_fiscal');
-        console.log('Orçamento enviado para aprovação com ID:', quoteId);
-      }
-
-      // Limpar formulário e voltar ao step 1 após envio
-      setTimeout(() => {
-        setFormData({
-          crm: '',
-          razaoSocial: '',
-          cnpj: '',
-          municipio: '',
-          uf: '',
-          responsavel: '',
-          email: '',
-          segmento: '',
-          escopo: [],
-          quantidadeEmpresas: 1,
-          quantidadeUfs: 1,
-          volumetriaNotas: '',
-          modalidade: '',
-          prazoContratacao: 12,
-          step: 1,
-          completed: false
-        });
-        setCurrentStep(1);
-      }, 2000);
-
-    } catch (error) {
-      console.error('Erro ao processar formulário fiscal:', error);
-    }
+    // Aguardar um pouco para o usuário ver o toast de sucesso
+    setTimeout(() => {
+      console.log('Limpando formulário fiscal e voltando ao início...');
+      setFormData({
+        crm: '',
+        razaoSocial: '',
+        cnpj: '',
+        municipio: '',
+        uf: '',
+        responsavel: '',
+        email: '',
+        segmento: '',
+        escopo: [],
+        quantidadeEmpresas: 1,
+        quantidadeUfs: 1,
+        volumetriaNotas: '',
+        modalidade: '',
+        prazoContratacao: 12,
+        step: 1,
+        completed: false
+      });
+      setCurrentStep(1);
+    }, 2000);
   };
 
   const handleTextToSpeech = () => {

@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useEmailTemplateMapping, FormContextProviderComponent } from '@/hooks/useEmailTemplateMapping';
 import { approvalService } from '@/services/approvalService';
 import { isSondaEmail } from '@/utils/emailValidation';
+import { submissionIdempotency } from '@/utils/submissionIdempotency';
 import SegmentSelector from './sections/SeletorSegmento';
 import ScopeSelector from './sections/SeletorEscopo';
 import AutomationSection from './sections/SecaoAutomacao';
@@ -26,6 +27,7 @@ const FormularioComplyEDocs2: React.FC<FormStep2Props> = ({ data, formData, onUp
   const [quantidadePrefeiturasInbound, setQuantidadePrefeiturasInbound] = React.useState(0);
   const [quantidadePrefeiturasOutbound, setQuantidadePrefeiturasOutbound] = React.useState(0);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [lastSubmissionTime, setLastSubmissionTime] = React.useState<number>(0);
   const { toast } = useToast();
   const { findWithFallback, loading: templateLoading } = useEmailTemplateMapping();
 
@@ -69,9 +71,29 @@ const FormularioComplyEDocs2: React.FC<FormStep2Props> = ({ data, formData, onUp
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevenir múltiplas submissões
+    if (isSubmitting || templateLoading) {
+      console.log('Submissão já em andamento, ignorando...');
+      return;
+    }
+
+    // Prevenir duplo clique (debounce de 3 segundos)
+    const now = Date.now();
+    if (now - lastSubmissionTime < 3000) {
+      console.log('Duplo clique detectado, ignorando submissão');
+      toast({
+        title: "Aguarde",
+        description: "Aguarde alguns segundos antes de tentar novamente.",
+        variant: "default",
+      });
+      return;
+    }
+
     if (!validateStep2()) return;
 
     setIsSubmitting(true);
+    setLastSubmissionTime(now);
     
     try {
       const completeFormData: FormData = { ...formData, ...data };
@@ -106,14 +128,24 @@ const FormularioComplyEDocs2: React.FC<FormStep2Props> = ({ data, formData, onUp
       // Simular processamento
       await new Promise(resolve => setTimeout(resolve, 2000));
 
+      // Gerar ID único para idempotência
+      const submissionId = submissionIdempotency.generateSubmissionId(completeFormData, 'comply_edocs');
+      
+      // Adicionar dados únicos para identificação
+      const uniqueFormData = {
+        ...completeFormData,
+        submissionTimestamp: new Date().toISOString(),
+        submissionId
+      };
+
       if (!isSondaUser) {
         // Outros domínios - submeter para aprovação
-        const quoteId = await approvalService.submitForApproval(completeFormData as any, 'comply_edocs');
+        const quoteId = await approvalService.submitForApproval(uniqueFormData as any, 'comply_edocs');
         console.log('Orçamento enviado para aprovação com ID:', quoteId);
       } else {
         // Email @sonda.com - enviar diretamente via webhook
         console.log('E-mail @sonda.com detectado - enviando orçamento diretamente');
-        await approvalService.sendQuoteDirectly(completeFormData, 'comply_edocs');
+        await approvalService.sendQuoteDirectly(uniqueFormData, 'comply_edocs');
       }
       
       // Mostrar toast de sucesso

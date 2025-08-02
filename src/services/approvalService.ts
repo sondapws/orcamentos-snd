@@ -1,4 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
+import { submissionLock } from '@/utils/submissionLock';
+import { submissionIdempotency } from '@/utils/submissionIdempotency';
 import type { 
   PendingQuote, 
   ApprovalNotification, 
@@ -40,15 +42,64 @@ class ApprovalService {
 
   // Submeter orçamento para aprovação
   async submitForApproval(formData: any, productType: 'comply_edocs' | 'comply_fiscal' = 'comply_edocs'): Promise<string> {
+    // 1. Verificar idempotência primeiro
+    let submissionId = formData.submissionId;
+    if (!submissionId) {
+      submissionId = submissionIdempotency.generateSubmissionId(formData, productType);
+      formData.submissionId = submissionId;
+    }
+
+    if (submissionIdempotency.isAlreadyProcessed(submissionId)) {
+      console.log(`🔒 Submissão já processada (idempotência): ${submissionId}`);
+      throw new Error('Esta submissão já foi processada. Se você deseja enviar um novo orçamento, aguarde alguns segundos e tente novamente.');
+    }
+
+    // 2. Marcar como processada imediatamente
+    submissionIdempotency.markAsProcessed(submissionId);
+
+    // 3. Criar chave única para o lock baseada no submissionId (não no CNPJ)
+    // Isso permite múltiplos orçamentos do mesmo CNPJ, mas previne duplo clique
+    const lockKey = `submit_${submissionId}`;
+    
+    // 4. Tentar adquirir lock
+    if (!submissionLock.acquire(lockKey, 30000)) {
+      // Se falhar no lock, desmarcar idempotência
+      submissionIdempotency.unmarkAsProcessed(submissionId);
+      throw new Error('Já existe uma submissão em andamento para este orçamento. Aguarde alguns segundos e tente novamente.');
+    }
+
     try {
       console.log('Submetendo orçamento para aprovação:', {
         cnpj: formData.cnpj,
         razaoSocial: formData.razaoSocial,
         email: formData.email,
-        productType
+        productType,
+        submissionId,
+        lockKey
       });
 
-      // Inserir orçamento pendente no banco (permitir múltiplos orçamentos por CNPJ)
+      // Verificar se já existe um orçamento com o mesmo submissionId (proteção contra duplicação real)
+      // Removemos a verificação por CNPJ para permitir múltiplos orçamentos da mesma empresa
+      const { data: existingQuote, error: checkError } = await supabase
+        .from('pending_quotes')
+        .select('id, submitted_at, form_data')
+        .eq('status', 'pending')
+        .eq('form_data->>submissionId', submissionId)
+        .limit(1);
+
+      if (checkError) {
+        console.warn('Erro ao verificar duplicatas por submissionId, continuando:', checkError);
+      } else if (existingQuote && existingQuote.length > 0) {
+        console.warn('Orçamento com mesmo submissionId já existe:', {
+          existingId: existingQuote[0].id,
+          submissionId
+        });
+        throw new Error(`Este orçamento já foi processado. ID: ${existingQuote[0].id}`);
+      }
+
+      console.log('✅ Verificação de duplicatas passou - permitindo submissão para CNPJ:', formData.cnpj);
+
+      // Inserir orçamento pendente no banco
       const { data: quote, error: quoteError } = await supabase
         .from('pending_quotes')
         .insert({
@@ -85,7 +136,12 @@ class ApprovalService {
       return typedQuote.id;
     } catch (error) {
       console.error('Erro ao submeter orçamento para aprovação:', error);
+      // Em caso de erro, desmarcar idempotência para permitir retry
+      submissionIdempotency.unmarkAsProcessed(submissionId);
       throw error;
+    } finally {
+      // Sempre liberar o lock
+      submissionLock.release(lockKey);
     }
   }
 
@@ -389,6 +445,15 @@ class ApprovalService {
   }
 
   private async sendQuoteEmail(formData: any, productType: 'comply_edocs' | 'comply_fiscal' = 'comply_edocs'): Promise<void> {
+    // Criar chave única para o lock de envio de e-mail
+    const emailLockKey = `email_${formData.email}_${productType}_${Date.now()}`;
+    
+    // Tentar adquirir lock para envio de e-mail
+    if (!submissionLock.acquire(emailLockKey, 15000)) {
+      console.warn('Já existe um envio de e-mail em andamento');
+      return;
+    }
+
     try {
       const { emailService } = await import('./emailService');
       const { emailTemplateMappingService } = await import('./emailTemplateMappingService');
@@ -401,8 +466,8 @@ class ApprovalService {
         formData.modalidade as 'on-premise' | 'saas'
       );
       
-      let emailSubject = `Seu orçamento Comply - ${formData.razaoSocial}`;
-      let emailBody = this.getDefaultEmailTemplate(formData);
+      let emailSubject: string;
+      let emailBody: string;
       
       if (templateResult.template) {
         // Usar template encontrado (específico ou padrão)
@@ -414,7 +479,10 @@ class ApprovalService {
           console.log('Template padrão usado - não foi encontrado mapeamento específico');
         }
       } else {
+        // Nenhum template encontrado - usar template padrão do sistema
         console.warn('Nenhum template encontrado, usando template padrão do sistema');
+        emailSubject = `Orçamento Comply - ${formData.razaoSocial}`;
+        emailBody = this.getDefaultEmailTemplate(formData);
       }
       
       const emailData = {
@@ -423,16 +491,26 @@ class ApprovalService {
         html: emailBody
       };
 
+      console.log('Enviando e-mail:', {
+        to: emailData.to,
+        subject: emailData.subject,
+        lockKey: emailLockKey
+      });
+
       const result = await emailService.sendEmail(emailData);
       
       if (result.success) {
         console.log('E-mail de orçamento enviado com sucesso via webhook');
       } else {
         console.error('Erro ao enviar e-mail de orçamento:', result.error);
+        throw new Error(`Falha no envio do e-mail: ${result.error}`);
       }
     } catch (error) {
       console.error('Erro ao enviar e-mail de orçamento:', error);
       throw error; // Re-throw para que o erro seja tratado no nível superior
+    } finally {
+      // Sempre liberar o lock de e-mail
+      submissionLock.release(emailLockKey);
     }
   }
 
@@ -515,13 +593,51 @@ class ApprovalService {
   }
   // Enviar orçamento diretamente (para @sonda.com)
   async sendQuoteDirectly(formData: any, productType: 'comply_edocs' | 'comply_fiscal' = 'comply_edocs'): Promise<boolean> {
+    // 1. Verificar idempotência primeiro
+    let submissionId = formData.submissionId;
+    if (!submissionId) {
+      submissionId = submissionIdempotency.generateSubmissionId(formData, productType);
+      formData.submissionId = submissionId;
+    }
+
+    if (submissionIdempotency.isAlreadyProcessed(submissionId)) {
+      console.log(`🔒 Envio direto já processado (idempotência): ${submissionId}`);
+      return false;
+    }
+
+    // 2. Marcar como processada imediatamente
+    submissionIdempotency.markAsProcessed(submissionId);
+
+    // 3. Criar chave única para o lock baseada no submissionId (não no email)
+    // Isso permite múltiplos orçamentos do mesmo e-mail, mas previne duplo clique
+    const lockKey = `direct_${submissionId}`;
+    
+    // 4. Tentar adquirir lock
+    if (!submissionLock.acquire(lockKey, 30000)) {
+      console.warn('Já existe um envio em andamento para este orçamento');
+      // Se falhar no lock, desmarcar idempotência
+      submissionIdempotency.unmarkAsProcessed(submissionId);
+      return false;
+    }
+
     try {
-      console.log('Enviando orçamento diretamente para @sonda.com:', formData.email);
+      console.log('Enviando orçamento diretamente para @sonda.com:', {
+        email: formData.email,
+        productType,
+        submissionId,
+        lockKey
+      });
+      
       await this.sendQuoteEmail(formData, productType);
       return true;
     } catch (error) {
       console.error('Erro ao enviar orçamento diretamente:', error);
+      // Em caso de erro, desmarcar idempotência para permitir retry
+      submissionIdempotency.unmarkAsProcessed(submissionId);
       return false;
+    } finally {
+      // Sempre liberar o lock
+      submissionLock.release(lockKey);
     }
   }
 }
