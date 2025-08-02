@@ -154,7 +154,7 @@ const TestMappingDialogExample: React.FC = () => {
   };
 
   const getModalidadeLabel = (modalidade: 'on-premise' | 'saas') => {
-    return modalidade === 'on-premise' ? 'On-premisse' : 'SaaS';
+    return modalidade === 'on-premise' ? 'On-premise' : 'SaaS';
   };
 
   const getFormularioIcon = (formulario: 'comply_edocs' | 'comply_fiscal') => {

@@ -166,7 +166,7 @@ const EmailTemplateMappingExample: React.FC = () => {
                   onClick={() => setCurrentContext(prev => ({ ...prev, modalidade: 'on-premise' }))}
                   className="w-full"
                 >
-                  On-premisse
+                  On-premise
                 </Button>
                 <Button
                   variant={currentContext.modalidade === 'saas' ? 'default' : 'outline'}

@@ -92,13 +92,13 @@ describe('TemplateMappingValidation', () => {
 
     it('deve gerar labels corretos para modalidades', () => {
       const labelMapping = {
-        'on-premise': 'On-premisse',
+        'on-premise': 'On-premise',
         'saas': 'SaaS'
       };
 
       Object.entries(labelMapping).forEach(([key, expectedLabel]) => {
         const getModalidadeLabel = (modalidade: string) => {
-          return modalidade === 'on-premise' ? 'On-premisse' : 'SaaS';
+          return modalidade === 'on-premise' ? 'On-premise' : 'SaaS';
         };
         
         expect(getModalidadeLabel(key)).toBe(expectedLabel);
@@ -209,7 +209,7 @@ describe('TemplateMappingValidation', () => {
       // Arrange
       const duplicateError = {
         isValid: false,
-        error: 'Já existe um template para Comply e-DOCS + On-premisse',
+        error: 'Já existe um template para Comply e-DOCS + On-premise',
         code: 'DUPLICATE_MAPPING'
       };
       mockValidateMapping.mockResolvedValue(duplicateError);

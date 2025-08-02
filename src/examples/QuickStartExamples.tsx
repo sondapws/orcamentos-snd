@@ -166,7 +166,7 @@ export const AutoTemplateForm: React.FC = () => {
                     value={modalidade}
                     onChange={(e) => setModalidade(e.target.value as any)}
                 >
-                    <option value="on-premise">On-premisse</option>
+                    <option value="on-premise">On-premise</option>
                     <option value="saas">SaaS</option>
                 </select>
             </div>

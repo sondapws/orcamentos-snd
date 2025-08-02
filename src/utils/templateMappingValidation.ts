@@ -61,7 +61,7 @@ export const validateMappingUniqueness = async (
 
     if (!isUnique) {
       const formularioLabel = formulario === 'comply_edocs' ? 'Comply e-DOCS' : 'Comply Fiscal';
-      const modalidadeLabel = modalidade === 'on-premise' ? 'On-premisse' : 'SaaS';
+      const modalidadeLabel = modalidade === 'on-premise' ? 'On-premise' : 'SaaS';
       
       return {
         isValid: false,

@@ -136,6 +136,19 @@ class ApprovalService {
       return typedQuote.id;
     } catch (error) {
       console.error('Erro ao submeter orçamento para aprovação:', error);
+
+      // Log detalhado do erro para debug
+      if (error && typeof error === 'object') {
+        console.error('Detalhes do erro:', {
+          name: (error as any).name,
+          message: (error as any).message,
+          code: (error as any).code,
+          details: (error as any).details,
+          hint: (error as any).hint,
+          stack: (error as any).stack?.split('\n').slice(0, 3)
+        });
+      }
+
       // Em caso de erro, desmarcar idempotência para permitir retry
       submissionIdempotency.unmarkAsProcessed(submissionId);
       throw error;

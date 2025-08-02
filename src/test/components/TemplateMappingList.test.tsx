@@ -238,12 +238,12 @@ describe('TemplateMappingList', () => {
       };
 
       const getModalidadeLabel = (modalidade: 'on-premise' | 'saas') => {
-        return modalidade === 'on-premise' ? 'On-premisse' : 'SaaS';
+        return modalidade === 'on-premise' ? 'On-premise' : 'SaaS';
       };
 
       expect(getFormularioLabel('comply_edocs')).toBe('Comply e-DOCS');
       expect(getFormularioLabel('comply_fiscal')).toBe('Comply Fiscal');
-      expect(getModalidadeLabel('on-premise')).toBe('On-premisse');
+      expect(getModalidadeLabel('on-premise')).toBe('On-premise');
       expect(getModalidadeLabel('saas')).toBe('SaaS');
     });
 

@@ -4,8 +4,8 @@
 class SubmissionIdempotency {
   private processedSubmissions = new Set<string>();
   private submissionTimestamps = new Map<string, number>();
-  private readonly CLEANUP_INTERVAL = 2 * 60 * 1000; // 2 minutos
-  private readonly MAX_AGE = 5 * 60 * 1000; // 5 minutos
+  private readonly CLEANUP_INTERVAL = 1 * 60 * 1000; // 1 minuto
+  private readonly MAX_AGE = 0.5 * 60 * 1000; // 30 segunos
 
   constructor() {
     // Limpeza automática de submissões antigas

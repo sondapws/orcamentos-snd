@@ -173,7 +173,7 @@ const TestMappingDialog: React.FC<TestMappingDialogProps> = ({
   };
 
   const getModalidadeLabel = (modalidade: 'on-premise' | 'saas') => {
-    return modalidade === 'on-premise' ? 'On-premisse' : 'SaaS';
+    return modalidade === 'on-premise' ? 'On-premise' : 'SaaS';
   };
 
   if (!mapping?.template) {

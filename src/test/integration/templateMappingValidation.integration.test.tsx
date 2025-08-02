@@ -157,7 +157,7 @@ describe('Template Mapping Validation Integration', () => {
 
       // Assert
       expect(validationResult.isValid).toBe(false);
-      expect(validationResult.error).toBe('Já existe um template para Comply Fiscal + On-premisse');
+      expect(validationResult.error).toBe('Já existe um template para Comply Fiscal + On-premise');
       expect(mockCreateTemplate).not.toHaveBeenCalled();
     });
 

@@ -101,7 +101,7 @@ describe('EmailTestService', () => {
       const preview = service.generateEmailPreview(fiscalTemplate);
       
       expect(preview).toContain('Formulário: Comply Fiscal');
-      expect(preview).toContain('Modalidade: On-premisse');
+      expect(preview).toContain('Modalidade: On-premise');
     });
 
     it('deve lançar erro em caso de falha', () => {

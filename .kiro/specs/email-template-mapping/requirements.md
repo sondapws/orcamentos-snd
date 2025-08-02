@@ -13,7 +13,7 @@ Este documento define os requisitos para implementar um sistema de mapeamento en
 #### Acceptance Criteria
 
 1. WHEN o administrador acessa a tela de configuração de mapeamentos THEN o sistema SHALL exibir uma interface para criar, editar e visualizar mapeamentos
-2. WHEN o administrador cria um novo mapeamento THEN o sistema SHALL permitir selecionar um formulário (Comply Fiscal ou Comply e-DOCS), uma modalidade (On-premisse ou SaaS) e um template de e-mail
+2. WHEN o administrador cria um novo mapeamento THEN o sistema SHALL permitir selecionar um formulário (Comply Fiscal ou Comply e-DOCS), uma modalidade (On-premise ou SaaS) e um template de e-mail
 3. WHEN o administrador salva um mapeamento THEN o sistema SHALL validar que a combinação formulário + modalidade é única
 4. IF já existe um mapeamento para a mesma combinação formulário + modalidade THEN o sistema SHALL exibir erro e não permitir duplicação
 5. WHEN o administrador visualiza os mapeamentos existentes THEN o sistema SHALL exibir uma lista com formulário, modalidade e template associado

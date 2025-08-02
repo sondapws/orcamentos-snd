@@ -123,7 +123,7 @@ const TemplateMappingList: React.FC<TemplateMappingListProps> = ({
   };
 
   const getModalidadeLabel = (modalidade: 'on-premise' | 'saas') => {
-    return modalidade === 'on-premise' ? 'On-premisse' : 'SaaS';
+    return modalidade === 'on-premise' ? 'On-premise' : 'SaaS';
   };
 
   const getStatusBadge = (template: EmailTemplateMapping['template']) => {
@@ -270,7 +270,7 @@ const TemplateMappingList: React.FC<TemplateMappingListProps> = ({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas as modalidades</SelectItem>
-                  <SelectItem value="on-premise">On-premisse</SelectItem>
+                  <SelectItem value="on-premise">On-premise</SelectItem>
                   <SelectItem value="saas">SaaS</SelectItem>
                 </SelectContent>
               </Select>

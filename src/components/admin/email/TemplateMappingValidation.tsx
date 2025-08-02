@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, forwardRef, useImperativeHandle } from 'react';
 import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -21,7 +21,11 @@ export interface TemplateMappingValidationProps {
   className?: string;
 }
 
-const TemplateMappingValidation: React.FC<TemplateMappingValidationProps> = ({
+export interface TemplateMappingValidationRef {
+  validate: () => Promise<boolean>;
+}
+
+const TemplateMappingValidation = forwardRef<TemplateMappingValidationRef, TemplateMappingValidationProps>(({
   formulario,
   modalidade,
   excludeId,
@@ -29,7 +33,7 @@ const TemplateMappingValidation: React.FC<TemplateMappingValidationProps> = ({
   showToasts = false, // Desabilitado por padrão para evitar spam de toasts
   onValidationChange,
   className = ''
-}) => {
+}, ref) => {
   const {
     validationState,
     isValidating,
@@ -72,7 +76,7 @@ const TemplateMappingValidation: React.FC<TemplateMappingValidationProps> = ({
           modalidade: modalidade as 'on-premise' | 'saas',
           excludeId
         });
-        
+
         onValidationChange?.(result.isValid, result.error);
       } catch (error) {
         console.error('Erro durante validação em tempo real:', error);
@@ -104,8 +108,8 @@ const TemplateMappingValidation: React.FC<TemplateMappingValidationProps> = ({
     return result.isValid;
   };
 
-  // Expor função de validação manual via ref (se necessário)
-  React.useImperativeHandle(React.forwardRef(() => null), () => ({
+  // Expor função de validação manual via ref
+  useImperativeHandle(ref, () => ({
     validate: validateManually
   }));
 
@@ -126,7 +130,7 @@ const TemplateMappingValidation: React.FC<TemplateMappingValidationProps> = ({
   };
 
   const getModalidadeLabel = (mod: string) => {
-    return mod === 'on-premise' ? 'On-premisse' : 'SaaS';
+    return mod === 'on-premise' ? 'On-premise' : 'SaaS';
   };
 
   return (
@@ -136,14 +140,14 @@ const TemplateMappingValidation: React.FC<TemplateMappingValidationProps> = ({
         <Badge variant="outline" className="text-xs">
           {getFormularioLabel(formulario)} + {getModalidadeLabel(modalidade)}
         </Badge>
-        
+
         {isValidating && (
           <div className="flex items-center gap-1 text-xs text-gray-500">
             <Loader2 className="h-3 w-3 animate-spin" />
             Validando...
           </div>
         )}
-        
+
         {!isValidating && validationState.isValid && (
           <div className="flex items-center gap-1 text-xs text-green-600">
             <CheckCircle className="h-3 w-3" />
@@ -184,6 +188,8 @@ const TemplateMappingValidation: React.FC<TemplateMappingValidationProps> = ({
       )}
     </div>
   );
-};
+});
+
+TemplateMappingValidation.displayName = 'TemplateMappingValidation';
 
 export default TemplateMappingValidation;

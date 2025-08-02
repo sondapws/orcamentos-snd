@@ -52,7 +52,7 @@ export class EmailTestService {
   generateEmailPreview(template: EmailTemplate, testData?: Record<string, any>): string {
     try {
       console.log(`Gerando prévia para template: ${template.nome}`);
-      
+
       // Dados padrão para teste se não fornecidos
       const defaultTestData = {
         nome_cliente: 'João Silva',
@@ -60,7 +60,7 @@ export class EmailTestService {
         email: 'joao.silva@empresateste.com.br',
         telefone: '(11) 99999-9999',
         produto: template.formulario === 'comply_edocs' ? 'Comply e-DOCS' : 'Comply Fiscal',
-        modalidade: template.modalidade === 'on-premise' ? 'On-premisse' : 'SaaS',
+        modalidade: template.modalidade === 'on-premise' ? 'On-premise' : 'SaaS',
         data_solicitacao: new Date().toLocaleDateString('pt-BR'),
         hora_solicitacao: new Date().toLocaleTimeString('pt-BR'),
         ...testData
@@ -146,7 +146,7 @@ export class EmailTestService {
             Template: ${template.nome}<br>
             ID: ${template.id}<br>
             Formulário: ${template.formulario === 'comply_edocs' ? 'Comply e-DOCS' : 'Comply Fiscal'}<br>
-            Modalidade: ${template.modalidade === 'on-premise' ? 'On-premisse' : 'SaaS'}<br>
+            Modalidade: ${template.modalidade === 'on-premise' ? 'On-premise' : 'SaaS'}<br>
             Testado em: ${new Date().toLocaleString('pt-BR')}
           </div>
         </body>
@@ -207,8 +207,8 @@ export class EmailTestService {
         tipo: templateData.tipo,
         ativo: templateData.ativo,
         vinculado_formulario: templateData.vinculado_formulario,
-        formulario: templateData.formulario,
-        modalidade: templateData.modalidade,
+        formulario: templateData.formulario as 'comply_edocs' | 'comply_fiscal',
+        modalidade: templateData.modalidade as 'on-premise' | 'saas',
         created_at: templateData.created_at,
         updated_at: templateData.updated_at
       };
@@ -278,7 +278,8 @@ export class EmailTestService {
    */
   private async logTestEmail(logData: Omit<EmailTestLog, 'id' | 'created_at'>): Promise<void> {
     try {
-      const { error } = await supabase
+      // Usar any para contornar problemas de tipagem do Supabase
+      const { error } = await (supabase as any)
         .from('email_test_logs')
         .insert({
           template_id: logData.template_id,
@@ -295,7 +296,10 @@ export class EmailTestService {
 
       if (error) {
         console.error('Erro ao registrar log de teste:', error);
-        // Não lançar erro aqui para não interromper o fluxo principal
+        // Se a tabela não existir, apenas log o erro sem interromper
+        if (error.code === '42P01') { // Tabela não existe
+          console.warn('Tabela email_test_logs não encontrada. Execute a migração 20250801000001_email_test_logs.sql');
+        }
       } else {
         console.log('Log de teste registrado com sucesso');
       }
@@ -313,7 +317,8 @@ export class EmailTestService {
    */
   async getTestLogs(templateId?: string, limit: number = 50): Promise<EmailTestLog[]> {
     try {
-      let query = supabase
+      // Usar any para contornar problemas de tipagem do Supabase
+      let query = (supabase as any)
         .from('email_test_logs')
         .select('*')
         .order('tested_at', { ascending: false })
@@ -327,6 +332,13 @@ export class EmailTestService {
 
       if (error) {
         console.error('Erro ao buscar logs de teste:', error);
+        
+        // Se a tabela não existir, retornar array vazio
+        if (error.code === '42P01') { // Tabela não existe
+          console.warn('Tabela email_test_logs não encontrada. Execute a migração 20250801000001_email_test_logs.sql');
+          return [];
+        }
+        
         throw new EmailTestError(
           'Erro ao buscar logs de teste',
           'DATABASE_ERROR',

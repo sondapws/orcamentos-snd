@@ -64,7 +64,7 @@ describe('useTemplateMappingValidation integration', () => {
       // Arrange
       const mockUniquenessError = { 
         isValid: false, 
-        error: 'Já existe um template para Comply e-DOCS + On-premisse', 
+        error: 'Já existe um template para Comply e-DOCS + On-premise', 
         code: 'DUPLICATE_MAPPING' 
       };
       
@@ -79,7 +79,7 @@ describe('useTemplateMappingValidation integration', () => {
       // Assert
       expect(result).toEqual(mockUniquenessError);
       expect(result.isValid).toBe(false);
-      expect(result.error).toBe('Já existe um template para Comply e-DOCS + On-premisse');
+      expect(result.error).toBe('Já existe um template para Comply e-DOCS + On-premise');
       expect(result.code).toBe('DUPLICATE_MAPPING');
     });
 

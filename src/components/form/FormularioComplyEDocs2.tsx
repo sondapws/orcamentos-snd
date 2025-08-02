@@ -162,20 +162,34 @@ const FormularioComplyEDocs2: React.FC<FormStep2Props> = ({ data, formData, onUp
     } catch (error) {
       console.error('Erro ao processar orçamento:', error);
       
-      // Tratamento específico para erros de template
-      if (error instanceof Error && error.message.includes('template')) {
-        toast({
-          title: "Erro de Template",
-          description: "Não foi possível encontrar um template de e-mail apropriado. Entre em contato com o suporte.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Erro",
-          description: "Ocorreu um erro ao processar seu orçamento. Tente novamente.",
-          variant: "destructive",
-        });
+      let errorMessage = "Ocorreu um erro ao processar seu orçamento. Tente novamente.";
+      let errorTitle = "Erro";
+      
+      if (error instanceof Error) {
+        // Tratamento específico para diferentes tipos de erro
+        if (error.message.includes('template')) {
+          errorTitle = "Erro de Template";
+          errorMessage = "Não foi possível encontrar um template de e-mail apropriado. Entre em contato com o suporte.";
+        } else if (error.message.includes('já foi processada')) {
+          errorTitle = "Submissão Duplicada";
+          errorMessage = "Este orçamento já foi processado. Se você deseja enviar um novo orçamento, aguarde alguns segundos e tente novamente.";
+        } else if (error.message.includes('submissão em andamento')) {
+          errorTitle = "Processamento em Andamento";
+          errorMessage = "Já existe uma submissão em andamento. Aguarde alguns segundos e tente novamente.";
+        } else if (error.message.includes('Este orçamento já foi processado')) {
+          errorTitle = "Orçamento Duplicado";
+          errorMessage = "Este orçamento já foi processado anteriormente. Verifique se você não enviou o mesmo orçamento recentemente.";
+        } else {
+          // Para outros erros, incluir parte da mensagem original para debug
+          errorMessage = `Erro: ${error.message.substring(0, 100)}${error.message.length > 100 ? '...' : ''}`;
+        }
       }
+      
+      toast({
+        title: errorTitle,
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }

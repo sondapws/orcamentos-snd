@@ -276,7 +276,7 @@ const template = await findTemplateFromContext();
 ```typescript
 const {
   getFormularioLabel,    // 'comply_fiscal' -> 'Comply Fiscal'
-  getModalidadeLabel,    // 'on-premise' -> 'On-premisse'
+  getModalidadeLabel,    // 'on-premise' -> 'On-premise'
   getCurrentContext      // { formulario: 'comply_fiscal', modalidade: 'on-premise' }
 } = useEmailTemplateMapping();
 

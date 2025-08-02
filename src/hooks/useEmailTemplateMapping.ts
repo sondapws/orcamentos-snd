@@ -376,7 +376,7 @@ export const useEmailTemplateMapping = (): UseEmailTemplateMappingReturn => {
   }, []);
 
   const getModalidadeLabel = useCallback((modalidade: 'on-premise' | 'saas'): string => {
-    return modalidade === 'on-premise' ? 'On-premisse' : 'SaaS';
+    return modalidade === 'on-premise' ? 'On-premise' : 'SaaS';
   }, []);
 
   return {
