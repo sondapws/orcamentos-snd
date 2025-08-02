@@ -11,7 +11,7 @@ const Breadcrumb = () => {
     admin: 'Administração',
     dashboard: 'Dashboard',
     aplicativos: 'Aplicativos',
-
+    aprovacoes: 'Aprovações',
     'email-config': 'Configuração de E-mail',
     precificacao: 'Precificação',
     'user-config': 'Configurações de Usuário'
